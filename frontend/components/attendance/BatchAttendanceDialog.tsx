@@ -1,0 +1,279 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { attendanceApi, coursesApi, enrollmentsApi, studentsApi } from "@/lib/api";
+import type { Course, Student } from "@/types";
+import { X, Loader2, CalendarCheck, CheckCircle2, XCircle, Clock, CheckSquare } from "lucide-react";
+
+interface BatchAttendanceDialogProps {
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+interface StudentAttendanceRow {
+  student: Student;
+  status: "PRESENT" | "LATE" | "ABSENT";
+}
+
+export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDialogProps) {
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [selectedCourse, setSelectedCourse] = useState<string>("");
+
+  const [rows, setRows] = useState<StudentAttendanceRow[]>([]);
+  const [isLoadingCourses, setIsLoadingCourses] = useState(true);
+  const [isLoadingStudents, setIsLoadingStudents] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    coursesApi.list({ limit: 100 })
+      .then((res) => {
+        setCourses(res.items);
+        if (res.items.length > 0) {
+          setSelectedCourse(res.items[0].course_code);
+        }
+      })
+      .catch((err: unknown) => setError((err as Error).message))
+      .finally(() => setIsLoadingCourses(false));
+  }, []);
+
+  // Fetch enrolled students whenever selectedCourse changes
+  useEffect(() => {
+    if (!selectedCourse) return;
+
+    setIsLoadingStudents(true);
+    setError(null);
+
+    Promise.all([
+      enrollmentsApi.list({ course_code: selectedCourse, limit: 200 }),
+      studentsApi.list({ limit: 500 }),
+    ])
+      .then(([enrRes, stRes]) => {
+        const studentMap: Record<string, Student> = {};
+        stRes.items.forEach((s) => { studentMap[s.student_id] = s; });
+
+        const enrolledStudents: Student[] = enrRes.items
+          .map((e) => studentMap[e.student_id])
+          .filter((s): s is Student => Boolean(s));
+
+        setRows(
+          enrolledStudents.map((s) => ({
+            student: s,
+            status: "PRESENT", // default all present
+          }))
+        );
+      })
+      .catch((err: unknown) => {
+        const msg = err instanceof Error ? err.message : typeof err === "object" && err ? JSON.stringify(err) : String(err);
+        setError(msg);
+      })
+      .finally(() => setIsLoadingStudents(false));
+  }, [selectedCourse]);
+
+  const handleSetAllStatus = (status: "PRESENT" | "LATE" | "ABSENT") => {
+    setRows((prev) => prev.map((r) => ({ ...r, status })));
+  };
+
+  const handleStudentStatusChange = (studentId: string, status: "PRESENT" | "LATE" | "ABSENT") => {
+    setRows((prev) =>
+      prev.map((r) => (r.student.student_id === studentId ? { ...r, status } : r))
+    );
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (rows.length === 0) {
+      setError("No enrolled students found for the selected course.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      await attendanceApi.createBatch({
+        course_code: selectedCourse,
+        items: rows.map((r) => ({
+          student_id: r.student.student_id,
+          status: r.status,
+          confidence_score: 1.0,
+        })),
+      });
+
+      onSuccess();
+      onClose();
+    } catch (err: unknown) {
+      setError((err as Error).message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/50 flex-shrink-0">
+          <div className="flex items-center gap-2 text-emerald-400 font-bold text-lg">
+            <CheckSquare className="w-5 h-5" />
+            <span>Class Attendance Sheet (အစုလိုက် ကောက်ရန်)</span>
+          </div>
+          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Content Body */}
+        <div className="p-6 space-y-5 overflow-y-auto flex-1">
+          {error && (
+            <div className="p-3 bg-red-950/60 border border-red-800/60 rounded-xl text-xs text-red-300">
+              {error}
+            </div>
+          )}
+
+          {/* Course Selector Row */}
+          <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+            <div className="flex-1 min-w-60">
+              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                Select Course (ဘာသာရပ် ရွေးပါ)
+              </label>
+              {isLoadingCourses ? (
+                <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+              ) : (
+                <select
+                  value={selectedCourse}
+                  onChange={(e) => setSelectedCourse(e.target.value)}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm font-semibold text-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                >
+                  {courses.map((c) => (
+                    <option key={c.course_code} value={c.course_code}>
+                      {c.course_code} — {c.course_name} ({c.dept_code})
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+
+            {/* Quick Bulk Actions */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => handleSetAllStatus("PRESENT")}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-950 border border-emerald-800/80 text-emerald-300 text-xs font-bold hover:bg-emerald-900 transition-colors"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" /> All Present
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSetAllStatus("ABSENT")}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-950 border border-red-800/80 text-red-300 text-xs font-bold hover:bg-red-900 transition-colors"
+              >
+                <XCircle className="w-3.5 h-3.5" /> All Absent
+              </button>
+            </div>
+          </div>
+
+          {/* Student Table */}
+          <div className="bg-slate-950/40 border border-slate-800 rounded-xl overflow-hidden">
+            {isLoadingStudents ? (
+              <div className="flex items-center justify-center py-16">
+                <Loader2 className="w-6 h-6 animate-spin text-emerald-400" />
+              </div>
+            ) : rows.length === 0 ? (
+              <div className="text-center py-12 text-slate-500 text-sm">
+                No enrolled students found for course <span className="font-mono text-amber-400">{selectedCourse}</span>.
+              </div>
+            ) : (
+              <table className="w-full text-sm">
+                <thead className="border-b border-slate-800 bg-slate-950">
+                  <tr className="text-left text-slate-500 text-xs uppercase tracking-wider">
+                    <th className="px-4 py-3">Roll No</th>
+                    <th className="px-4 py-3">Student Name</th>
+                    <th className="px-4 py-3">Section</th>
+                    <th className="px-4 py-3 text-right">Attendance Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60">
+                  {rows.map(({ student, status }) => (
+                    <tr key={student.student_id} className="hover:bg-slate-800/30 transition-colors">
+                      <td className="px-4 py-3 font-mono font-semibold text-violet-400 text-xs">
+                        {student.roll_number}
+                      </td>
+                      <td className="px-4 py-3">
+                        <p className="font-semibold text-slate-200 text-xs">{student.full_name}</p>
+                        <p className="text-[11px] font-mono text-slate-500">{student.student_id}</p>
+                      </td>
+                      <td className="px-4 py-3">
+                        {student.section && (
+                          <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-violet-950/60 text-violet-300 border border-violet-800/50">
+                            §{student.section}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {[
+                            { val: "PRESENT", label: "Present", icon: CheckCircle2, active: "bg-emerald-600 text-white border-emerald-500" },
+                            { val: "LATE", label: "Late", icon: Clock, active: "bg-amber-600 text-white border-amber-500" },
+                            { val: "ABSENT", label: "Absent", icon: XCircle, active: "bg-red-600 text-white border-red-500" },
+                          ].map((b) => {
+                            const Icon = b.icon;
+                            const isSelected = status === b.val;
+                            return (
+                              <button
+                                key={b.val}
+                                type="button"
+                                onClick={() => handleStudentStatusChange(student.student_id, b.val as any)}
+                                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs font-bold transition-all ${
+                                  isSelected
+                                    ? b.active
+                                    : "border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 hover:text-slate-200"
+                                }`}
+                              >
+                                <Icon className="w-3.5 h-3.5" />
+                                <span>{b.label}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-800 bg-slate-950/50 flex-shrink-0">
+          <p className="text-xs text-slate-400">
+            Total {rows.length} students enrolled in <span className="font-mono text-emerald-400 font-bold">{selectedCourse}</span>
+          </p>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSubmitting || rows.length === 0}
+              className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold transition-colors shadow-lg shadow-emerald-900/30 disabled:opacity-50"
+            >
+              {isSubmitting ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <CalendarCheck className="w-4 h-4" />
+              )}
+              Save Attendance Sheet ({rows.length})
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

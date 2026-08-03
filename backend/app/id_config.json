@@ -1,0 +1,8 @@
+{
+  "student_id_template": "STU-{YEAR}-{DEPT}-{SEQ:04d}",
+  "prefix": "STU",
+  "seq_padding": 4,
+  "roll_prefix": "MUB-",
+  "roll_padding": 4,
+  "roll_number_template": "{YEAR_SHORT}{DEPT}-{SEQ:03d}"
+}
