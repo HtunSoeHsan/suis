@@ -57,6 +57,16 @@ CREATE TABLE IF NOT EXISTS teachers (
     full_name VARCHAR(100) NOT NULL,
     designation VARCHAR(50) NOT NULL,
     phone VARCHAR(20),
+    -- Extended Profile
+    email VARCHAR(100),
+    nrc_number VARCHAR(50),
+    gender VARCHAR(10),
+    qualification VARCHAR(100),
+    specialization VARCHAR(100),
+    joining_date DATE,
+    status VARCHAR(20) DEFAULT 'Active',
+    address VARCHAR(255),
+    -- Face
     face_embedding vector(512),
     is_face_registered BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW()
@@ -78,6 +88,20 @@ CREATE TABLE IF NOT EXISTS students (
     academic_year INT NOT NULL,
     roll_number VARCHAR(20) NOT NULL,
     phone VARCHAR(20),
+    section VARCHAR(5),
+    -- Extended Profile
+    email VARCHAR(100),
+    nrc_number VARCHAR(50),
+    gender VARCHAR(10),
+    date_of_birth DATE,
+    blood_type VARCHAR(5),
+    address VARCHAR(255),
+    guardian_name VARCHAR(100),
+    guardian_phone VARCHAR(20),
+    admission_year INT,
+    status VARCHAR(20) DEFAULT 'Active',
+    major VARCHAR(100),
+    -- Face & Attendance
     attendance_rate DOUBLE PRECISION DEFAULT 100.0,
     face_embedding vector(512),
     is_face_registered BOOLEAN DEFAULT FALSE,
@@ -187,6 +211,15 @@ CREATE TABLE IF NOT EXISTS attendance_logs (
     confidence_score DOUBLE PRECISION,
     status attendance_status DEFAULT 'PRESENT'
 );
+
+CREATE TABLE IF NOT EXISTS face_embeddings (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    person_id UUID NOT NULL,
+    person_type VARCHAR(10) NOT NULL,
+    embedding vector(512) NOT NULL,
+    enrolled_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_face_embeddings_person ON face_embeddings (person_id);
 
 CREATE TABLE IF NOT EXISTS face_enrollment_logs (
     log_id SERIAL PRIMARY KEY,
