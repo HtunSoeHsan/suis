@@ -6,21 +6,21 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:password733@localhost:5432/suis_db"
+    DATABASE_URL: str = "postgresql+asyncpg://postgres:password@localhost:5432/suis_db"
 
     # Groq AI
-    GROQ_API_KEY: str = "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"
+    GROQ_API_KEY: str = ""
     GROQ_MODEL: str = "llama-3.3-70b-versatile"
 
-    # CORS
-    CORS_ORIGINS: str = "http://localhost:3000,http://localhost:3001,http://localhost:3002,http://127.0.0.1:3000,http://127.0.0.1:3001,http://127.0.0.1:3002"
+    # CORS — override via env: CORS_ORIGINS=https://app.example.com,https://www.example.com
+    CORS_ORIGINS: str = "http://localhost:3000"
 
     # Face recognition
     SIMILARITY_THRESHOLD: float = 0.45
     LIVENESS_THRESHOLD: float = 0.6
 
-    # JWT Auth
-    JWT_SECRET_KEY: str = "suis_secret_jwt_key_2026_ucsp_super_secure_key"
+    # JWT Auth — MUST be set via env in production: openssl rand -hex 32
+    JWT_SECRET_KEY: str = ""
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 480  # 8 hours
 
     # App
