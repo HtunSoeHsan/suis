@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { coursesApi, teachersApi, departmentsApi } from "@/lib/api";
-import type { Course, Teacher, Department } from "@/types";
+import { coursesApi, teachersApi, departmentsApi, semestersApi } from "@/lib/api";
+import type { Course, Teacher, Department, Semester } from "@/types";
 import { CourseFormDialog } from "@/components/courses/CourseFormDialog";
 import { Plus, Search, X, Loader2, BookOpen, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 
@@ -10,11 +10,15 @@ export default function CoursesPage() {
   const [data, setData] = useState<{ total: number; items: Course[] } | null>(null);
   const [teachersMap, setTeachersMap] = useState<Record<string, Teacher>>({});
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [semesters, setSemesters] = useState<Semester[]>([]);
+  const [semestersMap, setSemestersMap] = useState<Record<number, Semester>>({});
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [search, setSearch] = useState("");
   const [filterDept, setFilterDept] = useState("");
+  const [filterSemester, setFilterSemester] = useState("");
   const [page, setPage] = useState(0);
 
   const [showCreate, setShowCreate] = useState(false);
@@ -24,6 +28,12 @@ export default function CoursesPage() {
 
   useEffect(() => {
     departmentsApi.list({ limit: 100 }).then((res) => setDepartments(res.items)).catch(() => {});
+    semestersApi.list({ limit: 100 }).then((res) => {
+      setSemesters(res.items);
+      const sMap: Record<number, Semester> = {};
+      res.items.forEach((s) => { sMap[s.semester_id] = s; });
+      setSemestersMap(sMap);
+    }).catch(() => {});
   }, []);
 
   const fetchCourses = useCallback(async () => {
@@ -36,6 +46,7 @@ export default function CoursesPage() {
           skip: page * limit,
           limit,
           ...(filterDept ? { dept_code: filterDept } : {}),
+          ...(filterSemester ? { semester_id: Number(filterSemester) } : {}),
         }),
         teachersApi.list({ limit: 100 }),
       ]);
@@ -48,7 +59,7 @@ export default function CoursesPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [search, filterDept, page]);
+  }, [search, filterDept, filterSemester, page]);
 
   useEffect(() => {
     fetchCourses();
@@ -102,12 +113,29 @@ export default function CoursesPage() {
           )}
         </div>
 
+        {/* Semester Filter Dropdown */}
+        <div className="relative min-w-44">
+          <select
+            value={filterSemester}
+            onChange={(e) => { setFilterSemester(e.target.value); setPage(0); }}
+            className="w-full pl-3 pr-8 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-600/50 appearance-none cursor-pointer"
+          >
+            <option value="">All Semesters</option>
+            {semesters.map((s) => (
+              <option key={s.semester_id} value={s.semester_id}>
+                {s.academic_year} — {s.term} {s.is_active ? " ★ ACTIVE" : ""}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+        </div>
+
         {/* Department Filter Dropdown */}
         <div className="relative min-w-40">
           <select
             value={filterDept}
             onChange={(e) => { setFilterDept(e.target.value); setPage(0); }}
-            className="w-full pl-3 pr-8 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-600/50 appearance-none"
+            className="w-full pl-3 pr-8 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-600/50 appearance-none cursor-pointer"
           >
             <option value="">All Departments</option>
             {departments.map((d) => (
@@ -132,7 +160,7 @@ export default function CoursesPage() {
           <table className="w-full text-sm">
             <thead className="border-b border-slate-800 bg-slate-950/50">
               <tr className="text-left text-slate-500 text-xs uppercase tracking-wider">
-                {["Course Code", "Course Name", "Department", "Credits", "Assigned Teacher", "Actions"].map((h) => (
+                {["Course Code", "Course Name", "Semester", "Department", "Credits", "Assigned Teacher", "Actions"].map((h) => (
                   <th key={h} className="px-4 py-3 font-medium">{h}</th>
                 ))}
               </tr>
@@ -140,17 +168,28 @@ export default function CoursesPage() {
             <tbody className="divide-y divide-slate-800/60">
               {data?.items.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-slate-500">
+                  <td colSpan={7} className="text-center py-12 text-slate-500">
                     No courses found.{" "}
                     <button onClick={() => setShowCreate(true)} className="text-amber-400 hover:underline">Add one?</button>
                   </td>
                 </tr>
               ) : data?.items.map((c) => {
                 const teacher = c.teacher_id ? teachersMap[c.teacher_id] : null;
+                const sem = c.semester_id ? semestersMap[c.semester_id] : null;
+
                 return (
                   <tr key={c.course_code} className="hover:bg-slate-800/30 transition-colors group">
                     <td className="px-4 py-3 font-mono font-bold text-amber-400 text-xs">{c.course_code}</td>
                     <td className="px-4 py-3 font-semibold text-slate-200">{c.course_name}</td>
+                    <td className="px-4 py-3 text-xs">
+                      {sem ? (
+                        <span className="px-2 py-0.5 rounded-full bg-amber-950/60 border border-amber-800/60 text-amber-300 text-[11px] font-medium inline-flex items-center gap-1">
+                          {sem.academic_year} · {sem.term}
+                        </span>
+                      ) : (
+                        <span className="text-slate-500 italic text-[11px]">Unassigned</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 font-mono text-xs text-sky-400">{c.dept_code}</td>
                     <td className="px-4 py-3 text-slate-300 font-medium">{c.credit_hours} hrs</td>
                     <td className="px-4 py-3">

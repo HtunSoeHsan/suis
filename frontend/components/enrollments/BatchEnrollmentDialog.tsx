@@ -20,7 +20,7 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
   // Selection states
   const [semesterId, setSemesterId] = useState("");
   const [courseDeptFilter, setCourseDeptFilter] = useState("ALL");
-  const [studentDeptFilter, setStudentDeptFilter] = useState("ALL");
+  const [studentMajorFilter, setStudentMajorFilter] = useState("ALL");
   const [studentYearFilter, setStudentYearFilter] = useState<number | "ALL">("ALL");
 
   const [selectedCourseCodes, setSelectedCourseCodes] = useState<string[]>([]);
@@ -61,9 +61,9 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
   );
 
   const filteredStudents = allStudents.filter((s) => {
-    const matchDept = studentDeptFilter === "ALL" || s.dept_code === studentDeptFilter;
+    const matchMajor = studentMajorFilter === "ALL" || (s.major ?? s.dept_code) === studentMajorFilter;
     const matchYear = studentYearFilter === "ALL" || s.academic_year === studentYearFilter;
-    return matchDept && matchYear;
+    return matchMajor && matchYear;
   });
 
   // Select all handlers
@@ -133,7 +133,7 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-slate-800 shrink-0">
           <h3 className="font-semibold text-white flex items-center gap-2 text-lg">
-            <Layers className="w-5 h-5 text-teal-400" /> Batch Course Enrollment Manager
+            <Layers className="w-5 h-5 text-teal-400" /> Batch Course Enrollment
           </h3>
           <button onClick={onClose} className="text-slate-500 hover:text-slate-200 transition-colors">
             <X className="w-5 h-5" />
@@ -251,16 +251,14 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
                 {/* Filters */}
                 <div className="grid grid-cols-2 gap-2 mb-3 shrink-0">
                   <select
-                    value={studentDeptFilter}
-                    onChange={(e) => setStudentDeptFilter(e.target.value)}
+                    value={studentMajorFilter}
+                    onChange={(e) => setStudentMajorFilter(e.target.value)}
                     className="w-full px-2 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-300 focus:outline-none"
                   >
-                    <option value="ALL">All Depts</option>
-                    {departments.map((d) => (
-                      <option key={d.dept_code} value={d.dept_code}>
-                        {d.dept_code}
-                      </option>
-                    ))}
+                    <option value="ALL">All Majors</option>
+                    <option value="CST">CST</option>
+                    <option value="CS">CS</option>
+                    <option value="CT">CT</option>
                   </select>
                   <select
                     value={studentYearFilter}

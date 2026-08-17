@@ -28,6 +28,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/attendance": "Attendance Management",
   "/chatbot": "AI Chatbot Assistant",
   "/face-scanner": "Face Recognition Scanner",
+  "/users": "User Management",
   "/settings": "System ID Settings",
 };
 

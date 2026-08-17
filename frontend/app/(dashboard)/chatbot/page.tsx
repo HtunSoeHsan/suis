@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { chatApi } from "@/lib/api";
 import type { ChatMessage } from "@/types";
 import {
-  Send, Loader2, Bot, User, ChevronDown, Code2, Database, MessageSquareText,
+  Send, Loader2, Bot, User, ChevronDown, Code2, Database, MessageSquareText, Cpu, Globe, Zap, Sparkles
 } from "lucide-react";
 
 const SUGGESTIONS = [
@@ -14,6 +14,20 @@ const SUGGESTIONS = [
   "What is the attendance policy?",
   "List students enrolled this year sorted by name",
 ];
+
+interface ModelOption {
+  provider: string;
+  id: string;
+  name: string;
+  is_free?: boolean;
+}
+
+interface ModelsInfo {
+  groq_available: boolean;
+  openrouter_available: boolean;
+  default_provider: string;
+  models: ModelOption[];
+}
 
 function MessageBubble({ msg }: { msg: ChatMessage }) {
   const [showSql, setShowSql] = useState(false);
@@ -77,19 +91,36 @@ export default function ChatbotPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: "👋 Hello! I'm the SUIS AI Assistant. I can answer questions about students, teachers, attendance records, and university information. Try asking me anything!",
+      content: "👋 Hello! I'm the SUIS AI Assistant. I can answer questions about students, teachers, attendance records, and university information. Select your preferred AI Model above and ask me anything!",
       timestamp: new Date(),
       query_type: "general_info",
     },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [modelsInfo, setModelsInfo] = useState<ModelsInfo | null>(null);
+  const [selectedModelId, setSelectedModelId] = useState<string>("llama-3.3-70b-versatile");
+
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
+    chatApi.getModels().then((data) => {
+      setModelsInfo(data);
+      if (data.models.length > 0) {
+        // default to first groq if groq available, else first openrouter
+        const defaultModel = data.models.find((m) => m.provider === data.default_provider) ?? data.models[0];
+        if (defaultModel) setSelectedModelId(defaultModel.id);
+      }
+    }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const activeModelObj = modelsInfo?.models.find((m) => m.id === selectedModelId);
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || loading) return;
@@ -99,7 +130,11 @@ export default function ChatbotPage() {
     setLoading(true);
 
     try {
-      const res = await chatApi.send(text);
+      const res = await chatApi.send(
+        text,
+        activeModelObj?.provider,
+        activeModelObj?.id
+      );
       const assistantMsg: ChatMessage = {
         role: "assistant",
         content: res.answer,
@@ -131,14 +166,43 @@ export default function ChatbotPage() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-7rem)] max-h-[800px]">
-      {/* Page header */}
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-600 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-900/30">
-          <MessageSquareText className="w-5 h-5 text-white" />
+      {/* Page header with Model Selector */}
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-600 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-900/30">
+            <MessageSquareText className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              AI Chatbot
+              {activeModelObj?.provider === "openrouter" ? (
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-800 font-semibold flex items-center gap-1">
+                  <Globe className="w-3 h-3 text-cyan-400" /> OpenRouter API
+                </span>
+              ) : (
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-950 text-violet-300 border border-violet-800 font-semibold flex items-center gap-1">
+                  <Zap className="w-3 h-3 text-amber-400" /> Groq High-Speed LLM
+                </span>
+              )}
+            </h2>
+            <p className="text-xs text-slate-400">Natural Language Text-to-SQL & University Intelligence</p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-lg font-bold text-white">AI Chatbot</h2>
-          <p className="text-xs text-slate-400">Powered by Groq Llama 3.3 70B · Text-to-SQL</p>
+
+        {/* AI Model dropdown */}
+        <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 p-1.5 rounded-xl shadow-md">
+          <Cpu className="w-4 h-4 text-amber-400 ml-1.5 shrink-0" />
+          <select
+            value={selectedModelId}
+            onChange={(e) => setSelectedModelId(e.target.value)}
+            className="bg-slate-800 border border-slate-700 text-xs font-medium text-slate-100 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500/50 cursor-pointer"
+          >
+            {modelsInfo?.models.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -150,11 +214,13 @@ export default function ChatbotPage() {
         {loading && (
           <div className="chat-message flex gap-3">
             <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center flex-shrink-0">
-              <Bot className="w-4 h-4 text-violet-400" />
+              <Bot className="w-4 h-4 text-violet-400 animate-pulse" />
             </div>
             <div className="bg-slate-800 border border-slate-700/60 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin text-violet-400" />
-              <span className="text-sm text-slate-400">Thinking…</span>
+              <span className="text-sm text-slate-400">
+                Thinking with <span className="text-amber-400 font-semibold">{activeModelObj?.name ?? "AI"}</span>…
+              </span>
             </div>
           </div>
         )}

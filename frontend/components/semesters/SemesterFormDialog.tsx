@@ -12,7 +12,7 @@ interface Props {
 
 const EMPTY = {
   academic_year: "2025-2026",
-  term: "First Semester",
+  term: "Semester 1",
   start_date: "2025-11-01",
   end_date: "2026-03-31",
   is_active: false,
@@ -82,9 +82,9 @@ export function SemesterFormDialog({ semester, onClose }: Props) {
                 onChange={(e) => setForm({ ...form, term: e.target.value })}
                 className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-600/50"
               >
-                <option value="First Semester">First Semester</option>
-                <option value="Second Semester">Second Semester</option>
-                <option value="Summer Term">Summer Term</option>
+                {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                  <option key={n} value={`Semester ${n}`}>Semester {n}</option>
+                ))}
               </select>
             </div>
           </div>

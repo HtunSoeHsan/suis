@@ -16,6 +16,7 @@ import {
   ScanFace,
   LayoutDashboard,
   Settings2,
+  UserCog,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -32,6 +33,7 @@ const navItems = [
   { href: "/attendance", label: "Attendance", icon: CalendarCheck },
   { href: "/chatbot", label: "AI Chatbot", icon: MessageSquareText },
   { href: "/face-scanner", label: "Face Scanner", icon: ScanFace },
+  { href: "/users", label: "User Management", icon: UserCog },
   { href: "/settings", label: "Settings", icon: Settings2 },
 ];
 

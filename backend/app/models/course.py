@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from app.models.enrollment import Enrollment
     from app.models.timetable import AcademicTimetable, ExamTimetable
     from app.models.attendance import AttendanceLog
+    from app.models.semester import Semester
 
 
 class Course(Base):
@@ -19,6 +20,9 @@ class Course(Base):
     course_name: Mapped[str] = mapped_column(String(100), nullable=False)
     credit_hours: Mapped[int] = mapped_column(Integer, nullable=False)
     teacher_id: Mapped[str | None] = mapped_column(String(50), ForeignKey("teachers.teacher_id", ondelete="SET NULL"))
+    academic_year: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    major: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    semester_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("semesters.semester_id", ondelete="SET NULL"), nullable=True)
 
     # Relationships
     department: Mapped["Department"] = relationship("Department", back_populates="courses")

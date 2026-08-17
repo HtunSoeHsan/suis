@@ -11,11 +11,11 @@ interface Props {
 }
 
 const EMPTY = {
-  student_id: "", full_name: "", dept_code: "",
+  student_id: "", full_name: "", dept_code: "CST",
   roll_number: "", academic_year: "4", phone: "", section: "",
   email: "", nrc_number: "", gender: "Male", date_of_birth: "",
   blood_type: "", address: "", guardian_name: "", guardian_phone: "",
-  admission_year: new Date().getFullYear().toString(), status: "Active", major: "",
+  admission_year: new Date().getFullYear().toString(), status: "Active", major: "CST",
 };
 
 const SECTIONS = [
@@ -30,22 +30,22 @@ export function StudentFormDialog({ student, onClose }: Props) {
   const [form, setForm] = useState({ ...EMPTY });
   const [departments, setDepartments] = useState<Department[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
+  const [semesters, setSemesters] = useState<Semester[]>([]);
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
-  const [activeSemester, setActiveSemester] = useState<Semester | null>(null);
+  const [selectedSemesterId, setSelectedSemesterId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     departmentsApi.list({ limit: 100 }).then((res) => {
       setDepartments(res.items);
-      if (!student && res.items.length > 0) {
-        setForm((f) => ({ ...f, dept_code: res.items[0].dept_code }));
-      }
     }).catch(() => {});
 
     semestersApi.list({ limit: 50 }).then((res) => {
+      setSemesters(res.items);
       const active = res.items.find((s) => s.is_active);
-      if (active) setActiveSemester(active);
+      if (active) setSelectedSemesterId(active.semester_id);
+      else if (res.items.length > 0) setSelectedSemesterId(res.items[0].semester_id);
     }).catch(() => {});
 
     coursesApi.list({ limit: 100 }).then((res) => {
@@ -83,7 +83,8 @@ export function StudentFormDialog({ student, onClose }: Props) {
   }, [student]);
 
   const matchingCourses = courses.filter((c) => {
-    return !form.dept_code || !c.dept_code || c.dept_code === form.dept_code;
+    const majorMatch = !form.major || !c.major || c.major === form.major || c.major === form.dept_code;
+    return majorMatch;
   });
 
   const toggleCourse = (code: string) => {
@@ -130,11 +131,11 @@ export function StudentFormDialog({ student, onClose }: Props) {
         targetStudentId = created.student_id;
       }
 
-      if (targetStudentId && activeSemester && selectedCourses.length > 0) {
+      if (targetStudentId && selectedSemesterId && selectedCourses.length > 0) {
         await enrollmentsApi.createBatch({
           student_ids: [targetStudentId],
           course_codes: selectedCourses,
-          semester_id: activeSemester.semester_id,
+          semester_id: selectedSemesterId,
         });
       }
 
@@ -208,20 +209,24 @@ export function StudentFormDialog({ student, onClose }: Props) {
                 </div>
               </div>
 
-              {/* Department + Section */}
+              {/* Major + Section */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Department *</label>
+                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Major *</label>
                   <div className="relative">
-                    <select value={form.dept_code} onChange={(e) => set("dept_code", e.target.value)}
-                      required className={`${inputClass} appearance-none pr-9`}>
-                      {departments.length === 0 ? (
-                        <option value="" disabled>Loading…</option>
-                      ) : departments.map((d) => (
-                        <option key={d.dept_code} value={d.dept_code}>
-                          {d.dept_code} — {d.dept_name}
-                        </option>
-                      ))}
+                    <select
+                      value={form.major || form.dept_code || "CST"}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        set("major", val);
+                        set("dept_code", val);
+                      }}
+                      required
+                      className={`${inputClass} appearance-none pr-9`}
+                    >
+                      <option value="CST">CST — Computer Science & Technology</option>
+                      <option value="CS">CS — Computer Science</option>
+                      <option value="CT">CT — Computer Technology</option>
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                   </div>
@@ -287,11 +292,26 @@ export function StudentFormDialog({ student, onClose }: Props) {
                   <label className="text-xs font-semibold text-teal-400 uppercase tracking-wider flex items-center gap-1.5">
                     <BookOpen className="w-4 h-4 text-teal-400" /> Course Enrollment
                   </label>
-                  {activeSemester && (
-                    <span className="text-[11px] px-2 py-0.5 rounded bg-teal-950 text-teal-300 border border-teal-800/60 font-medium">
-                      {activeSemester.academic_year} ({activeSemester.term})
-                    </span>
-                  )}
+                </div>
+
+                {/* Semester Selector */}
+                <div className="relative">
+                  <label className="block text-[11px] text-slate-500 mb-1">Semester (ပညာသင်နှစ်)</label>
+                  <div className="relative">
+                    <select
+                      value={selectedSemesterId ?? ""}
+                      onChange={(e) => setSelectedSemesterId(e.target.value ? parseInt(e.target.value) : null)}
+                      className="w-full pl-3 pr-8 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-xs font-medium text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-600/50 appearance-none"
+                    >
+                      <option value="">-- No Semester --</option>
+                      {semesters.map((s) => (
+                        <option key={s.semester_id} value={s.semester_id}>
+                          {s.academic_year} ({s.term}){s.is_active ? " ★ ACTIVE" : ""}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                  </div>
                 </div>
 
                 {matchingCourses.length === 0 ? (
@@ -386,9 +406,12 @@ export function StudentFormDialog({ student, onClose }: Props) {
               {/* Major / Specialization */}
               <div>
                 <label className="block text-xs font-medium text-slate-400 mb-1.5">Major / Specialization</label>
-                <input type="text" value={form.major}
-                  onChange={(e) => set("major", e.target.value)}
-                  placeholder="e.g. Software Engineering, Cyber Security" className={inputClass} />
+                <select value={form.major} onChange={(e) => set("major", e.target.value)} className={inputClass}>
+                  <option value="">-- Select Major --</option>
+                  <option value="CST">CST — Computer Science &amp; Technology</option>
+                  <option value="CS">CS — Computer Science</option>
+                  <option value="CT">CT — Computer Technology</option>
+                </select>
               </div>
             </div>
           )}

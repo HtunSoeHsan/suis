@@ -29,11 +29,11 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-suis}:${POSTGRES_PASSWORD:-suispassword}@postgres:5432/${POSTGRES_DB:-suis_db}
       GROQ_API_KEY: ${GROQ_API_KEY}
-      CORS_ORIGINS: http://localhost:3000
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
       LIVENESS_THRESHOLD: ${LIVENESS_THRESHOLD:-0.6}
       SIMILARITY_THRESHOLD: ${SIMILARITY_THRESHOLD:-0.45}
     volumes:
-      - ./backend:/app
       - insightface_models:/root/.insightface
     depends_on:
       postgres:
@@ -53,7 +53,7 @@ services:
     ports:
       - "4001:4001"
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8001
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8001}
     depends_on:
       backend:
         condition: service_healthy

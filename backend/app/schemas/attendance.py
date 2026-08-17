@@ -46,6 +46,8 @@ class BatchAttendanceOut(BaseModel):
 
 class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=1000)
+    provider: Optional[str] = Field(None, description="'groq' or 'openrouter'")
+    model: Optional[str] = Field(None, description="Specific model ID (e.g. 'google/gemini-2.0-flash-001')")
     conversation_history: list[dict] = Field(default_factory=list)
 
 

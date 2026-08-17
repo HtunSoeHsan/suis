@@ -41,9 +41,17 @@ export function EnrollmentFormDialog({ onClose }: Props) {
 
   const selectedStudent = students.find((s) => s.student_id === studentId);
 
+  // Smart filter: show courses matching selected student's major
+  const filteredCourses = courses.filter((c) => {
+    if (!selectedStudent) return true;
+    const majorMatch = !c.major || c.major === (selectedStudent.major ?? selectedStudent.dept_code);
+    return majorMatch;
+  });
+
   useEffect(() => {
     if (selectedStudent) {
       setPromoteYear(Math.min(6, (selectedStudent.academic_year || 1) + 1));
+      setSelectedCourses([]); // clear on student change
     }
   }, [studentId]);
 
@@ -93,7 +101,7 @@ export function EnrollmentFormDialog({ onClose }: Props) {
             >
               {students.map((s) => (
                 <option key={s.student_id} value={s.student_id}>
-                  {s.full_name} ({s.roll_number} — {s.dept_code})
+                  {s.full_name} ({s.roll_number} — {s.major ?? s.dept_code})
                 </option>
               ))}
             </select>
@@ -109,26 +117,33 @@ export function EnrollmentFormDialog({ onClose }: Props) {
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-xs font-medium text-slate-400">
                 Select Courses * <span className="text-teal-400">({selectedCourses.length} selected)</span>
+                {selectedStudent && (selectedStudent.major || selectedStudent.academic_year) && (
+                  <span className="ml-2 text-[10px] text-slate-500">
+                    — {selectedStudent.major ?? selectedStudent.dept_code} · Year {selectedStudent.academic_year}
+                  </span>
+                )}
               </label>
-              {courses.length > 0 && (
+              {filteredCourses.length > 0 && (
                 <button
                   type="button"
                   onClick={() =>
                     setSelectedCourses(
-                      selectedCourses.length === courses.length ? [] : courses.map((c) => c.course_code)
+                      selectedCourses.length === filteredCourses.length ? [] : filteredCourses.map((c) => c.course_code)
                     )
                   }
                   className="text-[11px] text-teal-400 hover:text-teal-300 font-medium"
                 >
-                  {selectedCourses.length === courses.length ? "Deselect All" : "Select All"}
+                  {selectedCourses.length === filteredCourses.length ? "Deselect All" : "Select All"}
                 </button>
               )}
             </div>
             <div className="bg-slate-800 border border-slate-700 rounded-lg overflow-y-auto max-h-44 divide-y divide-slate-700/50">
-              {courses.length === 0 ? (
-                <p className="text-xs text-slate-500 py-6 text-center">No courses available</p>
+              {filteredCourses.length === 0 ? (
+                <p className="text-xs text-slate-500 py-6 text-center">
+                  {courses.length === 0 ? "No courses available" : "No courses match this student's major / year"}
+                </p>
               ) : (
-                courses.map((c) => {
+                filteredCourses.map((c) => {
                   const isSelected = selectedCourses.includes(c.course_code);
                   return (
                     <div
@@ -147,7 +162,6 @@ export function EnrollmentFormDialog({ onClose }: Props) {
                       )}
                       <span className="font-mono font-bold text-slate-200">{c.course_code}</span>
                       <span className="truncate text-slate-400">{c.course_name}</span>
-                      <span className="ml-auto text-[10px] text-slate-500 shrink-0">{c.dept_code}</span>
                     </div>
                   );
                 })

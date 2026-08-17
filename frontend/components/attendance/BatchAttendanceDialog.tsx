@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { attendanceApi, coursesApi, enrollmentsApi, studentsApi } from "@/lib/api";
-import type { Course, Student } from "@/types";
+import { attendanceApi, coursesApi, enrollmentsApi, studentsApi, semestersApi } from "@/lib/api";
+import type { Course, Student, Semester } from "@/types";
 import { X, Loader2, CalendarCheck, CheckCircle2, XCircle, Clock, CheckSquare } from "lucide-react";
 
 interface BatchAttendanceDialogProps {
@@ -16,6 +16,9 @@ interface StudentAttendanceRow {
 }
 
 export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDialogProps) {
+  const [semesters, setSemesters] = useState<Semester[]>([]);
+  const [selectedSemesterId, setSelectedSemesterId] = useState<number | "ALL">("ALL");
+
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string>("");
 
@@ -26,20 +29,48 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    coursesApi.list({ limit: 100 })
-      .then((res) => {
-        setCourses(res.items);
-        if (res.items.length > 0) {
-          setSelectedCourse(res.items[0].course_code);
+    Promise.all([
+      semestersApi.list({ limit: 100 }),
+      coursesApi.list({ limit: 200 }),
+    ])
+      .then(([semRes, crsRes]) => {
+        setSemesters(semRes.items);
+        setCourses(crsRes.items);
+
+        const activeSem = semRes.items.find((s) => s.is_active) ?? semRes.items[0];
+        if (activeSem) {
+          setSelectedSemesterId(activeSem.semester_id);
         }
       })
       .catch((err: unknown) => setError((err as Error).message))
       .finally(() => setIsLoadingCourses(false));
   }, []);
 
+  // Filter courses strictly by selected semester
+  const filteredCourses = courses.filter((c) => {
+    if (selectedSemesterId === "ALL") return true;
+    return c.semester_id === selectedSemesterId;
+  });
+
+  // When selected semester changes or filtered courses change, auto-select first matching course
+  useEffect(() => {
+    if (filteredCourses.length > 0) {
+      const isValid = filteredCourses.some((c) => c.course_code === selectedCourse);
+      if (!isValid) {
+        setSelectedCourse(filteredCourses[0].course_code);
+      }
+    } else {
+      setSelectedCourse("");
+      setRows([]);
+    }
+  }, [selectedSemesterId, filteredCourses]);
+
   // Fetch enrolled students whenever selectedCourse changes
   useEffect(() => {
-    if (!selectedCourse) return;
+    if (!selectedCourse) {
+      setRows([]);
+      return;
+    }
 
     setIsLoadingStudents(true);
     setError(null);
@@ -82,6 +113,10 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedCourse) {
+      setError("Please select a valid course.");
+      return;
+    }
     if (rows.length === 0) {
       setError("No enrolled students found for the selected course.");
       return;
@@ -131,30 +166,62 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
             </div>
           )}
 
-          {/* Course Selector Row */}
-          <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
-            <div className="flex-1 min-w-60">
+          {/* 2-Step Selector Row: Semester -> Course */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+            {/* 1. Semester Selector */}
+            <div>
               <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                Select Course (ဘာသာရပ် ရွေးပါ)
+                1. Select Academic Term (ပညာသင်နှစ် ရွေးပါ)
+              </label>
+              <select
+                value={selectedSemesterId}
+                onChange={(e) => setSelectedSemesterId(e.target.value === "ALL" ? "ALL" : Number(e.target.value))}
+                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+              >
+                <option value="ALL">-- All Semesters --</option>
+                {semesters.map((s) => (
+                  <option key={s.semester_id} value={s.semester_id}>
+                    {s.academic_year} — {s.term} {s.is_active ? " ★ ACTIVE" : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* 2. Course Selector */}
+            <div>
+              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                2. Select Course (ဘာသာရပ် ရွေးပါ)
               </label>
               {isLoadingCourses ? (
-                <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+                <div className="py-2">
+                  <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+                </div>
               ) : (
                 <select
                   value={selectedCourse}
                   onChange={(e) => setSelectedCourse(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm font-semibold text-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  disabled={filteredCourses.length === 0}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm font-semibold text-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50"
                 >
-                  {courses.map((c) => (
-                    <option key={c.course_code} value={c.course_code}>
-                      {c.course_code} — {c.course_name} ({c.dept_code})
-                    </option>
-                  ))}
+                  {filteredCourses.length === 0 ? (
+                    <option value="">No courses available in this semester</option>
+                  ) : (
+                    filteredCourses.map((c) => (
+                      <option key={c.course_code} value={c.course_code}>
+                        {c.course_code} — {c.course_name} ({c.major ?? c.dept_code})
+                      </option>
+                    ))
+                  )}
                 </select>
               )}
             </div>
+          </div>
 
-            {/* Quick Bulk Actions */}
+          {/* Quick Bulk Actions & Counter */}
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs font-medium text-slate-400">
+              Showing <span className="text-emerald-400 font-bold">{rows.length}</span> enrolled student{rows.length !== 1 ? "s" : ""}
+            </span>
             <div className="flex items-center gap-2">
               <button
                 type="button"
@@ -181,7 +248,11 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
               </div>
             ) : rows.length === 0 ? (
               <div className="text-center py-12 text-slate-500 text-sm">
-                No enrolled students found for course <span className="font-mono text-amber-400">{selectedCourse}</span>.
+                {!selectedCourse ? (
+                  "Please select a course above to load enrolled students."
+                ) : (
+                  <>No enrolled students found for course <span className="font-mono text-amber-400">{selectedCourse}</span>.</>
+                )}
               </div>
             ) : (
               <table className="w-full text-sm">
@@ -248,7 +319,7 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
         {/* Footer */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-slate-800 bg-slate-950/50 flex-shrink-0">
           <p className="text-xs text-slate-400">
-            Total {rows.length} students enrolled in <span className="font-mono text-emerald-400 font-bold">{selectedCourse}</span>
+            Total {rows.length} students enrolled in <span className="font-mono text-emerald-400 font-bold">{selectedCourse || "—"}</span>
           </p>
           <div className="flex items-center gap-3">
             <button
@@ -261,7 +332,7 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={isSubmitting || rows.length === 0}
+              disabled={isSubmitting || rows.length === 0 || !selectedCourse}
               className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold transition-colors shadow-lg shadow-emerald-900/30 disabled:opacity-50"
             >
               {isSubmitting ? (

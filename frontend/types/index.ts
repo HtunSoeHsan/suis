@@ -9,6 +9,12 @@ export interface User {
   teacher_id?: string | null;
 }
 
+export interface UserDetail extends User {
+  linked_name?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Student {
   student_id: string;
   user_id?: string | null;
@@ -75,6 +81,8 @@ export interface Course {
   course_name: string;
   credit_hours: number;
   teacher_id?: string | null;
+  semester_id?: number | null;
+  major?: string | null;
 }
 
 export interface Semester {

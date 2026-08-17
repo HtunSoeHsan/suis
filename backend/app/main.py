@@ -5,6 +5,7 @@ from app.routers import (
     students, teachers, departments, courses, semesters, enrollments,
     classrooms, time_slots, timetables, attendance, chat, vision, auth, settings as settings_router
 )
+from app.routers import users as users_router
 
 settings = get_settings()
 
@@ -58,6 +59,7 @@ else:
 
 # ─── Routers ──────────────────────────────────────────────────────────────────
 app.include_router(auth.router)
+app.include_router(users_router.router)
 app.include_router(students.router)
 app.include_router(teachers.router)
 app.include_router(departments.router)

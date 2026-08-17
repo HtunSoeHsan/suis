@@ -8,8 +8,6 @@ import {
   CalendarCheck,
   MessageSquareText,
   ScanFace,
-  Brain,
-  TrendingUp,
   ArrowRight,
   Sparkles,
   Zap,
@@ -22,7 +20,6 @@ interface StatsData {
   teachers: number | string;
   attendance: number | string;
   enrolledFaces: number | string;
-  apiConnected: boolean;
   loading: boolean;
 }
 
@@ -32,53 +29,35 @@ export default function DashboardPage() {
     teachers: "...",
     attendance: "...",
     enrolledFaces: "...",
-    apiConnected: false,
     loading: true,
   });
 
   useEffect(() => {
     async function loadStats() {
       try {
-        const [studRes, teachRes, attRes] = await Promise.allSettled([
-          studentsApi.list({ limit: 100 }),
-          teachersApi.list({ limit: 100 }),
-          attendanceApi.list({ limit: 100 }),
+        const [studRes, teachRes, studFaceRes, teachFaceRes, attRes] = await Promise.allSettled([
+          studentsApi.list({ limit: 1 }),
+          teachersApi.list({ limit: 1 }),
+          studentsApi.list({ is_face_registered: true, limit: 1 }),
+          teachersApi.list({ is_face_registered: true, limit: 1 }),
+          attendanceApi.list({ limit: 1 }),
         ]);
 
-        let studentCount = 0;
-        let studentEnrolled = 0;
-        if (studRes.status === "fulfilled") {
-          studentCount = studRes.value.total ?? studRes.value.items?.length ?? 0;
-          studentEnrolled = studRes.value.items?.filter((s) => s.is_face_registered).length ?? 0;
-        }
-
-        let teacherCount = 0;
-        let teacherEnrolled = 0;
-        if (teachRes.status === "fulfilled") {
-          teacherCount = teachRes.value.total ?? teachRes.value.items?.length ?? 0;
-          teacherEnrolled = teachRes.value.items?.filter((t) => t.is_face_registered).length ?? 0;
-        }
-
-        let attendanceCount = 0;
-        if (attRes.status === "fulfilled") {
-          attendanceCount = attRes.value.total ?? attRes.value.items?.length ?? 0;
-        }
-
-        const isOk =
-          studRes.status === "fulfilled" ||
-          teachRes.status === "fulfilled" ||
-          attRes.status === "fulfilled";
+        const studentCount = studRes.status === "fulfilled" ? studRes.value.total ?? 0 : 0;
+        const teacherCount = teachRes.status === "fulfilled" ? teachRes.value.total ?? 0 : 0;
+        const studentFaceCount = studFaceRes.status === "fulfilled" ? studFaceRes.value.total ?? 0 : 0;
+        const teacherFaceCount = teachFaceRes.status === "fulfilled" ? teachFaceRes.value.total ?? 0 : 0;
+        const attendanceCount = attRes.status === "fulfilled" ? attRes.value.total ?? 0 : 0;
 
         setStats({
           students: studentCount,
           teachers: teacherCount,
           attendance: attendanceCount,
-          enrolledFaces: studentEnrolled + teacherEnrolled,
-          apiConnected: isOk,
+          enrolledFaces: studentFaceCount + teacherFaceCount,
           loading: false,
         });
       } catch {
-        setStats((prev) => ({ ...prev, apiConnected: false, loading: false }));
+        setStats((prev) => ({ ...prev, loading: false }));
       }
     }
 
@@ -105,12 +84,12 @@ export default function DashboardPage() {
       href: "/teachers",
     },
     {
-      label: "Today's Attendance",
+      label: "Attendance Logs",
       value: stats.attendance,
       icon: CalendarCheck,
       color: "from-emerald-500 via-teal-600 to-green-700",
       shadow: "shadow-emerald-500/20",
-      hint: "Biometric & auto-verified",
+      hint: "Total recorded attendance logs",
       href: "/attendance",
     },
     {
@@ -207,26 +186,6 @@ export default function DashboardPage() {
               </Link>
             </div>
           </div>
-
-          {/* Connection Pill */}
-          <div className="flex flex-col items-end gap-3 w-full lg:w-auto">
-            <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-slate-900/80 border border-slate-800 backdrop-blur-xl shadow-lg">
-              {stats.apiConnected ? (
-                <>
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-                  </span>
-                  <span className="text-xs font-semibold text-emerald-400">Backend API Active</span>
-                </>
-              ) : (
-                <>
-                  <span className="h-2.5 w-2.5 rounded-full bg-amber-500 animate-pulse"></span>
-                  <span className="text-xs font-medium text-amber-400">API Syncing (Port 8001)</span>
-                </>
-              )}
-            </div>
-          </div>
         </div>
       </div>
 
@@ -243,7 +202,7 @@ export default function DashboardPage() {
                 <Icon className="w-6 h-6 text-white" />
               </div>
               <span className="text-xs text-slate-500 group-hover:text-violet-400 transition-colors flex items-center gap-1 font-medium">
-                View <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                View <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
               </span>
             </div>
 
@@ -308,4 +267,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-

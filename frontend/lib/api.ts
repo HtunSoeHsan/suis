@@ -37,6 +37,32 @@ export const authApi = {
   seedPasswords: () => apiFetch<{ message: string; users_updated: string[] }>("/api/auth/seed-passwords", { method: "POST" }),
 };
 
+// ─── Users (Management) ───────────────────────────────────────────────────────
+export const usersApi = {
+  list: (params?: Record<string, string | number | boolean>) => {
+    const qs = params ? "?" + new URLSearchParams(params as Record<string, string>).toString() : "";
+    return apiFetch<{ total: number; items: import("@/types").UserDetail[] }>(`/api/users${qs}`);
+  },
+  get: (id: string) => apiFetch<import("@/types").UserDetail>(`/api/users/${id}`),
+  create: (data: { username: string; email: string; password: string; role: string; link_student_id?: string; link_teacher_id?: string }) =>
+    apiFetch<import("@/types").UserDetail>("/api/users", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  update: (id: string, data: { username?: string; email?: string; role?: string }) =>
+    apiFetch<import("@/types").UserDetail>(`/api/users/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  resetPassword: (id: string, new_password: string) =>
+    apiFetch<{ message: string }>(`/api/users/${id}/reset-password`, {
+      method: "POST",
+      body: JSON.stringify({ new_password }),
+    }),
+  delete: (id: string) =>
+    apiFetch<void>(`/api/users/${id}`, { method: "DELETE" }),
+};
+
 // ─── Students ─────────────────────────────────────────────────────────────────
 export const studentsApi = {
   list: (params?: Record<string, string | number | boolean>) => {
@@ -235,6 +261,11 @@ export const timeSlotsApi = {
       method: "POST",
       body: JSON.stringify(data),
     }),
+  update: (id: number, data: Record<string, unknown>) =>
+    apiFetch<import("@/types").TimeSlot>(`/api/time-slots/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
   delete: (id: number) =>
     apiFetch<void>(`/api/time-slots/${id}`, { method: "DELETE" }),
 };
@@ -267,11 +298,18 @@ export const timetablesApi = {
 
 // ─── Chat ─────────────────────────────────────────────────────────────────────
 export const chatApi = {
-  send: (message: string) =>
+  send: (message: string, provider?: string, model?: string) =>
     apiFetch<import("@/types").ChatResponse>("/api/chat", {
       method: "POST",
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ message, provider, model }),
     }),
+  getModels: () =>
+    apiFetch<{
+      groq_available: boolean;
+      openrouter_available: boolean;
+      default_provider: string;
+      models: Array<{ provider: string; id: string; name: string; is_free?: boolean }>;
+    }>("/api/chat/models"),
 };
 
 // ─── Settings ─────────────────────────────────────────────────────────────────

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { attendanceApi, studentsApi, coursesApi } from "@/lib/api";
-import type { Student, Course } from "@/types";
+import { attendanceApi, studentsApi, coursesApi, semestersApi } from "@/lib/api";
+import type { Student, Course, Semester } from "@/types";
 import { X, Loader2, CalendarCheck, UserCheck } from "lucide-react";
 
 interface SingleAttendanceDialogProps {
@@ -12,7 +12,10 @@ interface SingleAttendanceDialogProps {
 
 export function SingleAttendanceDialog({ onClose, onSuccess }: SingleAttendanceDialogProps) {
   const [students, setStudents] = useState<Student[]>([]);
+  const [semesters, setSemesters] = useState<Semester[]>([]);
+  const [selectedSemesterId, setSelectedSemesterId] = useState<number | "ALL">("ALL");
   const [courses, setCourses] = useState<Course[]>([]);
+
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,22 +27,45 @@ export function SingleAttendanceDialog({ onClose, onSuccess }: SingleAttendanceD
   useEffect(() => {
     Promise.all([
       studentsApi.list({ limit: 200 }),
-      coursesApi.list({ limit: 100 }),
+      semestersApi.list({ limit: 100 }),
+      coursesApi.list({ limit: 200 }),
     ])
-      .then(([stRes, crsRes]) => {
+      .then(([stRes, semRes, crsRes]) => {
         setStudents(stRes.items);
+        setSemesters(semRes.items);
         setCourses(crsRes.items);
+
         if (stRes.items.length > 0) setStudentId(stRes.items[0].student_id);
-        if (crsRes.items.length > 0) setCourseCode(crsRes.items[0].course_code);
+
+        const activeSem = semRes.items.find((s) => s.is_active) ?? semRes.items[0];
+        if (activeSem) {
+          setSelectedSemesterId(activeSem.semester_id);
+        }
       })
       .catch((err: unknown) => setError((err as Error).message))
       .finally(() => setIsLoadingData(false));
   }, []);
 
+  const filteredCourses = courses.filter((c) => {
+    if (selectedSemesterId === "ALL") return true;
+    return c.semester_id === selectedSemesterId;
+  });
+
+  useEffect(() => {
+    if (filteredCourses.length > 0) {
+      const isValid = filteredCourses.some((c) => c.course_code === courseCode);
+      if (!isValid) {
+        setCourseCode(filteredCourses[0].course_code);
+      }
+    } else {
+      setCourseCode("");
+    }
+  }, [selectedSemesterId, filteredCourses]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!studentId || !courseCode) {
-      setError("Please select both a student and a course.");
+      setError("Please select both a student and a valid course.");
       return;
     }
 
@@ -108,6 +134,25 @@ export function SingleAttendanceDialog({ onClose, onSuccess }: SingleAttendanceD
                 </select>
               </div>
 
+              {/* Academic Term / Semester Selector */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                  Select Academic Term / Semester
+                </label>
+                <select
+                  value={selectedSemesterId}
+                  onChange={(e) => setSelectedSemesterId(e.target.value === "ALL" ? "ALL" : Number(e.target.value))}
+                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                >
+                  <option value="ALL">-- All Semesters --</option>
+                  {semesters.map((s) => (
+                    <option key={s.semester_id} value={s.semester_id}>
+                      {s.academic_year} — {s.term} {s.is_active ? " ★ ACTIVE" : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               {/* Course Selector */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
@@ -116,14 +161,19 @@ export function SingleAttendanceDialog({ onClose, onSuccess }: SingleAttendanceD
                 <select
                   value={courseCode}
                   onChange={(e) => setCourseCode(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  disabled={filteredCourses.length === 0}
+                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50"
                   required
                 >
-                  {courses.map((c) => (
-                    <option key={c.course_code} value={c.course_code}>
-                      {c.course_code} — {c.course_name}
-                    </option>
-                  ))}
+                  {filteredCourses.length === 0 ? (
+                    <option value="">No courses in this semester</option>
+                  ) : (
+                    filteredCourses.map((c) => (
+                      <option key={c.course_code} value={c.course_code}>
+                        {c.course_code} — {c.course_name} ({c.major ?? c.dept_code})
+                      </option>
+                    ))
+                  )}
                 </select>
               </div>
 
@@ -165,7 +215,7 @@ export function SingleAttendanceDialog({ onClose, onSuccess }: SingleAttendanceD
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !courseCode}
                   className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold transition-colors shadow-lg shadow-emerald-900/30 disabled:opacity-50"
                 >
                   {isSubmitting ? (

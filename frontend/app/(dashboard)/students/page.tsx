@@ -214,7 +214,7 @@ export default function StudentsPage() {
                     className="rounded border-slate-700 bg-slate-800 text-teal-500 focus:ring-teal-500/30"
                   />
                 </th>
-                {["Student ID", "Name / Email", "Dept / Roll", "Year & Section", "NRC / Contact", "Status", "Face", "Actions"].map((h) => (
+                {["Student ID", "Name / Email", "Major / Roll", "Year & Section", "NRC / Contact", "Status", "Face", "Actions"].map((h) => (
                   <th key={h} className="px-4 py-3 font-medium">{h}</th>
                 ))}
               </tr>
@@ -249,7 +249,7 @@ export default function StudentsPage() {
                         {s.email && <div className="text-[11px] text-slate-400">{s.email}</div>}
                       </td>
                       <td className="px-4 py-3 text-slate-400">
-                        <span className="font-semibold text-slate-300">{s.dept_code}</span>
+                        <span className="font-semibold text-slate-300">{s.major || s.dept_code}</span>
                         {s.roll_number && <span className="text-slate-500 ml-1.5 font-mono text-xs">({s.roll_number})</span>}
                       </td>
                       <td className="px-4 py-3">

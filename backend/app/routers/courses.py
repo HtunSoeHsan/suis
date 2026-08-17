@@ -12,6 +12,8 @@ router = APIRouter(prefix="/api/courses", tags=["Courses"])
 async def list_courses(
     search: str | None = Query(None, description="Search by course code or name"),
     dept_code: str | None = Query(None, description="Filter by department code"),
+    semester_id: int | None = Query(None, description="Filter by semester ID"),
+    major: str | None = Query(None, description="Filter by major"),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
     db: AsyncSession = Depends(get_db),
@@ -26,6 +28,10 @@ async def list_courses(
         )
     if dept_code:
         query = query.where(Course.dept_code == dept_code)
+    if semester_id is not None:
+        query = query.where(Course.semester_id == semester_id)
+    if major:
+        query = query.where(Course.major == major)
 
     total_result = await db.execute(select(func.count()).select_from(query.subquery()))
     total = total_result.scalar_one()

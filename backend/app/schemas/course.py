@@ -8,6 +8,8 @@ class CourseBase(BaseModel):
     course_name: str = Field(..., max_length=100, examples=["Advanced Artificial Intelligence"])
     credit_hours: int = Field(..., ge=1, le=10, examples=[4])
     teacher_id: Optional[str] = Field(None, max_length=50, examples=["TCH-2026-01"])
+    major: Optional[str] = Field(None, max_length=50, description="Major this course belongs to, e.g. CST, CS, CT")
+    semester_id: Optional[int] = Field(None, description="FK to semesters table — which academic semester this course belongs to")
 
 
 class CourseCreate(CourseBase):
@@ -19,6 +21,8 @@ class CourseUpdate(BaseModel):
     course_name: Optional[str] = Field(None, max_length=100)
     credit_hours: Optional[int] = Field(None, ge=1, le=10)
     teacher_id: Optional[str] = Field(None, max_length=50)
+    major: Optional[str] = Field(None, max_length=50)
+    semester_id: Optional[int] = Field(None)
 
 
 class CourseOut(CourseBase):

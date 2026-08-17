@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { timetablesApi, coursesApi, teachersApi, classroomsApi, timeSlotsApi, semestersApi } from "@/lib/api";
 import type { AcademicTimetable, ExamTimetable, Course, Teacher, Classroom, TimeSlot, Semester } from "@/types";
 import { TimetableFormDialog } from "@/components/timetables/TimetableFormDialog";
-import { Plus, Search, X, Loader2, CalendarRange, Trash2, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import { PeriodSetupDialog } from "@/components/timetables/PeriodSetupDialog";
+import { Plus, Search, X, Loader2, CalendarRange, Trash2, ChevronLeft, ChevronRight, ChevronDown, Clock } from "lucide-react";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
@@ -29,6 +30,7 @@ export default function TimetablesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
+  const [showPeriodSetup, setShowPeriodSetup] = useState(false);
 
   const limit = 10;
 
@@ -135,12 +137,20 @@ export default function TimetablesPage() {
           </h2>
           <p className="text-sm text-slate-400 mt-0.5">{totalItems} scheduled timetable slots</p>
         </div>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-medium transition-colors shadow-lg shadow-cyan-900/30"
-        >
-          <Plus className="w-4 h-4" /> Add Schedule Slot
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowPeriodSetup(true)}
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 text-sm font-medium transition-colors"
+          >
+            <Clock className="w-4 h-4 text-amber-400" /> Period Setup
+          </button>
+          <button
+            onClick={() => setShowCreate(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-medium transition-colors shadow-lg shadow-cyan-900/30"
+          >
+            <Plus className="w-4 h-4" /> Add Schedule Slot
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -426,6 +436,13 @@ export default function TimetablesPage() {
             setShowCreate(false);
             fetchTimetables();
           }}
+        />
+      )}
+
+      {showPeriodSetup && (
+        <PeriodSetupDialog
+          onClose={() => setShowPeriodSetup(false)}
+          onUpdated={fetchTimetables}
         />
       )}
     </div>
