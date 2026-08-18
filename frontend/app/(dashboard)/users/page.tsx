@@ -428,7 +428,7 @@ export default function UsersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
-  const [filterRole, setFilterRole] = useState<"" | UserRole>("");
+  const [filterRole, setFilterRole] = useState<"" | Exclude<UserRole, "STUDENT">>("");
   const [page, setPage] = useState(0);
   const limit = 15;
 
@@ -474,7 +474,7 @@ export default function UsersPage() {
   };
 
   const totalPages = Math.ceil(total / limit);
-  const roles: Array<"" | UserRole> = ["", "ADMIN", "TEACHER"];
+  const roles: Array<"" | Exclude<UserRole, "STUDENT">> = ["", "ADMIN", "TEACHER"];
 
   if (currentUser && currentUser.role !== "ADMIN") {
     return (
@@ -522,7 +522,7 @@ export default function UsersPage() {
         <div className="flex items-center gap-1.5">
           <span className="text-xs text-slate-500 font-medium">Role:</span>
           {roles.map((r) => {
-            const meta = r ? ROLE_META[r] : null;
+            const meta = r ? ROLE_META[r as Exclude<UserRole, "STUDENT">] : null;
             return (
               <button key={r || "all"} onClick={() => { setFilterRole(r); setPage(0); }}
                 className={cn("px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors",
