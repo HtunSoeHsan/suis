@@ -14,6 +14,7 @@ import {
   Fingerprint,
 } from "lucide-react";
 import { studentsApi, teachersApi, attendanceApi } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 
 interface StatsData {
   students: number | string;
@@ -24,6 +25,9 @@ interface StatsData {
 }
 
 export default function DashboardPage() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "ADMIN";
+
   const [stats, setStats] = useState<StatsData>({
     students: "...",
     teachers: "...",
@@ -103,6 +107,10 @@ export default function DashboardPage() {
     },
   ];
 
+  const visibleStatCards = isAdmin
+    ? statCards
+    : statCards.filter((c) => c.href !== "/students" && c.href !== "/teachers");
+
   const quickLinks = [
     {
       href: "/chatbot",
@@ -141,6 +149,10 @@ export default function DashboardPage() {
       iconBg: "bg-blue-500/10 text-blue-400",
     },
   ];
+
+  const visibleQuickLinks = isAdmin
+    ? quickLinks
+    : quickLinks.filter((l) => l.href !== "/students" && l.href !== "/teachers");
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-10">
@@ -191,7 +203,7 @@ export default function DashboardPage() {
 
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {statCards.map(({ label, value, icon: Icon, color, shadow, hint, href }) => (
+        {visibleStatCards.map(({ label, value, icon: Icon, color, shadow, hint, href }) => (
           <Link
             key={label}
             href={href}
@@ -232,7 +244,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {quickLinks.map(({ href, label, desc, icon: Icon, badge, accent, iconBg }) => (
+          {visibleQuickLinks.map(({ href, label, desc, icon: Icon, badge, accent, iconBg }) => (
             <Link
               key={href}
               href={href}
