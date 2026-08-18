@@ -319,7 +319,7 @@ async def face_retrieve_info(body: FaceEnrollRequest, db: AsyncSession = Depends
     groq = get_groq_service()
     ai_prompt = f"Summarize information for {best_match.full_name} ({target_type.upper()}, ID: {target_id}). Profile: {json.dumps(profile)}. Enrolled courses: {json.dumps(courses)}. Timetable: {json.dumps(timetables)}."
     ai_summary = None
-    if groq.client:
+    if groq.groq_client:
         try:
             ai_summary = await groq._call_groq(
                 "You are an AI university assistant summarizing a student or teacher profile retrieved via face recognition scan.",

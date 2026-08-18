@@ -273,7 +273,7 @@ export function TeacherFormDialog({ teacher, onClose }: Props) {
                 <label className="block text-xs font-medium text-slate-400 mb-1.5">Address (နေရပ်လိပ်စာ)</label>
                 <textarea rows={3} value={form.address}
                   onChange={(e) => set("address", e.target.value)}
-                  placeholder="Staff Housing, Pyay University Campus..."
+                  placeholder="Staff Housing, University Campus..."
                   className={`${inputClass} resize-none`} />
               </div>
             </div>
