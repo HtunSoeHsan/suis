@@ -8,16 +8,15 @@ import Link from "next/link";
 import type { UserDetail, UserRole, Student, Teacher } from "@/types";
 import {
   Plus, Search, Trash2, Pencil, KeyRound, X, Loader2,
-  ChevronLeft, ChevronRight, ShieldCheck, UserCheck, GraduationCap,
+  ChevronLeft, ChevronRight, ShieldCheck, UserCheck,
   ShieldAlert, Eye, EyeOff, RefreshCw, Link2, ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // ─── Role metadata ─────────────────────────────────────────────────────────────
-const ROLE_META: Record<UserRole, { label: string; badge: string; icon: React.ElementType }> = {
+const ROLE_META: Record<Exclude<UserRole, "STUDENT">, { label: string; badge: string; icon: React.ElementType }> = {
   ADMIN:   { label: "Admin",   badge: "bg-violet-500/15 text-violet-300 border-violet-500/30",  icon: ShieldCheck },
   TEACHER: { label: "Teacher", badge: "bg-sky-500/15 text-sky-300 border-sky-500/30",           icon: UserCheck },
-  STUDENT: { label: "Student", badge: "bg-teal-500/15 text-teal-300 border-teal-500/30",        icon: GraduationCap },
 };
 
 // ─── Modal wrapper ────────────────────────────────────────────────────────────
@@ -190,7 +189,7 @@ function ProfileLinkPicker({
 // ─── Create Dialog ────────────────────────────────────────────────────────────
 function CreateUserDialog({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
   const [form, setForm] = useState({
-    username: "", email: "", password: "", role: "STUDENT" as UserRole,
+    username: "", email: "", password: "", role: "TEACHER" as UserRole,
     link_student_id: "", link_teacher_id: "",
   });
   const [loading, setLoading] = useState(false);
@@ -243,7 +242,6 @@ function CreateUserDialog({ onClose, onSuccess }: { onClose: () => void; onSucce
           <select value={form.role}
             onChange={(e) => setForm((f) => ({ ...f, role: e.target.value as UserRole, link_student_id: "", link_teacher_id: "" }))}
             className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-600/50">
-            <option value="STUDENT">Student</option>
             <option value="TEACHER">Teacher</option>
             <option value="ADMIN">Admin</option>
           </select>
@@ -307,7 +305,6 @@ function EditUserDialog({ user, onClose, onSuccess }: { user: UserDetail; onClos
           <label className="text-xs font-medium text-slate-400">Role</label>
           <select value={form.role} onChange={(e) => setForm((f) => ({ ...f, role: e.target.value as UserRole }))}
             className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-600/50">
-            <option value="STUDENT">Student</option>
             <option value="TEACHER">Teacher</option>
             <option value="ADMIN">Admin</option>
           </select>
@@ -477,7 +474,7 @@ export default function UsersPage() {
   };
 
   const totalPages = Math.ceil(total / limit);
-  const roles: Array<"" | UserRole> = ["", "ADMIN", "TEACHER", "STUDENT"];
+  const roles: Array<"" | UserRole> = ["", "ADMIN", "TEACHER"];
 
   if (currentUser && currentUser.role !== "ADMIN") {
     return (
@@ -566,7 +563,9 @@ export default function UsersPage() {
                 </tr>
               ) : (
                 users.map((u) => {
-                  const meta = ROLE_META[u.role];
+                  const meta = ROLE_META[u.role as Exclude<UserRole, "STUDENT">] ?? {
+                    label: u.role, badge: "bg-slate-500/15 text-slate-300 border-slate-500/30", icon: UserCheck,
+                  };
                   const RoleIcon = meta.icon;
                   const isSelf = u.user_id === currentUser?.user_id;
                   return (

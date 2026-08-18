@@ -19,26 +19,34 @@ import {
   UserCog,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
+import type { UserRole } from "@/types";
 
-const navItems = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/students", label: "Students", icon: GraduationCap },
-  { href: "/teachers", label: "Teachers", icon: Users },
-  { href: "/departments", label: "Departments", icon: Building2 },
-  { href: "/courses", label: "Courses", icon: BookOpen },
-  { href: "/semesters", label: "Semesters", icon: Calendar },
-  { href: "/enrollments", label: "Enrollments", icon: UserCheck },
-  { href: "/classrooms", label: "Classrooms", icon: DoorOpen },
-  { href: "/timetables", label: "Timetables", icon: CalendarRange },
-  { href: "/attendance", label: "Attendance", icon: CalendarCheck },
-  { href: "/chatbot", label: "AI Chatbot", icon: MessageSquareText },
-  { href: "/face-scanner", label: "Face Scanner", icon: ScanFace },
-  { href: "/users", label: "User Management", icon: UserCog },
-  { href: "/settings", label: "Settings", icon: Settings2 },
+// roles: undefined = visible to all, otherwise only listed roles can see it
+const navItems: { href: string; label: string; icon: React.ElementType; roles?: UserRole[] }[] = [
+  { href: "/",            label: "Dashboard",       icon: LayoutDashboard },
+  { href: "/students",    label: "Students",        icon: GraduationCap,  roles: ["ADMIN"] },
+  { href: "/teachers",    label: "Teachers",        icon: Users,          roles: ["ADMIN"] },
+  { href: "/departments", label: "Departments",     icon: Building2,      roles: ["ADMIN"] },
+  { href: "/courses",     label: "Courses",         icon: BookOpen },
+  { href: "/semesters",   label: "Semesters",       icon: Calendar,       roles: ["ADMIN"] },
+  { href: "/enrollments", label: "Enrollments",     icon: UserCheck,      roles: ["ADMIN"] },
+  { href: "/classrooms",  label: "Classrooms",      icon: DoorOpen,       roles: ["ADMIN"] },
+  { href: "/timetables",  label: "Timetables",      icon: CalendarRange },
+  { href: "/attendance",  label: "Attendance",      icon: CalendarCheck },
+  { href: "/chatbot",     label: "AI Chatbot",      icon: MessageSquareText },
+  { href: "/face-scanner",label: "Face Scanner",    icon: ScanFace },
+  { href: "/users",       label: "User Management", icon: UserCog,        roles: ["ADMIN"] },
+  { href: "/settings",    label: "Settings",        icon: Settings2,      roles: ["ADMIN"] },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const role = user?.role ?? "TEACHER";
+  const visibleItems = navItems.filter((item) =>
+    !item.roles || item.roles.includes(role as UserRole)
+  );
 
   return (
     <aside className="w-64 min-h-screen bg-slate-950 border-r border-slate-800 flex flex-col">
@@ -57,7 +65,7 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-1">
-        {navItems.map(({ href, label, icon: Icon }) => {
+        {visibleItems.map(({ href, label, icon: Icon }) => {
           const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
           return (
             <Link

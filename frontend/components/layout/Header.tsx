@@ -8,7 +8,6 @@ import {
   LogOut,
   ShieldCheck,
   UserCheck,
-  GraduationCap,
   ChevronDown,
   User,
   Settings,
@@ -47,13 +46,6 @@ const ROLE_META = {
     avatarClass: "from-sky-600 via-cyan-600 to-blue-700",
     glowClass: "shadow-sky-500/20",
   },
-  STUDENT: {
-    icon: GraduationCap,
-    label: "Student",
-    badgeClass: "bg-teal-500/15 text-teal-300 border-teal-500/30",
-    avatarClass: "from-teal-600 via-emerald-600 to-green-700",
-    glowClass: "shadow-teal-500/20",
-  },
 };
 
 export function Header() {
@@ -66,7 +58,9 @@ export function Header() {
     key === "/" ? pathname === "/" : pathname.startsWith(key)
   )?.[1] ?? "SUIS Management System";
 
-  const meta = user?.role ? ROLE_META[user.role] : ROLE_META.ADMIN;
+  const meta = user?.role && user.role in ROLE_META
+    ? ROLE_META[user.role as "ADMIN" | "TEACHER"]
+    : ROLE_META.TEACHER;
   const RoleIcon = meta.icon;
 
   // Close dropdown on outside click
