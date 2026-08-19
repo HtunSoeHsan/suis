@@ -11,6 +11,7 @@ export function useStudents(params: {
   section?: string;
   academic_year?: number | "";
   dept_code?: string;
+  status?: string;
 }) {
   const [data, setData] = useState<{ total: number; items: Student[] } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,6 +32,7 @@ export function useStudents(params: {
       queryParams.academic_year = params.academic_year;
     }
     if (params.dept_code) queryParams.dept_code = params.dept_code;
+    if (params.status) queryParams.status = params.status;
 
     studentsApi
       .list(queryParams)
@@ -44,6 +46,7 @@ export function useStudents(params: {
     params.section,
     params.academic_year,
     params.dept_code,
+    params.status,
     tick,
   ]);
 

@@ -4,7 +4,7 @@ from sqlalchemy import select, func
 from app.database import get_db
 from app.models.attendance import AttendanceLog
 from app.schemas.attendance import AttendanceLogOut, AttendanceLogListOut, AttendanceLogCreate
-from datetime import date
+from datetime import date, timedelta
 
 router = APIRouter(prefix="/api/attendance", tags=["Attendance"])
 
@@ -43,7 +43,8 @@ async def list_attendance(
     if date_from:
         query = query.where(AttendanceLog.verified_at >= date_from)
     if date_to:
-        query = query.where(AttendanceLog.verified_at <= date_to)
+        # Add 1 day so the full day is included (verified_at is a datetime, date_to is date-only)
+        query = query.where(AttendanceLog.verified_at < date_to + timedelta(days=1))
 
     total_result = await db.execute(select(func.count()).select_from(query.subquery()))
     total = total_result.scalar_one()

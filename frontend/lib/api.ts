@@ -128,6 +128,7 @@ export const attendanceApi = {
     }),
   createBatch: (data: {
     course_code: string;
+    verified_at?: string; // ISO datetime string for custom date
     items: Array<{ student_id: string; status: string; confidence_score?: number }>;
   }) =>
     apiFetch<{ total_recorded: number; course_code: string }>("/api/attendance/batch", {

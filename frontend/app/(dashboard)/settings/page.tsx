@@ -244,8 +244,8 @@ export default function SettingsPage() {
                   <Users className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white text-base">Teacher / Faculty ID Rules</h3>
-                  <p className="text-xs text-slate-400">Prefix and sequence padding for Faculty Member IDs</p>
+                  <h3 className="font-semibold text-white text-base">Teacher ID Rules</h3>
+                  <p className="text-xs text-slate-400">Prefix and sequence padding for Teacher IDs</p>
                 </div>
               </div>
               <span className="text-xs font-mono px-3 py-1 rounded-full bg-indigo-950 text-indigo-300 border border-indigo-800/60">

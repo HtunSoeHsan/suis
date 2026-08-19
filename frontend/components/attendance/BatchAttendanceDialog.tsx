@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { attendanceApi, coursesApi, enrollmentsApi, studentsApi, semestersApi } from "@/lib/api";
 import type { Course, Student, Semester } from "@/types";
-import { X, Loader2, CalendarCheck, CheckCircle2, XCircle, Clock, CheckSquare } from "lucide-react";
+import { X, Loader2, CalendarCheck, CheckCircle2, XCircle, Clock, CheckSquare, CalendarDays } from "lucide-react";
 
 interface BatchAttendanceDialogProps {
   onClose: () => void;
@@ -21,12 +21,17 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
 
   const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string>("");
+  const [selectedSection, setSelectedSection] = useState<string>("ALL");
 
   const [rows, setRows] = useState<StudentAttendanceRow[]>([]);
   const [isLoadingCourses, setIsLoadingCourses] = useState(true);
   const [isLoadingStudents, setIsLoadingStudents] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Default to today's date
+  const todayStr = new Date().toISOString().split("T")[0];
+  const [attendanceDate, setAttendanceDate] = useState(todayStr);
 
   useEffect(() => {
     Promise.all([
@@ -52,18 +57,28 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
     return c.semester_id === selectedSemesterId;
   });
 
-  // When selected semester changes or filtered courses change, auto-select first matching course
+  // Filter student rows by section
+  const displayedRows = rows.filter((r) => {
+    if (selectedSection === "ALL") return true;
+    return r.student.section === selectedSection;
+  });
+
+  // When semester changes, auto-select first matching course (use courses + selectedSemesterId as deps to avoid infinite loop)
   useEffect(() => {
-    if (filteredCourses.length > 0) {
-      const isValid = filteredCourses.some((c) => c.course_code === selectedCourse);
+    const filtered = courses.filter((c) =>
+      selectedSemesterId === "ALL" ? true : c.semester_id === selectedSemesterId
+    );
+    if (filtered.length > 0) {
+      const isValid = filtered.some((c) => c.course_code === selectedCourse);
       if (!isValid) {
-        setSelectedCourse(filteredCourses[0].course_code);
+        setSelectedCourse(filtered[0].course_code);
       }
     } else {
       setSelectedCourse("");
       setRows([]);
     }
-  }, [selectedSemesterId, filteredCourses]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedSemesterId, courses]);
 
   // Fetch enrolled students whenever selectedCourse changes
   useEffect(() => {
@@ -102,7 +117,10 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
   }, [selectedCourse]);
 
   const handleSetAllStatus = (status: "PRESENT" | "LATE" | "ABSENT") => {
-    setRows((prev) => prev.map((r) => ({ ...r, status })));
+    const displayedIds = new Set(displayedRows.map((r) => r.student.student_id));
+    setRows((prev) =>
+      prev.map((r) => (displayedIds.has(r.student.student_id) ? { ...r, status } : r))
+    );
   };
 
   const handleStudentStatusChange = (studentId: string, status: "PRESENT" | "LATE" | "ABSENT") => {
@@ -117,8 +135,8 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
       setError("Please select a valid course.");
       return;
     }
-    if (rows.length === 0) {
-      setError("No enrolled students found for the selected course.");
+    if (displayedRows.length === 0) {
+      setError("No enrolled students found for the selected section.");
       return;
     }
 
@@ -126,9 +144,15 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
     setError(null);
 
     try {
+      // Build ISO datetime: selected date at current time
+      const now = new Date();
+      const [year, month, day] = attendanceDate.split("-").map(Number);
+      const verifiedAt = new Date(year, month - 1, day, now.getHours(), now.getMinutes(), now.getSeconds());
+
       await attendanceApi.createBatch({
         course_code: selectedCourse,
-        items: rows.map((r) => ({
+        verified_at: verifiedAt.toISOString(),
+        items: displayedRows.map((r) => ({
           student_id: r.student.student_id,
           status: r.status,
           confidence_score: 1.0,
@@ -166,22 +190,55 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
             </div>
           )}
 
-          {/* 2-Step Selector Row: Semester -> Course */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+          {/* Attendance Date Picker */}
+          <div className="flex items-center gap-3 bg-slate-950/60 px-4 py-3 rounded-xl border border-cyan-900/50">
+            <CalendarDays className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+            <div className="flex-1">
+              <label className="block text-[11px] font-semibold text-cyan-400 uppercase tracking-wider mb-1">
+                Attendance Date (ရက်စွဲ)
+              </label>
+              <div className="flex items-center gap-2 flex-wrap">
+                <input
+                  type="date"
+                  value={attendanceDate}
+                  max={todayStr}
+                  onChange={(e) => setAttendanceDate(e.target.value)}
+                  className="px-2.5 py-1.5 bg-slate-900 border border-cyan-800/60 rounded-lg text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-600/50 [color-scheme:dark]"
+                />
+                {attendanceDate !== todayStr && (
+                  <button
+                    type="button"
+                    onClick={() => setAttendanceDate(todayStr)}
+                    className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-cyan-800/60 bg-cyan-950/40 text-cyan-400 hover:bg-cyan-900/40 transition-colors"
+                  >
+                    Today
+                  </button>
+                )}
+                {attendanceDate !== todayStr && (
+                  <span className="text-xs text-amber-400 font-medium">
+                    ⚠ Past date recording
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* 3-Step Selector Row: Semester -> Course -> Section */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
             {/* 1. Semester Selector */}
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                1. Select Academic Term (ပညာသင်နှစ် ရွေးပါ)
+              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                1. Select Academic Term
               </label>
               <select
                 value={selectedSemesterId}
                 onChange={(e) => setSelectedSemesterId(e.target.value === "ALL" ? "ALL" : Number(e.target.value))}
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
               >
                 <option value="ALL">-- All Semesters --</option>
                 {semesters.map((s) => (
                   <option key={s.semester_id} value={s.semester_id}>
-                    {s.academic_year} — {s.term} {s.is_active ? " ★ ACTIVE" : ""}
+                    {s.academic_year} ({s.term}) {s.is_active ? " ★ ACTIVE" : ""}
                   </option>
                 ))}
               </select>
@@ -189,8 +246,8 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
 
             {/* 2. Course Selector */}
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-                2. Select Course (ဘာသာရပ် ရွေးပါ)
+              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                2. Select Course
               </label>
               {isLoadingCourses ? (
                 <div className="py-2">
@@ -201,26 +258,43 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
                   value={selectedCourse}
                   onChange={(e) => setSelectedCourse(e.target.value)}
                   disabled={filteredCourses.length === 0}
-                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm font-semibold text-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50"
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-semibold text-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50"
                 >
                   {filteredCourses.length === 0 ? (
-                    <option value="">No courses available in this semester</option>
+                    <option value="">No courses in semester</option>
                   ) : (
                     filteredCourses.map((c) => (
                       <option key={c.course_code} value={c.course_code}>
-                        {c.course_code} — {c.course_name} ({c.major ?? c.dept_code})
+                        {c.course_code} — {c.course_name}
                       </option>
                     ))
                   )}
                 </select>
               )}
             </div>
+
+            {/* 3. Section Filter */}
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+                3. Filter Section (အစု)
+              </label>
+              <select
+                value={selectedSection}
+                onChange={(e) => setSelectedSection(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-semibold text-violet-300 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+              >
+                <option value="ALL">-- All Sections --</option>
+                <option value="A">Section A</option>
+                <option value="B">Section B</option>
+                <option value="C">Section C</option>
+              </select>
+            </div>
           </div>
 
           {/* Quick Bulk Actions & Counter */}
           <div className="flex items-center justify-between gap-3">
             <span className="text-xs font-medium text-slate-400">
-              Showing <span className="text-emerald-400 font-bold">{rows.length}</span> enrolled student{rows.length !== 1 ? "s" : ""}
+              Showing <span className="text-emerald-400 font-bold">{displayedRows.length}</span> enrolled student{displayedRows.length !== 1 ? "s" : ""}
             </span>
             <div className="flex items-center gap-2">
               <button
@@ -246,12 +320,12 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
               <div className="flex items-center justify-center py-16">
                 <Loader2 className="w-6 h-6 animate-spin text-emerald-400" />
               </div>
-            ) : rows.length === 0 ? (
+            ) : displayedRows.length === 0 ? (
               <div className="text-center py-12 text-slate-500 text-sm">
                 {!selectedCourse ? (
                   "Please select a course above to load enrolled students."
                 ) : (
-                  <>No enrolled students found for course <span className="font-mono text-amber-400">{selectedCourse}</span>.</>
+                  <>No enrolled students found for course <span className="font-mono text-amber-400">{selectedCourse}</span>{selectedSection !== "ALL" ? ` in Section ${selectedSection}` : ""}.</>
                 )}
               </div>
             ) : (
@@ -265,7 +339,7 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
-                  {rows.map(({ student, status }) => (
+                  {displayedRows.map(({ student, status }) => (
                     <tr key={student.student_id} className="hover:bg-slate-800/30 transition-colors">
                       <td className="px-4 py-3 font-mono font-semibold text-violet-400 text-xs">
                         {student.roll_number}
@@ -319,7 +393,7 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
         {/* Footer */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-slate-800 bg-slate-950/50 flex-shrink-0">
           <p className="text-xs text-slate-400">
-            Total {rows.length} students enrolled in <span className="font-mono text-emerald-400 font-bold">{selectedCourse || "—"}</span>
+            Total {displayedRows.length} students enrolled in <span className="font-mono text-emerald-400 font-bold">{selectedCourse || "—"}</span>
           </p>
           <div className="flex items-center gap-3">
             <button

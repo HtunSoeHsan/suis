@@ -5,7 +5,7 @@ import { attendanceApi, studentsApi, coursesApi } from "@/lib/api";
 import type { AttendanceLog, Student, Course } from "@/types";
 import { SingleAttendanceDialog } from "@/components/attendance/SingleAttendanceDialog";
 import { BatchAttendanceDialog } from "@/components/attendance/BatchAttendanceDialog";
-import { CalendarCheck, Loader2, Search, X, ChevronLeft, ChevronRight, ChevronDown, Plus, CheckSquare, Trash2 } from "lucide-react";
+import { CalendarCheck, Loader2, Search, X, ChevronLeft, ChevronRight, ChevronDown, Plus, CheckSquare, Trash2, CalendarDays } from "lucide-react";
 
 const STATUS_COLORS: Record<string, string> = {
   PRESENT: "bg-emerald-900/30 text-emerald-400 border-emerald-800/50",
@@ -25,6 +25,9 @@ export default function AttendancePage() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"" | "PRESENT" | "LATE" | "ABSENT">("");
   const [filterCourse, setFilterCourse] = useState("");
+  const [filterSection, setFilterSection] = useState<"" | "A" | "B" | "C">("");
+  const [filterDateFrom, setFilterDateFrom] = useState("");
+  const [filterDateTo, setFilterDateTo] = useState("");
   const [page, setPage] = useState(0);
 
   const [showSingleModal, setShowSingleModal] = useState(false);
@@ -47,6 +50,8 @@ export default function AttendancePage() {
       if (search) params.search = search;
       if (filterStatus) params.status = filterStatus;
       if (filterCourse) params.course_code = filterCourse;
+      if (filterDateFrom) params.date_from = filterDateFrom;
+      if (filterDateTo) params.date_to = filterDateTo;
 
       const [attRes, stRes, crsRes] = await Promise.all([
         attendanceApi.list(params),
@@ -67,7 +72,7 @@ export default function AttendancePage() {
     } finally {
       setIsLoading(false);
     }
-  }, [search, filterStatus, filterCourse, page]);
+  }, [search, filterStatus, filterCourse, filterDateFrom, filterDateTo, page]);
 
   useEffect(() => {
     fetchAttendance();
@@ -110,12 +115,12 @@ export default function AttendancePage() {
             <CheckSquare className="w-4 h-4 text-emerald-400" /> Class Attendance Sheet (အစုလိုက်)
           </button>
 
-          <button
+          {/* <button
             onClick={() => setShowSingleModal(true)}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium transition-colors shadow-lg shadow-emerald-900/30"
           >
             <Plus className="w-4 h-4" /> Single Entry
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -171,6 +176,64 @@ export default function AttendancePage() {
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
         </div>
+
+        {/* Section Filter Buttons */}
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs text-slate-500 font-medium">Section:</span>
+          {(["", "A", "B", "C"] as const).map((sec) => (
+            <button
+              key={sec || "all"}
+              onClick={() => { setFilterSection(sec); setPage(0); }}
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                filterSection === sec
+                  ? "bg-violet-900/40 border-violet-500 text-violet-300"
+                  : "border-slate-700 text-slate-400 hover:border-slate-500"
+              }`}
+            >
+              {sec === "" ? "All" : `§${sec}`}
+            </button>
+          ))}
+        </div>
+
+        {/* Date Range Filter */}
+        <div className="flex items-center gap-2">
+          <CalendarDays className="w-4 h-4 text-slate-500 flex-shrink-0" />
+          <input
+            type="date"
+            value={filterDateFrom}
+            onChange={(e) => { setFilterDateFrom(e.target.value); setPage(0); }}
+            className="px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-600/50 [color-scheme:dark]"
+            title="From date"
+          />
+          <span className="text-xs text-slate-500">—</span>
+          <input
+            type="date"
+            value={filterDateTo}
+            onChange={(e) => { setFilterDateTo(e.target.value); setPage(0); }}
+            className="px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-600/50 [color-scheme:dark]"
+            title="To date"
+          />
+          {(filterDateFrom || filterDateTo) && (
+            <button
+              onClick={() => { setFilterDateFrom(""); setFilterDateTo(""); setPage(0); }}
+              className="p-1 rounded text-slate-500 hover:text-slate-300 transition-colors"
+              title="Clear date filter"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+          <button
+            onClick={() => {
+              const today = new Date().toISOString().split("T")[0];
+              setFilterDateFrom(today);
+              setFilterDateTo(today);
+              setPage(0);
+            }}
+            className="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-cyan-800/60 bg-cyan-950/40 text-cyan-400 hover:bg-cyan-900/40 transition-colors"
+          >
+            Today
+          </button>
+        </div>
       </div>
 
       {/* Table */}
@@ -191,17 +254,28 @@ export default function AttendancePage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
-              {data?.items.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="text-center py-12 text-slate-500">
-                    No attendance records found matching filters.{" "}
-                    <button onClick={() => setShowBatchModal(true)} className="text-emerald-400 hover:underline">Mark Class Attendance?</button>
-                  </td>
-                </tr>
-              ) : data?.items.map((a) => {
-                const student = studentsMap[a.student_id];
-                const course = coursesMap[a.course_code];
-                const isManual = a.confidence_score === 1.0 || a.confidence_score === null;
+              {(() => {
+                const itemsToRender = (data?.items ?? []).filter((a) => {
+                  if (!filterSection) return true;
+                  const st = studentsMap[a.student_id];
+                  return st?.section === filterSection;
+                });
+
+                if (itemsToRender.length === 0) {
+                  return (
+                    <tr>
+                      <td colSpan={7} className="text-center py-12 text-slate-500">
+                        No attendance records found matching filters.{" "}
+                        <button onClick={() => setShowBatchModal(true)} className="text-emerald-400 hover:underline">Mark Class Attendance?</button>
+                      </td>
+                    </tr>
+                  );
+                }
+
+                return itemsToRender.map((a) => {
+                  const student = studentsMap[a.student_id];
+                  const course = coursesMap[a.course_code];
+                  const isManual = a.confidence_score === 1.0 || a.confidence_score === null;
 
                 return (
                   <tr key={a.log_id} className="hover:bg-slate-800/30 transition-colors group">
@@ -259,7 +333,8 @@ export default function AttendancePage() {
                     </td>
                   </tr>
                 );
-              })}
+              });
+            })()}
             </tbody>
           </table>
         )}

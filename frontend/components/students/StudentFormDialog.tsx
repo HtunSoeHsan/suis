@@ -84,8 +84,14 @@ export function StudentFormDialog({ student, onClose }: Props) {
 
   const matchingCourses = courses.filter((c) => {
     const majorMatch = !form.major || !c.major || c.major === form.major || c.major === form.dept_code;
-    return majorMatch;
+    const semesterMatch = selectedSemesterId ? c.semester_id === selectedSemesterId : true;
+    return majorMatch && semesterMatch;
   });
+
+  const handleSemesterChange = (newSemId: number | null) => {
+    setSelectedSemesterId(newSemId);
+    setSelectedCourses([]);
+  };
 
   const toggleCourse = (code: string) => {
     setSelectedCourses((prev) =>
@@ -300,7 +306,7 @@ export function StudentFormDialog({ student, onClose }: Props) {
                   <div className="relative">
                     <select
                       value={selectedSemesterId ?? ""}
-                      onChange={(e) => setSelectedSemesterId(e.target.value ? parseInt(e.target.value) : null)}
+                      onChange={(e) => handleSemesterChange(e.target.value ? parseInt(e.target.value) : null)}
                       className="w-full pl-3 pr-8 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-xs font-medium text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-600/50 appearance-none"
                     >
                       <option value="">-- No Semester --</option>

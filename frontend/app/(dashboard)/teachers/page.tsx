@@ -5,10 +5,11 @@ import { teachersApi, departmentsApi } from "@/lib/api";
 import type { Teacher, Department } from "@/types";
 import {
   Plus, Search, Trash2, Pencil, Camera, CheckCircle2, Clock,
-  ChevronLeft, ChevronRight, X, Loader2, Briefcase, ChevronDown
+  ChevronLeft, ChevronRight, X, Loader2, Briefcase, ChevronDown, Eye
 } from "lucide-react";
 import { FaceEnrollDialog } from "@/components/students/FaceEnrollDialog";
 import { TeacherFormDialog } from "@/components/teachers/TeacherFormDialog";
+import { TeacherDetailDialog } from "@/components/teachers/TeacherDetailDialog";
 import { useTeachers } from "@/hooks/useTeachers";
 
 const STATUS_COLORS: Record<string, string> = {
@@ -25,6 +26,7 @@ export default function TeachersPage() {
   const [page, setPage] = useState(0);
   const [departments, setDepartments] = useState<Department[]>([]);
 
+  const [detailTarget, setDetailTarget] = useState<Teacher | null>(null);
   const [enrollTarget, setEnrollTarget] = useState<Teacher | null>(null);
   const [editTarget, setEditTarget] = useState<Teacher | null>(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -154,10 +156,24 @@ export default function TeachersPage() {
                   const statusName = t.status || "Active";
                   return (
                     <tr key={t.teacher_id} className="hover:bg-slate-800/30 transition-colors group">
-                      <td className="px-4 py-3 font-mono text-indigo-400 text-xs">{t.teacher_id}</td>
+                      <td className="px-4 py-3 font-mono text-indigo-400 text-xs">
+                        <button
+                          onClick={() => setDetailTarget(t)}
+                          className="hover:underline text-left font-semibold text-indigo-400"
+                          title="View Teacher Profile Details"
+                        >
+                          {t.teacher_id}
+                        </button>
+                      </td>
                       <td className="px-4 py-3">
-                        <div className="font-medium text-slate-200">{t.full_name}</div>
-                        {t.email && <div className="text-[11px] text-slate-400">{t.email}</div>}
+                        <button
+                          onClick={() => setDetailTarget(t)}
+                          className="hover:text-indigo-300 text-left transition-colors"
+                          title="View Teacher Profile Details"
+                        >
+                          <div className="font-medium text-slate-200">{t.full_name}</div>
+                          {t.email && <div className="text-[11px] text-slate-400">{t.email}</div>}
+                        </button>
                       </td>
                       <td className="px-4 py-3 text-slate-300 font-semibold">{t.dept_code}</td>
                       <td className="px-4 py-3">
@@ -190,6 +206,13 @@ export default function TeachersPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => setDetailTarget(t)}
+                            title="View Full Profile Details"
+                            className="p-1.5 rounded-md hover:bg-sky-900/30 hover:text-sky-400 text-slate-500 transition-colors"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
                           <button
                             onClick={() => setEnrollTarget(t)}
                             title="Enroll / Re-enroll face"
@@ -246,6 +269,14 @@ export default function TeachersPage() {
       )}
 
       {/* Dialogs */}
+      {detailTarget && (
+        <TeacherDetailDialog
+          teacher={detailTarget}
+          onClose={() => setDetailTarget(null)}
+          onEdit={() => setEditTarget(detailTarget)}
+          onFaceEnroll={() => setEnrollTarget(detailTarget)}
+        />
+      )}
       {enrollTarget && (
         <FaceEnrollDialog
           person={enrollTarget}
