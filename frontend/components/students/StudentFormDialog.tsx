@@ -83,9 +83,7 @@ export function StudentFormDialog({ student, onClose }: Props) {
   }, [student]);
 
   const matchingCourses = courses.filter((c) => {
-    const majorMatch = !form.major || !c.major || c.major === form.major || c.major === form.dept_code;
-    const semesterMatch = selectedSemesterId ? c.semester_id === selectedSemesterId : true;
-    return majorMatch && semesterMatch;
+    return selectedSemesterId ? c.semester_id === selectedSemesterId : true;
   });
 
   const handleSemesterChange = (newSemId: number | null) => {

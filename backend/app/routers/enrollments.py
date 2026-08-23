@@ -73,14 +73,17 @@ async def create_enrollment(body: EnrollmentCreate, db: AsyncSession = Depends(g
             detail=f"Student '{body.student_id}' is already enrolled in course '{body.course_code}' for this semester.",
         )
 
-    # Optional Auto-Promotion of Student Academic Year
-    if body.promote_academic_year is not None:
+    # Optional Auto-Promotion of Student Academic Year & Major Update
+    if body.promote_academic_year is not None or body.update_major is not None:
         st_res = await db.execute(select(Student).where(Student.student_id == body.student_id))
         student = st_res.scalar_one_or_none()
         if student:
-            student.academic_year = body.promote_academic_year
+            if body.promote_academic_year is not None:
+                student.academic_year = body.promote_academic_year
+            if body.update_major is not None:
+                student.major = body.update_major
 
-    enroll_data = body.model_dump(exclude={"promote_academic_year"})
+    enroll_data = body.model_dump(exclude={"promote_academic_year", "update_major"})
     enrollment = Enrollment(**enroll_data)
     db.add(enrollment)
     await db.flush()
@@ -114,13 +117,16 @@ async def create_batch_enrollment(body: BatchEnrollmentCreate, db: AsyncSession 
     if new_enrollments:
         db.add_all(new_enrollments)
 
-    if body.promote_academic_year is not None:
+    if body.promote_academic_year is not None or body.update_major is not None:
         st_res = await db.execute(
             select(Student).where(Student.student_id.in_(body.student_ids))
         )
         students = st_res.scalars().all()
         for st in students:
-            st.academic_year = body.promote_academic_year
+            if body.promote_academic_year is not None:
+                st.academic_year = body.promote_academic_year
+            if body.update_major is not None:
+                st.major = body.update_major
 
     await db.flush()
 

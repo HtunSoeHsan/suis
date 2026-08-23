@@ -40,6 +40,8 @@ export default function CoursesPage() {
     setModalConfig({ isOpen: true, title, message, isAlert: true, variant: "warning" });
   };
 
+  const [departmentsMap, setDepartmentsMap] = useState<Record<string, Department>>({});
+
   useEffect(() => {
     Promise.all([
       departmentsApi.list({ limit: 100 }),
@@ -47,6 +49,9 @@ export default function CoursesPage() {
     ]).then(([dRes, sRes]) => {
       setDepartments(dRes.items);
       setSemesters(sRes.items);
+      const dMap: Record<string, Department> = {};
+      dRes.items.forEach((d) => { dMap[d.dept_code] = d; });
+      setDepartmentsMap(dMap);
       const sMap: Record<number, Semester> = {};
       sRes.items.forEach((s) => { sMap[s.semester_id] = s; });
       setSemestersMap(sMap);
@@ -217,7 +222,14 @@ export default function CoursesPage() {
                         <span className="text-slate-500 italic text-[11px]">Unassigned</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-sky-400">{c.dept_code}</td>
+                    <td className="px-4 py-3 text-xs">
+                      <span className="font-mono font-bold text-sky-400">{c.dept_code}</span>
+                      {departmentsMap[c.dept_code] && (
+                        <span className="text-slate-400 ml-1.5 font-medium">
+                          — {departmentsMap[c.dept_code].dept_name}
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-slate-300 font-medium">{c.credit_hours} hrs</td>
                     <td className="px-4 py-3">
                       {teacher ? (

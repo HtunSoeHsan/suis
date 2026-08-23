@@ -40,13 +40,23 @@ export function EnrollmentFormDialog({ onClose }: Props) {
   const [promoteYear, setPromoteYear] = useState<number>(2);
 
   const selectedStudent = students.find((s) => s.student_id === studentId);
+  const selectedSemester = semesters.find((s) => s.semester_id.toString() === semesterId);
 
-  // Smart filter: show courses matching selected student's major
+  const isSemester3 = selectedSemester && (
+    selectedSemester.term.includes("3") ||
+    selectedSemester.semester_id === 3 ||
+    selectedSemester.term.toLowerCase().includes("sem 3") ||
+    selectedSemester.term.toLowerCase().includes("semester 3")
+  );
+
+  // Filter courses ONLY by selected semester
   const filteredCourses = courses.filter((c) => {
-    if (!selectedStudent) return true;
-    const majorMatch = !c.major || c.major === (selectedStudent.major ?? selectedStudent.dept_code);
-    return majorMatch;
+    return semesterId && c.semester_id ? c.semester_id === parseInt(semesterId) : true;
   });
+
+  useEffect(() => {
+    setSelectedCourses([]); // clear selection when semester or student changes
+  }, [semesterId, studentId]);
 
   useEffect(() => {
     if (selectedStudent) {
@@ -61,17 +71,21 @@ export function EnrollmentFormDialog({ onClose }: Props) {
     );
   };
 
+  const [updateStudentMajor, setUpdateStudentMajor] = useState<string>("NO_CHANGE");
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
+      const effectiveMajor = updateStudentMajor !== "NO_CHANGE" ? updateStudentMajor : undefined;
       // Use batch API even for single student, supports multi-course
       await enrollmentsApi.createBatch({
         student_ids: [studentId],
         course_codes: selectedCourses,
         semester_id: parseInt(semesterId),
         promote_academic_year: autoPromote ? promoteYear : undefined,
+        update_major: effectiveMajor,
       });
       onClose();
     } catch (e: unknown) {
@@ -91,6 +105,22 @@ export function EnrollmentFormDialog({ onClose }: Props) {
           </button>
         </div>
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
+          {/* Semester Selector */}
+          <div>
+            <label className="block text-xs font-medium text-slate-400 mb-1.5">Select Academic Term / Semester *</label>
+            <select
+              value={semesterId}
+              onChange={(e) => setSemesterId(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-600/50 font-mono"
+            >
+              {semesters.map((sem) => (
+                <option key={sem.semester_id} value={sem.semester_id}>
+                  {sem.academic_year} {sem.term} {sem.is_active ? "(ACTIVE)" : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Student */}
           <div>
             <label className="block text-xs font-medium text-slate-400 mb-1.5">Select Student *</label>
@@ -106,8 +136,10 @@ export function EnrollmentFormDialog({ onClose }: Props) {
               ))}
             </select>
             {selectedStudent && (
-              <p className="text-[11px] text-slate-400 mt-1">
-                Current Year: <span className="text-teal-400 font-semibold">Year {selectedStudent.academic_year}</span>
+              <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-2">
+                <span>Current Year: <span className="text-teal-400 font-semibold">Year {selectedStudent.academic_year}</span></span>
+                <span>·</span>
+                <span>Major: <span className="text-amber-400 font-semibold">{selectedStudent.major ?? selectedStudent.dept_code}</span></span>
               </p>
             )}
           </div>
@@ -117,9 +149,9 @@ export function EnrollmentFormDialog({ onClose }: Props) {
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-xs font-medium text-slate-400">
                 Select Courses * <span className="text-teal-400">({selectedCourses.length} selected)</span>
-                {selectedStudent && (selectedStudent.major || selectedStudent.academic_year) && (
+                {selectedSemester && (
                   <span className="ml-2 text-[10px] text-slate-500">
-                    — {selectedStudent.major ?? selectedStudent.dept_code} · Year {selectedStudent.academic_year}
+                    — {selectedSemester.term}
                   </span>
                 )}
               </label>
@@ -140,7 +172,7 @@ export function EnrollmentFormDialog({ onClose }: Props) {
             <div className="bg-slate-800 border border-slate-700 rounded-lg overflow-y-auto max-h-44 divide-y divide-slate-700/50">
               {filteredCourses.length === 0 ? (
                 <p className="text-xs text-slate-500 py-6 text-center">
-                  {courses.length === 0 ? "No courses available" : "No courses match this student's major / year"}
+                  {courses.length === 0 ? "No courses available" : "No courses match selected semester / major"}
                 </p>
               ) : (
                 filteredCourses.map((c) => {
@@ -162,6 +194,11 @@ export function EnrollmentFormDialog({ onClose }: Props) {
                       )}
                       <span className="font-mono font-bold text-slate-200">{c.course_code}</span>
                       <span className="truncate text-slate-400">{c.course_name}</span>
+                      {c.major && (
+                        <span className="ml-auto font-mono text-[10px] px-1.5 py-0.5 rounded bg-slate-900 text-teal-300">
+                          {c.major}
+                        </span>
+                      )}
                     </div>
                   );
                 })
@@ -169,36 +206,19 @@ export function EnrollmentFormDialog({ onClose }: Props) {
             </div>
           </div>
 
-          {/* Semester */}
-          <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">Select Academic Term *</label>
-            <select
-              value={semesterId}
-              onChange={(e) => setSemesterId(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-600/50 font-mono"
-            >
-              {semesters.map((sem) => (
-                <option key={sem.semester_id} value={sem.semester_id}>
-                  {sem.academic_year} {sem.term} {sem.is_active ? "(ACTIVE)" : ""}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Auto-Promote */}
-          <div className="p-3 bg-slate-950/60 border border-slate-800 rounded-xl space-y-2">
-            <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-300">
-              <input
-                type="checkbox"
-                checked={autoPromote}
-                onChange={(e) => setAutoPromote(e.target.checked)}
-                className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-teal-500 focus:ring-teal-500/50"
-              />
-              Auto-promote student's Academic Year upon enrollment
-            </label>
-            {autoPromote && (
-              <div className="flex items-center gap-2 pl-6 pt-1">
-                <span className="text-xs text-slate-400">Promote to Year:</span>
+          {/* Auto-Promote & Major Update */}
+          <div className="p-3 bg-slate-950/60 border border-slate-800 rounded-xl space-y-2.5">
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={autoPromote}
+                  onChange={(e) => setAutoPromote(e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-teal-500 focus:ring-teal-500/50"
+                />
+                Promote Student's Academic Year upon enrollment
+              </label>
+              {autoPromote && (
                 <select
                   value={promoteYear}
                   onChange={(e) => setPromoteYear(parseInt(e.target.value))}
@@ -207,6 +227,21 @@ export function EnrollmentFormDialog({ onClose }: Props) {
                   {[1, 2, 3, 4, 5].map((y) => (
                     <option key={y} value={y}>Year {y}</option>
                   ))}
+                </select>
+              )}
+            </div>
+
+            {isSemester3 && (
+              <div className="flex items-center justify-between border-t border-slate-800/80 pt-2 text-xs animate-in fade-in duration-150">
+                <span className="font-semibold text-slate-300">Update Student Major (အတန်းပြောင်းချိန် Major သိမ်းရန်):</span>
+                <select
+                  value={updateStudentMajor}
+                  onChange={(e) => setUpdateStudentMajor(e.target.value)}
+                  className="px-2.5 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-amber-300 font-bold focus:outline-none"
+                >
+                  <option value="NO_CHANGE">Keep Current Major ({selectedStudent?.major ?? selectedStudent?.dept_code ?? "None"})</option>
+                  <option value="CS">CS (Computer Science)</option>
+                  <option value="CT">CT (Computer Technology)</option>
                 </select>
               </div>
             )}

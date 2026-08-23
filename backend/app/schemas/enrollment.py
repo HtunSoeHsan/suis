@@ -12,6 +12,7 @@ class EnrollmentBase(BaseModel):
 
 class EnrollmentCreate(EnrollmentBase):
     promote_academic_year: Optional[int] = Field(None, ge=1, le=5, description="Optionally update student's academic year upon enrollment")
+    update_major: Optional[str] = Field(None, max_length=20, description="Optionally update student's major upon enrollment (e.g. CS, CT)")
 
 
 class EnrollmentOut(EnrollmentBase):
@@ -31,6 +32,7 @@ class BatchEnrollmentCreate(BaseModel):
     course_codes: list[str] = Field(..., min_length=1)
     semester_id: int
     promote_academic_year: Optional[int] = Field(None, ge=1, le=5)
+    update_major: Optional[str] = Field(None, max_length=20)
 
 
 class BatchEnrollmentOut(BaseModel):

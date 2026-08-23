@@ -248,6 +248,7 @@ export const enrollmentsApi = {
     course_codes: string[];
     semester_id: number;
     promote_academic_year?: number;
+    update_major?: string;
   }) =>
     apiFetch<import("@/types").BatchEnrollmentResponse>("/api/enrollments/batch", {
       method: "POST",
