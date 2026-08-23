@@ -13,6 +13,7 @@ import { IDConfigDialog } from "@/components/students/IDConfigDialog";
 import { StudentDetailDialog } from "@/components/students/StudentDetailDialog";
 import { BatchEnrollmentDialog } from "@/components/enrollments/BatchEnrollmentDialog";
 import { useStudents } from "@/hooks/useStudents";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 const SECTION_COLORS: Record<string, string> = {
   A: "bg-blue-900/30 text-blue-400 border-blue-800/50",
@@ -46,6 +47,16 @@ export default function StudentsPage() {
   const [showBatchEnroll, setShowBatchEnroll] = useState(false);
   const [batchTargetIds, setBatchTargetIds] = useState<string[]>([]);
 
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    title?: string;
+    message: string;
+    onConfirm?: () => void;
+    isAlert?: boolean;
+    variant?: "danger" | "warning" | "info";
+    isLoading?: boolean;
+  }>({ isOpen: false, message: "" });
+
   const limit = 10;
   const { data, isLoading, error, refetch } = useStudents({
     search,
@@ -55,6 +66,10 @@ export default function StudentsPage() {
     ...(filterYear !== "" ? { academic_year: filterYear } : {}),
     ...(filterStatus ? { status: filterStatus } : {}),
   });
+
+  const showAlert = (message: string, title = "Notification") => {
+    setModalConfig({ isOpen: true, title, message, isAlert: true, variant: "warning" });
+  };
 
   const allPageIds = data?.items.map((s) => s.student_id) ?? [];
   const isAllChecked = allPageIds.length > 0 && allPageIds.every((id) => checkedStudentIds.includes(id));
@@ -73,15 +88,25 @@ export default function StudentsPage() {
     );
   };
 
-  const handleDelete = async (s: Student) => {
-    if (!confirm(`Delete student "${s.full_name}" (${s.student_id})?`)) return;
-    try {
-      await studentsApi.delete(s.student_id);
-      setCheckedStudentIds((prev) => prev.filter((id) => id !== s.student_id));
-      refetch();
-    } catch (e: unknown) {
-      alert((e as Error).message);
-    }
+  const handleDelete = (s: Student) => {
+    setModalConfig({
+      isOpen: true,
+      title: "Delete Student Profile",
+      message: `Are you sure you want to delete student "${s.full_name}" (${s.student_id})? This action cannot be undone.`,
+      variant: "danger",
+      onConfirm: async () => {
+        setModalConfig((prev) => ({ ...prev, isLoading: true }));
+        try {
+          await studentsApi.delete(s.student_id);
+          setCheckedStudentIds((prev) => prev.filter((id) => id !== s.student_id));
+          refetch();
+        } catch (e: unknown) {
+          showAlert((e as Error).message, "Delete Failed");
+        } finally {
+          setModalConfig({ isOpen: false, message: "" });
+        }
+      },
+    });
   };
 
   const openBatchEnroll = (ids?: string[]) => {
@@ -403,6 +428,17 @@ export default function StudentsPage() {
           onSuccess={() => { setShowBatchEnroll(false); setBatchTargetIds([]); setCheckedStudentIds([]); refetch(); }}
         />
       )}
+
+      <ConfirmModal
+        isOpen={modalConfig.isOpen}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        isAlert={modalConfig.isAlert}
+        variant={modalConfig.variant}
+        isLoading={modalConfig.isLoading}
+        onConfirm={modalConfig.onConfirm}
+        onCancel={() => setModalConfig({ isOpen: false, message: "" })}
+      />
     </div>
   );
 }

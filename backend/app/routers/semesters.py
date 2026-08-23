@@ -8,6 +8,22 @@ from app.schemas.semester import SemesterCreate, SemesterUpdate, SemesterOut, Se
 router = APIRouter(prefix="/api/semesters", tags=["Semesters"])
 
 
+MAX_ACTIVE_SEMESTERS = 5
+
+
+async def _check_active_semesters_limit(db: AsyncSession, exclude_semester_id: int | None = None) -> None:
+    query = select(func.count(Semester.semester_id)).where(Semester.is_active == True)
+    if exclude_semester_id is not None:
+        query = query.where(Semester.semester_id != exclude_semester_id)
+    res = await db.execute(query)
+    count = res.scalar_one()
+    if count >= MAX_ACTIVE_SEMESTERS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot activate semester. Maximum of {MAX_ACTIVE_SEMESTERS} active semesters allowed.",
+        )
+
+
 @router.get("", response_model=SemesterListOut)
 async def list_semesters(
     search: str | None = Query(None, description="Search by academic year or term"),
@@ -39,8 +55,7 @@ async def list_semesters(
 @router.post("", response_model=SemesterOut, status_code=status.HTTP_201_CREATED)
 async def create_semester(body: SemesterCreate, db: AsyncSession = Depends(get_db)):
     if body.is_active:
-        # Deactivate any other currently active semesters
-        await db.execute(update(Semester).values(is_active=False))
+        await _check_active_semesters_limit(db)
 
     semester = Semester(**body.model_dump())
     db.add(semester)
@@ -69,7 +84,7 @@ async def update_semester(
 
     payload = body.model_dump(exclude_unset=True)
     if payload.get("is_active"):
-        await db.execute(update(Semester).values(is_active=False))
+        await _check_active_semesters_limit(db, exclude_semester_id=semester_id)
 
     for field, value in payload.items():
         setattr(sem, field, value)
@@ -85,8 +100,22 @@ async def activate_semester(semester_id: int, db: AsyncSession = Depends(get_db)
     if not sem:
         raise HTTPException(status_code=404, detail="Semester not found.")
 
-    await db.execute(update(Semester).values(is_active=False))
-    sem.is_active = True
+    if not sem.is_active:
+        await _check_active_semesters_limit(db, exclude_semester_id=semester_id)
+        sem.is_active = True
+        await db.flush()
+        await db.refresh(sem)
+    return sem
+
+
+@router.post("/{semester_id}/deactivate", response_model=SemesterOut)
+async def deactivate_semester(semester_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Semester).where(Semester.semester_id == semester_id))
+    sem = result.scalar_one_or_none()
+    if not sem:
+        raise HTTPException(status_code=404, detail="Semester not found.")
+
+    sem.is_active = False
     await db.flush()
     await db.refresh(sem)
     return sem

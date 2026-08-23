@@ -419,6 +419,8 @@ function LinkedProfileCell({ user }: { user: UserDetail }) {
 }
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
+
 export default function UsersPage() {
   const { user: currentUser } = useAuth();
   const router = useRouter();
@@ -426,15 +428,29 @@ export default function UsersPage() {
   const [users, setUsers] = useState<UserDetail[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [filterRole, setFilterRole] = useState<"" | Exclude<UserRole, "STUDENT">>("");
+  const [filterRole, setFilterRole] = useState<"" | "ADMIN" | "TEACHER">("");
   const [page, setPage] = useState(0);
-  const limit = 15;
+  const limit = 10;
 
   const [showCreate, setShowCreate] = useState(false);
   const [editTarget, setEditTarget] = useState<UserDetail | null>(null);
   const [resetTarget, setResetTarget] = useState<UserDetail | null>(null);
+
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    title?: string;
+    message: string;
+    onConfirm?: () => void;
+    isAlert?: boolean;
+    variant?: "danger" | "warning" | "info";
+    isLoading?: boolean;
+  }>({ isOpen: false, message: "" });
+
+  const showAlert = (message: string, title = "Notification") => {
+    setModalConfig({ isOpen: true, title, message, isAlert: true, variant: "warning" });
+  };
 
   // Admin-only guard
   useEffect(() => {
@@ -462,15 +478,28 @@ export default function UsersPage() {
 
   useEffect(() => { fetchUsers(); }, [fetchUsers]);
 
-  const handleDelete = async (u: UserDetail) => {
-    if (u.user_id === currentUser?.user_id) { alert("You cannot delete your own account."); return; }
-    if (!confirm(`Delete user "${u.username}"? This cannot be undone.`)) return;
-    try {
-      await usersApi.delete(u.user_id);
-      fetchUsers();
-    } catch (e: unknown) {
-      alert((e as Error).message);
+  const handleDelete = (u: UserDetail) => {
+    if (u.user_id === currentUser?.user_id) {
+      showAlert("You cannot delete your own account.", "Action Prohibited");
+      return;
     }
+    setModalConfig({
+      isOpen: true,
+      title: "Delete User Account",
+      message: `Are you sure you want to delete user "${u.username}"? This action cannot be undone.`,
+      variant: "danger",
+      onConfirm: async () => {
+        setModalConfig((prev) => ({ ...prev, isLoading: true }));
+        try {
+          await usersApi.delete(u.user_id);
+          fetchUsers();
+        } catch (e: unknown) {
+          showAlert((e as Error).message, "Delete Failed");
+        } finally {
+          setModalConfig({ isOpen: false, message: "" });
+        }
+      },
+    });
   };
 
   const totalPages = Math.ceil(total / limit);
@@ -647,6 +676,17 @@ export default function UsersPage() {
       {resetTarget && (
         <ResetPasswordDialog user={resetTarget} onClose={() => setResetTarget(null)} onSuccess={() => setResetTarget(null)} />
       )}
+
+      <ConfirmModal
+        isOpen={modalConfig.isOpen}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        isAlert={modalConfig.isAlert}
+        variant={modalConfig.variant}
+        isLoading={modalConfig.isLoading}
+        onConfirm={modalConfig.onConfirm}
+        onCancel={() => setModalConfig({ isOpen: false, message: "" })}
+      />
     </div>
   );
 }

@@ -86,7 +86,7 @@ export function DepartmentFormDialog({ department, onClose }: Props) {
             <input
               value={form.dept_code}
               onChange={(e) => set("dept_code", e.target.value)}
-              placeholder="CST"
+              placeholder="e.g. 01, 02 or CS"
               disabled={!!department}
               className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-600/50 disabled:opacity-50 font-mono"
             />

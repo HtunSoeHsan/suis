@@ -5,6 +5,7 @@ import { departmentsApi, teachersApi } from "@/lib/api";
 import type { Department, Teacher } from "@/types";
 import { DepartmentFormDialog } from "@/components/departments/DepartmentFormDialog";
 import { Plus, Search, X, Loader2, Building2, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 export default function DepartmentsPage() {
   const [data, setData] = useState<{ total: number; items: Department[] } | null>(null);
@@ -15,8 +16,21 @@ export default function DepartmentsPage() {
   const [page, setPage] = useState(0);
   const [showCreate, setShowCreate] = useState(false);
   const [editDept, setEditDept] = useState<Department | null>(null);
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    title?: string;
+    message: string;
+    onConfirm?: () => void;
+    isAlert?: boolean;
+    variant?: "danger" | "warning" | "info";
+    isLoading?: boolean;
+  }>({ isOpen: false, message: "" });
 
   const limit = 10;
+
+  const showAlert = (message: string, title = "Notification") => {
+    setModalConfig({ isOpen: true, title, message, isAlert: true, variant: "warning" });
+  };
 
   const fetchDepartments = useCallback(async () => {
     setIsLoading(true);
@@ -41,14 +55,24 @@ export default function DepartmentsPage() {
     fetchDepartments();
   }, [fetchDepartments]);
 
-  const handleDelete = async (d: Department) => {
-    if (!confirm(`Delete department "${d.dept_name}" (${d.dept_code})?`)) return;
-    try {
-      await departmentsApi.delete(d.dept_code);
-      fetchDepartments();
-    } catch (e: unknown) {
-      alert((e as Error).message);
-    }
+  const handleDelete = (d: Department) => {
+    setModalConfig({
+      isOpen: true,
+      title: "Delete Department",
+      message: `Are you sure you want to delete department "${d.dept_name}" (${d.dept_code})? This action cannot be undone.`,
+      variant: "danger",
+      onConfirm: async () => {
+        setModalConfig((prev) => ({ ...prev, isLoading: true }));
+        try {
+          await departmentsApi.delete(d.dept_code);
+          fetchDepartments();
+        } catch (e: unknown) {
+          showAlert((e as Error).message, "Delete Failed");
+        } finally {
+          setModalConfig({ isOpen: false, message: "" });
+        }
+      },
+    });
   };
 
   const totalPages = Math.ceil((data?.total ?? 0) / limit);
@@ -195,6 +219,17 @@ export default function DepartmentsPage() {
           }}
         />
       )}
+
+      <ConfirmModal
+        isOpen={modalConfig.isOpen}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        isAlert={modalConfig.isAlert}
+        variant={modalConfig.variant}
+        isLoading={modalConfig.isLoading}
+        onConfirm={modalConfig.onConfirm}
+        onCancel={() => setModalConfig({ isOpen: false, message: "" })}
+      />
     </div>
   );
 }
