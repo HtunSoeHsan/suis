@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, or_
+from sqlalchemy import select, func, or_, and_
 from app.database import get_db
 from app.models.department import Department
 from app.schemas.department import DepartmentCreate, DepartmentUpdate, DepartmentOut, DepartmentListOut
@@ -35,9 +35,15 @@ async def list_departments(
 
 @router.post("", response_model=DepartmentOut, status_code=status.HTTP_201_CREATED)
 async def create_department(body: DepartmentCreate, db: AsyncSession = Depends(get_db)):
-    existing = await db.execute(select(Department).where(Department.dept_code == body.dept_code))
-    if existing.scalar_one_or_none():
+    existing_code = await db.execute(select(Department).where(Department.dept_code == body.dept_code))
+    if existing_code.scalar_one_or_none():
         raise HTTPException(status_code=409, detail=f"Department code '{body.dept_code}' already exists.")
+
+    existing_name = await db.execute(
+        select(Department).where(func.lower(Department.dept_name) == body.dept_name.strip().lower())
+    )
+    if existing_name.scalar_one_or_none():
+        raise HTTPException(status_code=409, detail=f"Department name '{body.dept_name}' already exists.")
 
     dept = Department(**body.model_dump())
     db.add(dept)
@@ -63,6 +69,18 @@ async def update_department(
     dept = result.scalar_one_or_none()
     if not dept:
         raise HTTPException(status_code=404, detail="Department not found.")
+
+    if body.dept_name is not None and body.dept_name.strip():
+        existing_name = await db.execute(
+            select(Department).where(
+                and_(
+                    func.lower(Department.dept_name) == body.dept_name.strip().lower(),
+                    Department.dept_code != dept_code,
+                )
+            )
+        )
+        if existing_name.scalar_one_or_none():
+            raise HTTPException(status_code=409, detail=f"Department name '{body.dept_name}' already exists.")
 
     for field, value in body.model_dump(exclude_unset=True).items():
         setattr(dept, field, value)

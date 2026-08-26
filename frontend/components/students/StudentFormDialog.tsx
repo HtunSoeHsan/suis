@@ -83,9 +83,7 @@ export function StudentFormDialog({ student, onClose }: Props) {
   }, [student]);
 
   const matchingCourses = courses.filter((c) => {
-    const majorMatch = !form.major || !c.major || c.major === form.major || c.major === form.dept_code;
-    const semesterMatch = selectedSemesterId ? c.semester_id === selectedSemesterId : true;
-    return majorMatch && semesterMatch;
+    return selectedSemesterId ? c.semester_id === selectedSemesterId : true;
   });
 
   const handleSemesterChange = (newSemId: number | null) => {
@@ -381,10 +379,20 @@ export function StudentFormDialog({ student, onClose }: Props) {
                     placeholder="12/PAYA(N)123456" className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Date of Birth</label>
-                  <input type="date" value={form.date_of_birth}
+                  <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                    Date of Birth <span className="text-slate-500 font-normal">(အနည်းဆုံး ၁၅ နှစ်)</span>
+                  </label>
+                  <input
+                    type="date"
+                    value={form.date_of_birth}
+                    max={(() => {
+                      const d = new Date();
+                      d.setFullYear(d.getFullYear() - 15);
+                      return d.toISOString().split("T")[0];
+                    })()}
                     onChange={(e) => set("date_of_birth", e.target.value)}
-                    className={inputClass} />
+                    className={inputClass}
+                  />
                 </div>
               </div>
 

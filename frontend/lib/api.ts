@@ -20,10 +20,33 @@ async function apiFetch<T>(
   });
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(err.detail || `API error ${res.status}`);
+    const text = await res.text().catch(() => "");
+    let errDetail = res.statusText;
+    if (text) {
+      try {
+        const errJson = JSON.parse(text);
+        errDetail = errJson.detail || errJson.message || errDetail;
+      } catch {
+        errDetail = text;
+      }
+    }
+    throw new Error(errDetail || `API error ${res.status}`);
   }
-  return res.json();
+
+  if (res.status === 204) {
+    return {} as T;
+  }
+
+  const text = await res.text();
+  if (!text || text.trim() === "") {
+    return {} as T;
+  }
+
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return {} as T;
+  }
 }
 
 // ─── Authentication ──────────────────────────────────────────────────────────
@@ -201,6 +224,10 @@ export const semestersApi = {
     apiFetch<import("@/types").Semester>(`/api/semesters/${id}/activate`, {
       method: "POST",
     }),
+  deactivate: (id: number) =>
+    apiFetch<import("@/types").Semester>(`/api/semesters/${id}/deactivate`, {
+      method: "POST",
+    }),
   delete: (id: number) =>
     apiFetch<void>(`/api/semesters/${id}`, { method: "DELETE" }),
 };
@@ -221,6 +248,7 @@ export const enrollmentsApi = {
     course_codes: string[];
     semester_id: number;
     promote_academic_year?: number;
+    update_major?: string;
   }) =>
     apiFetch<import("@/types").BatchEnrollmentResponse>("/api/enrollments/batch", {
       method: "POST",

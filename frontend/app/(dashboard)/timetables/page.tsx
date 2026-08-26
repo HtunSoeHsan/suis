@@ -9,6 +9,8 @@ import { Plus, Search, X, Loader2, CalendarRange, Trash2, ChevronLeft, ChevronRi
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
+
 export default function TimetablesPage() {
   const [academicData, setAcademicData] = useState<{ total: number; items: AcademicTimetable[] } | null>(null);
   const [examData, setExamData] = useState<{ total: number; items: ExamTimetable[] } | null>(null);
@@ -32,7 +34,21 @@ export default function TimetablesPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [showPeriodSetup, setShowPeriodSetup] = useState(false);
 
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    title?: string;
+    message: string;
+    onConfirm?: () => void;
+    isAlert?: boolean;
+    variant?: "danger" | "warning" | "info";
+    isLoading?: boolean;
+  }>({ isOpen: false, message: "" });
+
   const limit = 10;
+
+  const showAlert = (message: string, title = "Notification") => {
+    setModalConfig({ isOpen: true, title, message, isAlert: true, variant: "warning" });
+  };
 
   useEffect(() => {
     Promise.all([
@@ -104,24 +120,44 @@ export default function TimetablesPage() {
     fetchTimetables();
   }, [fetchTimetables]);
 
-  const handleDeleteAcademic = async (tt: AcademicTimetable) => {
-    if (!confirm(`Delete schedule slot for course "${tt.course_code}" on ${tt.day_of_week}?`)) return;
-    try {
-      await timetablesApi.deleteAcademic(tt.timetable_id);
-      fetchTimetables();
-    } catch (err: unknown) {
-      alert((err as Error).message);
-    }
+  const handleDeleteAcademic = (tt: AcademicTimetable) => {
+    setModalConfig({
+      isOpen: true,
+      title: "Delete Academic Schedule",
+      message: `Are you sure you want to delete schedule slot for course "${tt.course_code}" on ${tt.day_of_week}?`,
+      variant: "danger",
+      onConfirm: async () => {
+        setModalConfig((prev) => ({ ...prev, isLoading: true }));
+        try {
+          await timetablesApi.deleteAcademic(tt.timetable_id);
+          fetchTimetables();
+        } catch (err: unknown) {
+          showAlert((err as Error).message, "Delete Failed");
+        } finally {
+          setModalConfig({ isOpen: false, message: "" });
+        }
+      },
+    });
   };
 
-  const handleDeleteExam = async (e: ExamTimetable) => {
-    if (!confirm(`Delete exam slot for course "${e.course_code}" on ${e.exam_date}?`)) return;
-    try {
-      await timetablesApi.deleteExam(e.exam_id);
-      fetchTimetables();
-    } catch (err: unknown) {
-      alert((err as Error).message);
-    }
+  const handleDeleteExam = (e: ExamTimetable) => {
+    setModalConfig({
+      isOpen: true,
+      title: "Delete Exam Schedule",
+      message: `Are you sure you want to delete exam slot for course "${e.course_code}" on ${e.exam_date}?`,
+      variant: "danger",
+      onConfirm: async () => {
+        setModalConfig((prev) => ({ ...prev, isLoading: true }));
+        try {
+          await timetablesApi.deleteExam(e.exam_id);
+          fetchTimetables();
+        } catch (err: unknown) {
+          showAlert((err as Error).message, "Delete Failed");
+        } finally {
+          setModalConfig({ isOpen: false, message: "" });
+        }
+      },
+    });
   };
 
   const totalItems = activeTab === "academic" ? academicData?.total ?? 0 : examData?.total ?? 0;
@@ -445,6 +481,17 @@ export default function TimetablesPage() {
           onUpdated={fetchTimetables}
         />
       )}
+
+      <ConfirmModal
+        isOpen={modalConfig.isOpen}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        isAlert={modalConfig.isAlert}
+        variant={modalConfig.variant}
+        isLoading={modalConfig.isLoading}
+        onConfirm={modalConfig.onConfirm}
+        onCancel={() => setModalConfig({ isOpen: false, message: "" })}
+      />
     </div>
   );
 }

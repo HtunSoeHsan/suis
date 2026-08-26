@@ -55,13 +55,30 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
       .finally(() => setLoading(false));
   }, []);
 
-  // Filtered courses & students
-  const filteredCourses = allCourses.filter(
-    (c) => courseDeptFilter === "ALL" || c.dept_code === courseDeptFilter
+  const selectedSemester = semesters.find((s) => s.semester_id.toString() === semesterId);
+  const isSemester3 = selectedSemester && (
+    selectedSemester.term.includes("3") ||
+    selectedSemester.semester_id === 3 ||
+    selectedSemester.term.toLowerCase().includes("sem 3") ||
+    selectedSemester.term.toLowerCase().includes("semester 3")
   );
 
+  // Filtered courses & students
+  const filteredCourses = allCourses.filter((c) => {
+    // Filter by target semester
+    if (semesterId && c.semester_id && c.semester_id !== parseInt(semesterId)) {
+      return false;
+    }
+    // Filter by department
+    if (courseDeptFilter !== "ALL" && c.dept_code !== courseDeptFilter) {
+      return false;
+    }
+    return true;
+  });
+
   const filteredStudents = allStudents.filter((s) => {
-    const matchMajor = studentMajorFilter === "ALL" || (s.major ?? s.dept_code) === studentMajorFilter;
+    const sMajor = s.major ?? s.dept_code;
+    const matchMajor = studentMajorFilter === "ALL" || sMajor === studentMajorFilter;
     const matchYear = studentYearFilter === "ALL" || s.academic_year === studentYearFilter;
     return matchMajor && matchYear;
   });
@@ -99,20 +116,24 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
     );
   };
 
+  const [updateMajor, setUpdateMajor] = useState<string>("NO_CHANGE");
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSubmitting(true);
     try {
+      const effectiveMajor = updateMajor !== "NO_CHANGE" ? updateMajor : undefined;
       const res = await enrollmentsApi.createBatch({
         semester_id: parseInt(semesterId),
         course_codes: selectedCourseCodes,
         student_ids: selectedStudentIds,
         promote_academic_year: autoPromote ? promoteYear : undefined,
+        update_major: effectiveMajor,
       });
 
       setResultMsg(
-        `Successfully created ${res.total_enrolled} course enrollments for ${res.enrolled_student_count} students across ${res.enrolled_course_count} courses!`
+        `Successfully created ${res.total_enrolled} course enrollments for ${res.enrolled_student_count} students! Saved academic year & major updates in database.`
       );
       setTimeout(() => {
         onSuccess();
@@ -154,7 +175,7 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
               <select
                 value={semesterId}
                 onChange={(e) => setSemesterId(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm font-medium text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm font-medium text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500/50 font-mono"
               >
                 {semesters.map((sem) => (
                   <option key={sem.semester_id} value={sem.semester_id}>
@@ -315,30 +336,47 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
               </div>
             </div>
 
-            {/* Step 4: Auto-Promote Banner */}
-            <div className="p-3.5 bg-slate-950/80 border border-slate-800 rounded-xl space-y-2">
-              <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-300">
-                <input
-                  type="checkbox"
-                  checked={autoPromote}
-                  onChange={(e) => setAutoPromote(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-teal-500 focus:ring-teal-500/50"
-                />
-                Auto-promote all selected students' Academic Year upon enrollment
-              </label>
-              {autoPromote && (
-                <div className="flex items-center gap-2 pl-6 text-xs">
-                  <span className="text-slate-400">Promote all selected students to:</span>
+            {/* Step 4: Auto-Promote & Major Update Banner */}
+            <div className="p-3.5 bg-slate-950/80 border border-slate-800 rounded-xl space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-300">
+                  <input
+                    type="checkbox"
+                    checked={autoPromote}
+                    onChange={(e) => setAutoPromote(e.target.checked)}
+                    className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-teal-500 focus:ring-teal-500/50"
+                  />
+                  Promote Selected Students' Academic Year upon enrollment
+                </label>
+                {autoPromote && (
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="text-slate-400">Promote to:</span>
+                    <select
+                      value={promoteYear}
+                      onChange={(e) => setPromoteYear(parseInt(e.target.value))}
+                      className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-teal-300 font-bold focus:outline-none"
+                    >
+                      {[1, 2, 3, 4, 5].map((y) => (
+                        <option key={y} value={y}>
+                          Year {y}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              {isSemester3 && (
+                <div className="flex items-center justify-between border-t border-slate-800/80 pt-2.5 text-xs animate-in fade-in duration-150">
+                  <span className="font-semibold text-slate-300">Update Student Major (အတန်းပြောင်းချိန် Major သိမ်းရန်):</span>
                   <select
-                    value={promoteYear}
-                    onChange={(e) => setPromoteYear(parseInt(e.target.value))}
-                    className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-teal-300 font-bold focus:outline-none"
+                    value={updateMajor}
+                    onChange={(e) => setUpdateMajor(e.target.value)}
+                    className="px-2.5 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-amber-300 font-bold focus:outline-none"
                   >
-                    {[1, 2, 3, 4, 5].map((y) => (
-                      <option key={y} value={y}>
-                        Year {y}
-                      </option>
-                    ))}
+                    <option value="NO_CHANGE">Keep Current Major</option>
+                    <option value="CS">CS (Computer Science)</option>
+                    <option value="CT">CT (Computer Technology)</option>
                   </select>
                 </div>
               )}

@@ -6,6 +6,7 @@ import type { Enrollment, Student, Course, Semester } from "@/types";
 import { EnrollmentFormDialog } from "@/components/enrollments/EnrollmentFormDialog";
 import { BatchEnrollmentDialog } from "@/components/enrollments/BatchEnrollmentDialog";
 import { Plus, Search, X, Loader2, UserCheck, Trash2, Layers, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 export default function EnrollmentsPage() {
   const [data, setData] = useState<{ total: number; items: Enrollment[] } | null>(null);
@@ -27,7 +28,21 @@ export default function EnrollmentsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [showBatch, setShowBatch] = useState(false);
 
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    title?: string;
+    message: string;
+    onConfirm?: () => void;
+    isAlert?: boolean;
+    variant?: "danger" | "warning" | "info";
+    isLoading?: boolean;
+  }>({ isOpen: false, message: "" });
+
   const limit = 10;
+
+  const showAlert = (message: string, title = "Notification") => {
+    setModalConfig({ isOpen: true, title, message, isAlert: true, variant: "warning" });
+  };
 
   useEffect(() => {
     Promise.all([
@@ -82,14 +97,24 @@ export default function EnrollmentsPage() {
     fetchEnrollments();
   }, [fetchEnrollments]);
 
-  const handleDelete = async (e: Enrollment) => {
-    if (!confirm(`Unenroll student "${e.student_id}" from course "${e.course_code}"?`)) return;
-    try {
-      await enrollmentsApi.delete(e.enrollment_id);
-      fetchEnrollments();
-    } catch (err: unknown) {
-      alert((err as Error).message);
-    }
+  const handleDelete = (e: Enrollment) => {
+    setModalConfig({
+      isOpen: true,
+      title: "Remove Enrollment",
+      message: `Are you sure you want to unenroll student "${e.student_id}" from course "${e.course_code}"?`,
+      variant: "danger",
+      onConfirm: async () => {
+        setModalConfig((prev) => ({ ...prev, isLoading: true }));
+        try {
+          await enrollmentsApi.delete(e.enrollment_id);
+          fetchEnrollments();
+        } catch (err: unknown) {
+          showAlert((err as Error).message, "Remove Failed");
+        } finally {
+          setModalConfig({ isOpen: false, message: "" });
+        }
+      },
+    });
   };
 
   const formatDate = (iso: string) => {
@@ -168,11 +193,13 @@ export default function EnrollmentsPage() {
             className="w-full pl-3 pr-8 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-600/50 appearance-none"
           >
             <option value="">All Courses</option>
-            {courses.map((c) => (
-              <option key={c.course_code} value={c.course_code}>
-                {c.course_code} — {c.course_name}
-              </option>
-            ))}
+            {courses
+              .filter((c) => filterSemester === "" || !c.semester_id || c.semester_id === filterSemester)
+              .map((c) => (
+                <option key={c.course_code} value={c.course_code}>
+                  {c.course_code} — {c.course_name}
+                </option>
+              ))}
           </select>
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
         </div>
@@ -300,6 +327,17 @@ export default function EnrollmentsPage() {
           onSuccess={fetchEnrollments}
         />
       )}
+
+      <ConfirmModal
+        isOpen={modalConfig.isOpen}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        isAlert={modalConfig.isAlert}
+        variant={modalConfig.variant}
+        isLoading={modalConfig.isLoading}
+        onConfirm={modalConfig.onConfirm}
+        onCancel={() => setModalConfig({ isOpen: false, message: "" })}
+      />
     </div>
   );
 }

@@ -6,6 +6,8 @@ import type { Semester } from "@/types";
 import { SemesterFormDialog } from "@/components/semesters/SemesterFormDialog";
 import { Plus, Loader2, Calendar, CheckCircle2, Pencil, Trash2, Zap, Search, X, ChevronLeft, ChevronRight } from "lucide-react";
 
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
+
 export default function SemestersPage() {
   const [data, setData] = useState<{ total: number; items: Semester[] } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -18,7 +20,44 @@ export default function SemestersPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [editSem, setEditSem] = useState<Semester | null>(null);
 
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    title?: string;
+    message: string;
+    onConfirm?: () => void;
+    isAlert?: boolean;
+    variant?: "danger" | "warning" | "info";
+    isLoading?: boolean;
+  }>({ isOpen: false, message: "" });
+
   const limit = 10;
+
+  const showAlert = (message: string, title = "Notification") => {
+    setModalConfig({
+      isOpen: true,
+      title,
+      message,
+      isAlert: true,
+      variant: "warning",
+    });
+  };
+
+  const showConfirm = (message: string, onConfirm: () => Promise<void>, title = "Confirm Delete") => {
+    setModalConfig({
+      isOpen: true,
+      title,
+      message,
+      variant: "danger",
+      onConfirm: async () => {
+        setModalConfig((prev) => ({ ...prev, isLoading: true }));
+        try {
+          await onConfirm();
+        } finally {
+          setModalConfig({ isOpen: false, message: "" });
+        }
+      },
+    });
+  };
 
   const fetchSemesters = useCallback(async () => {
     setIsLoading(true);
@@ -44,23 +83,31 @@ export default function SemestersPage() {
     fetchSemesters();
   }, [fetchSemesters]);
 
-  const handleActivate = async (s: Semester) => {
+  const handleToggleActive = async (s: Semester) => {
     try {
-      await semestersApi.activate(s.semester_id);
+      if (s.is_active) {
+        await semestersApi.deactivate(s.semester_id);
+      } else {
+        await semestersApi.activate(s.semester_id);
+      }
       fetchSemesters();
     } catch (e: unknown) {
-      alert((e as Error).message);
+      showAlert((e as Error).message, "Activation Limit Exceeded");
     }
   };
 
-  const handleDelete = async (s: Semester) => {
-    if (!confirm(`Delete semester "${s.academic_year} ${s.term}"?`)) return;
-    try {
-      await semestersApi.delete(s.semester_id);
-      fetchSemesters();
-    } catch (e: unknown) {
-      alert((e as Error).message);
-    }
+  const handleDelete = (s: Semester) => {
+    showConfirm(
+      `Are you sure you want to delete semester "${s.academic_year} ${s.term}"? This action cannot be undone.`,
+      async () => {
+        try {
+          await semestersApi.delete(s.semester_id);
+          fetchSemesters();
+        } catch (e: unknown) {
+          showAlert((e as Error).message, "Delete Failed");
+        }
+      }
+    );
   };
 
   const totalPages = Math.ceil((data?.total ?? 0) / limit);
@@ -73,7 +120,9 @@ export default function SemestersPage() {
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <Calendar className="w-6 h-6 text-emerald-400" /> Academic Semesters
           </h2>
-          <p className="text-sm text-slate-400 mt-0.5">{data?.total ?? 0} total terms configured</p>
+          <p className="text-sm text-slate-400 mt-0.5">
+            {data?.total ?? 0} total terms configured — (Supports up to 5 Multi-Active Semesters)
+          </p>
         </div>
         <button
           onClick={() => setShowCreate(true)}
@@ -156,18 +205,25 @@ export default function SemestersPage() {
                   <td className="px-4 py-3 text-slate-400 text-xs">{s.start_date}</td>
                   <td className="px-4 py-3 text-slate-400 text-xs">{s.end_date}</td>
                   <td className="px-4 py-3">
-                    {s.is_active ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-900/40 text-emerald-400 border border-emerald-700/60 text-xs font-bold uppercase tracking-wider">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Current Active
-                      </span>
-                    ) : (
-                      <button
-                        onClick={() => handleActivate(s)}
-                        className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border border-slate-700 text-xs transition-colors"
-                      >
-                        <Zap className="w-3 h-3 text-amber-400" /> Set Active
-                      </button>
-                    )}
+                    <button
+                      onClick={() => handleToggleActive(s)}
+                      title={s.is_active ? "Click to deactivate semester" : "Click to activate semester (max 5 active)"}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-colors border ${
+                        s.is_active
+                          ? "bg-emerald-900/40 text-emerald-400 border-emerald-700/60 hover:bg-red-900/30 hover:text-red-300 hover:border-red-700"
+                          : "bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border-slate-700"
+                      }`}
+                    >
+                      {s.is_active ? (
+                        <>
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Active
+                        </>
+                      ) : (
+                        <>
+                          <Zap className="w-3.5 h-3.5 text-amber-400" /> Set Active
+                        </>
+                      )}
+                    </button>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
@@ -227,6 +283,17 @@ export default function SemestersPage() {
           }}
         />
       )}
+
+      <ConfirmModal
+        isOpen={modalConfig.isOpen}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        isAlert={modalConfig.isAlert}
+        variant={modalConfig.variant}
+        isLoading={modalConfig.isLoading}
+        onConfirm={modalConfig.onConfirm}
+        onCancel={() => setModalConfig({ isOpen: false, message: "" })}
+      />
     </div>
   );
 }

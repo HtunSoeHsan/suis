@@ -11,6 +11,7 @@ import { FaceEnrollDialog } from "@/components/students/FaceEnrollDialog";
 import { TeacherFormDialog } from "@/components/teachers/TeacherFormDialog";
 import { TeacherDetailDialog } from "@/components/teachers/TeacherDetailDialog";
 import { useTeachers } from "@/hooks/useTeachers";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 const STATUS_COLORS: Record<string, string> = {
   Active: "bg-emerald-900/30 text-emerald-400 border-emerald-800/50",
@@ -31,6 +32,16 @@ export default function TeachersPage() {
   const [editTarget, setEditTarget] = useState<Teacher | null>(null);
   const [showCreate, setShowCreate] = useState(false);
 
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    title?: string;
+    message: string;
+    onConfirm?: () => void;
+    isAlert?: boolean;
+    variant?: "danger" | "warning" | "info";
+    isLoading?: boolean;
+  }>({ isOpen: false, message: "" });
+
   const limit = 10;
   const { data, isLoading, error, refetch } = useTeachers({
     search,
@@ -44,14 +55,28 @@ export default function TeachersPage() {
     departmentsApi.list({ limit: 100 }).then((res) => setDepartments(res.items)).catch(() => {});
   }, []);
 
-  const handleDelete = async (t: Teacher) => {
-    if (!confirm(`Delete faculty member "${t.full_name}" (${t.teacher_id})?`)) return;
-    try {
-      await teachersApi.delete(t.teacher_id);
-      refetch();
-    } catch (e: unknown) {
-      alert((e as Error).message);
-    }
+  const showAlert = (message: string, title = "Notification") => {
+    setModalConfig({ isOpen: true, title, message, isAlert: true, variant: "warning" });
+  };
+
+  const handleDelete = (t: Teacher) => {
+    setModalConfig({
+      isOpen: true,
+      title: "Delete Teacher",
+      message: `Are you sure you want to delete faculty member "${t.full_name}" (${t.teacher_id})? This action cannot be undone.`,
+      variant: "danger",
+      onConfirm: async () => {
+        setModalConfig((prev) => ({ ...prev, isLoading: true }));
+        try {
+          await teachersApi.delete(t.teacher_id);
+          refetch();
+        } catch (e: unknown) {
+          showAlert((e as Error).message, "Delete Failed");
+        } finally {
+          setModalConfig({ isOpen: false, message: "" });
+        }
+      },
+    });
   };
 
   const totalPages = Math.ceil((data?.total ?? 0) / limit);
@@ -154,6 +179,8 @@ export default function TeachersPage() {
               ) : (
                 data?.items.map((t) => {
                   const statusName = t.status || "Active";
+                  const deptObj = departments.find((d) => d.dept_code === t.dept_code);
+                  const deptName = deptObj ? deptObj.dept_name : "";
                   return (
                     <tr key={t.teacher_id} className="hover:bg-slate-800/30 transition-colors group">
                       <td className="px-4 py-3 font-mono text-indigo-400 text-xs">
@@ -175,7 +202,10 @@ export default function TeachersPage() {
                           {t.email && <div className="text-[11px] text-slate-400">{t.email}</div>}
                         </button>
                       </td>
-                      <td className="px-4 py-3 text-slate-300 font-semibold">{t.dept_code}</td>
+                      <td className="px-4 py-3">
+                        <div className="font-mono text-xs font-semibold text-slate-200">{t.dept_code}</div>
+                        {deptName && <div className="text-[11px] text-slate-400 font-normal">{deptName}</div>}
+                      </td>
                       <td className="px-4 py-3">
                         <div className="text-slate-200 font-medium">{t.designation}</div>
                         {(t.qualification || t.specialization) && (
@@ -290,6 +320,17 @@ export default function TeachersPage() {
           onClose={() => { setShowCreate(false); setEditTarget(null); refetch(); }}
         />
       )}
+
+      <ConfirmModal
+        isOpen={modalConfig.isOpen}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        isAlert={modalConfig.isAlert}
+        variant={modalConfig.variant}
+        isLoading={modalConfig.isLoading}
+        onConfirm={modalConfig.onConfirm}
+        onCancel={() => setModalConfig({ isOpen: false, message: "" })}
+      />
     </div>
   );
 }

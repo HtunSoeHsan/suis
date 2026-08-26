@@ -54,6 +54,8 @@ export function CourseFormDialog({ course, onClose }: Props) {
     }
   }, [course]);
 
+  const filteredTeachers = teachers.filter((t) => !form.dept_code || t.dept_code === form.dept_code);
+
   const set = (k: keyof typeof EMPTY, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -192,16 +194,18 @@ export function CourseFormDialog({ course, onClose }: Props) {
             </div>
           </div>
 
-          {/* Assigned Teacher */}
+          {/* Assigned Teacher (Filtered by Department) */}
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">Assigned Teacher</label>
+            <label className="block text-xs font-medium text-slate-400 mb-1.5">
+              Assigned Teacher {form.dept_code ? `(${form.dept_code} Department)` : ""}
+            </label>
             <select
               value={form.teacher_id}
               onChange={(e) => set("teacher_id", e.target.value)}
               className={inputCls}
             >
               <option value="">-- None Assigned --</option>
-              {teachers.map((t) => (
+              {filteredTeachers.map((t) => (
                 <option key={t.teacher_id} value={t.teacher_id}>
                   {t.full_name} ({t.teacher_id})
                 </option>

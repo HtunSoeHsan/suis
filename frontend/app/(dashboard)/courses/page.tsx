@@ -5,6 +5,7 @@ import { coursesApi, teachersApi, departmentsApi, semestersApi } from "@/lib/api
 import type { Course, Teacher, Department, Semester } from "@/types";
 import { CourseFormDialog } from "@/components/courses/CourseFormDialog";
 import { Plus, Search, X, Loader2, BookOpen, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 export default function CoursesPage() {
   const [data, setData] = useState<{ total: number; items: Course[] } | null>(null);
@@ -23,15 +24,36 @@ export default function CoursesPage() {
 
   const [showCreate, setShowCreate] = useState(false);
   const [editCourse, setEditCourse] = useState<Course | null>(null);
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    title?: string;
+    message: string;
+    onConfirm?: () => void;
+    isAlert?: boolean;
+    variant?: "danger" | "warning" | "info";
+    isLoading?: boolean;
+  }>({ isOpen: false, message: "" });
 
   const limit = 10;
 
+  const showAlert = (message: string, title = "Notification") => {
+    setModalConfig({ isOpen: true, title, message, isAlert: true, variant: "warning" });
+  };
+
+  const [departmentsMap, setDepartmentsMap] = useState<Record<string, Department>>({});
+
   useEffect(() => {
-    departmentsApi.list({ limit: 100 }).then((res) => setDepartments(res.items)).catch(() => {});
-    semestersApi.list({ limit: 100 }).then((res) => {
-      setSemesters(res.items);
+    Promise.all([
+      departmentsApi.list({ limit: 100 }),
+      semestersApi.list({ limit: 100 }),
+    ]).then(([dRes, sRes]) => {
+      setDepartments(dRes.items);
+      setSemesters(sRes.items);
+      const dMap: Record<string, Department> = {};
+      dRes.items.forEach((d) => { dMap[d.dept_code] = d; });
+      setDepartmentsMap(dMap);
       const sMap: Record<number, Semester> = {};
-      res.items.forEach((s) => { sMap[s.semester_id] = s; });
+      sRes.items.forEach((s) => { sMap[s.semester_id] = s; });
       setSemestersMap(sMap);
     }).catch(() => {});
   }, []);
@@ -65,14 +87,24 @@ export default function CoursesPage() {
     fetchCourses();
   }, [fetchCourses]);
 
-  const handleDelete = async (c: Course) => {
-    if (!confirm(`Delete course "${c.course_name}" (${c.course_code})?`)) return;
-    try {
-      await coursesApi.delete(c.course_code);
-      fetchCourses();
-    } catch (e: unknown) {
-      alert((e as Error).message);
-    }
+  const handleDelete = (c: Course) => {
+    setModalConfig({
+      isOpen: true,
+      title: "Delete Course",
+      message: `Are you sure you want to delete course "${c.course_name}" (${c.course_code})? This action cannot be undone.`,
+      variant: "danger",
+      onConfirm: async () => {
+        setModalConfig((prev) => ({ ...prev, isLoading: true }));
+        try {
+          await coursesApi.delete(c.course_code);
+          fetchCourses();
+        } catch (e: unknown) {
+          showAlert((e as Error).message, "Delete Failed");
+        } finally {
+          setModalConfig({ isOpen: false, message: "" });
+        }
+      },
+    });
   };
 
   const totalPages = Math.ceil((data?.total ?? 0) / limit);
@@ -190,7 +222,14 @@ export default function CoursesPage() {
                         <span className="text-slate-500 italic text-[11px]">Unassigned</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-sky-400">{c.dept_code}</td>
+                    <td className="px-4 py-3 text-xs">
+                      <span className="font-mono font-bold text-sky-400">{c.dept_code}</span>
+                      {departmentsMap[c.dept_code] && (
+                        <span className="text-slate-400 ml-1.5 font-medium">
+                          — {departmentsMap[c.dept_code].dept_name}
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-slate-300 font-medium">{c.credit_hours} hrs</td>
                     <td className="px-4 py-3">
                       {teacher ? (
@@ -268,6 +307,17 @@ export default function CoursesPage() {
           }}
         />
       )}
+
+      <ConfirmModal
+        isOpen={modalConfig.isOpen}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        isAlert={modalConfig.isAlert}
+        variant={modalConfig.variant}
+        isLoading={modalConfig.isLoading}
+        onConfirm={modalConfig.onConfirm}
+        onCancel={() => setModalConfig({ isOpen: false, message: "" })}
+      />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { classroomsApi } from "@/lib/api";
 import type { Classroom } from "@/types";
 import { ClassroomFormDialog } from "@/components/classrooms/ClassroomFormDialog";
 import { Plus, Search, X, Loader2, DoorOpen, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 export default function ClassroomsPage() {
   const [data, setData] = useState<{ total: number; items: Classroom[] } | null>(null);
@@ -18,7 +19,21 @@ export default function ClassroomsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [editRoom, setEditRoom] = useState<Classroom | null>(null);
 
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean;
+    title?: string;
+    message: string;
+    onConfirm?: () => void;
+    isAlert?: boolean;
+    variant?: "danger" | "warning" | "info";
+    isLoading?: boolean;
+  }>({ isOpen: false, message: "" });
+
   const limit = 10;
+
+  const showAlert = (message: string, title = "Notification") => {
+    setModalConfig({ isOpen: true, title, message, isAlert: true, variant: "warning" });
+  };
 
   const fetchClassrooms = useCallback(async () => {
     setIsLoading(true);
@@ -42,14 +57,24 @@ export default function ClassroomsPage() {
     fetchClassrooms();
   }, [fetchClassrooms]);
 
-  const handleDelete = async (c: Classroom) => {
-    if (!confirm(`Delete room "${c.room_name}" (${c.room_id})?`)) return;
-    try {
-      await classroomsApi.delete(c.room_id);
-      fetchClassrooms();
-    } catch (e: unknown) {
-      alert((e as Error).message);
-    }
+  const handleDelete = (c: Classroom) => {
+    setModalConfig({
+      isOpen: true,
+      title: "Delete Classroom",
+      message: `Are you sure you want to delete room "${c.room_name}" (${c.room_id})? This action cannot be undone.`,
+      variant: "danger",
+      onConfirm: async () => {
+        setModalConfig((prev) => ({ ...prev, isLoading: true }));
+        try {
+          await classroomsApi.delete(c.room_id);
+          fetchClassrooms();
+        } catch (e: unknown) {
+          showAlert((e as Error).message, "Delete Failed");
+        } finally {
+          setModalConfig({ isOpen: false, message: "" });
+        }
+      },
+    });
   };
 
   const totalPages = Math.ceil((data?.total ?? 0) / limit);
@@ -209,6 +234,17 @@ export default function ClassroomsPage() {
           }}
         />
       )}
+
+      <ConfirmModal
+        isOpen={modalConfig.isOpen}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        isAlert={modalConfig.isAlert}
+        variant={modalConfig.variant}
+        isLoading={modalConfig.isLoading}
+        onConfirm={modalConfig.onConfirm}
+        onCancel={() => setModalConfig({ isOpen: false, message: "" })}
+      />
     </div>
   );
 }
