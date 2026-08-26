@@ -51,7 +51,7 @@ export default function EnrollmentsPage() {
     ]).then(([semRes, crsRes]) => {
       setSemesters(semRes.items);
       setCourses(crsRes.items);
-    }).catch(() => {});
+    }).catch(() => { });
   }, []);
 
   const fetchEnrollments = useCallback(async () => {
@@ -141,12 +141,12 @@ export default function EnrollmentsPage() {
             <Layers className="w-4 h-4 text-teal-400" /> Batch Enroll (အစုလိုက်)
           </button>
 
-          <button
+          {/* <button
             onClick={() => setShowCreate(true)}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-sm font-medium transition-colors shadow-lg shadow-teal-900/30"
           >
             <Plus className="w-4 h-4" /> Single Enroll
-          </button>
+          </button> */}
         </div>
       </div>
 
