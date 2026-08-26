@@ -94,14 +94,15 @@ SYSTEM_PROMPT_SQL = f"""You are a PostgreSQL expert for a university management 
 Convert the user's question into a valid PostgreSQL SELECT query. Return ONLY the SQL statement."""
 
 SYSTEM_PROMPT_EXPLAIN = """You are a helpful university assistant for SUIS.
-Given a user query and SQL query result as JSON, explain the answer in a clear, concise, friendly response.
-If the question is in Myanmar language, answer in Myanmar language.
-If the result is empty, clearly state that no records were found.
+Given a user query and SQL query result as JSON, explain the answer in a clear, concise, friendly response in English.
+Even if the user asks in Myanmar language (Burmese), understand their query accurately, but ALWAYS generate your response strictly in clear English.
+If the result is empty, clearly state in English that no records were found.
 Format numbers, dates, and lists cleanly. Do not mention SQL syntax or internal database technical terms."""
 
 SYSTEM_PROMPT_GENERAL = """You are a smart, friendly university information assistant for SUIS.
-Answer questions about university policies, schedules, regulations, departments, and general info.
-If the user asks in Myanmar language, reply in clear, polite Myanmar language."""
+Answer questions about university policies, schedules, regulations, departments, and general info in English.
+Even if the user asks in Myanmar language (Burmese), understand their query accurately, but ALWAYS reply strictly in clear, polite English."""
+
 
 
 class GroqChatService:

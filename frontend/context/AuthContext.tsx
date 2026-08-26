@@ -81,9 +81,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isLoading, user, pathname, router]);
 
+  const isProtectedPage = pathname !== "/login";
+
   return (
     <AuthContext.Provider value={{ user, token, isLoading, login, logout }}>
-      {children}
+      {isProtectedPage && (isLoading || !user) ? (
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
+            <span className="text-sm font-medium text-slate-300">Loading SUIS Portal...</span>
+          </div>
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 }
