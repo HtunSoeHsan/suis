@@ -17,6 +17,7 @@ import {
   LayoutDashboard,
   Settings2,
   UserCog,
+  Award,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
@@ -25,19 +26,19 @@ import type { UserRole } from "@/types";
 // roles: undefined = visible to all, otherwise only listed roles can see it
 const navItems: { href: string; label: string; icon: React.ElementType; roles?: UserRole[] }[] = [
   { href: "/",            label: "Dashboard",       icon: LayoutDashboard },
-  { href: "/students",    label: "Students",        icon: GraduationCap,  roles: ["ADMIN"] },
-  { href: "/teachers",    label: "Teachers",        icon: Users,          roles: ["ADMIN"] },
-  { href: "/departments", label: "Departments",     icon: Building2,      roles: ["ADMIN"] },
+  { href: "/students",    label: "Students",        icon: GraduationCap,  roles: ["ADMIN", "TEACHER"] },
+  { href: "/teachers",    label: "Teachers",        icon: Users,          roles: ["ADMIN", "TEACHER"] },
+  { href: "/departments", label: "Departments",     icon: Building2,      roles: ["ADMIN", "TEACHER"] },
   { href: "/courses",     label: "Courses",         icon: BookOpen },
-  { href: "/semesters",   label: "Semesters",       icon: Calendar,       roles: ["ADMIN"] },
-  { href: "/enrollments", label: "Enrollments",     icon: UserCheck,      roles: ["ADMIN"] },
-  { href: "/classrooms",  label: "Classrooms",      icon: DoorOpen,       roles: ["ADMIN"] },
+  { href: "/semesters",   label: "Semesters",       icon: Calendar,       roles: ["ADMIN", "TEACHER"] },
+  { href: "/enrollments", label: "Enrollments",     icon: UserCheck,      roles: ["ADMIN", "TEACHER"] },
+  { href: "/classrooms",  label: "Classrooms",      icon: DoorOpen,       roles: ["ADMIN", "TEACHER"] },
   { href: "/timetables",  label: "Timetables",      icon: CalendarRange },
   { href: "/attendance",  label: "Attendance",      icon: CalendarCheck },
   { href: "/chatbot",     label: "AI Chatbot",      icon: MessageSquareText },
   { href: "/face-scanner",label: "Face Scanner",    icon: ScanFace },
   { href: "/users",       label: "User Management", icon: UserCog,        roles: ["ADMIN"] },
-  { href: "/settings",    label: "Settings",        icon: Settings2,      roles: ["ADMIN"] },
+  { href: "/settings",    label: "Settings",        icon: Settings2,      roles: ["ADMIN", "TEACHER"] },
 ];
 
 export function Sidebar() {

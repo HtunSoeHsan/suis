@@ -17,13 +17,17 @@ from app.database import engine
 async def lifespan(app: FastAPI):
     # Auto-verify DB schema on startup
     try:
-        async with engine.connect() as conn:
+        async with engine.begin() as conn:
             res = await conn.execute(text("SELECT column_name FROM information_schema.columns WHERE table_name='students' AND column_name='user_id'"))
             if not res.fetchone():
                 print("⚠️ Outdated or uninitialized database schema detected! Running init_db script...")
                 from scripts.init_db import initialize_database
                 await initialize_database(reset=True)
                 print("✅ Database successfully initialized!")
+
+            await conn.execute(text("ALTER TABLE enrollments ADD COLUMN IF NOT EXISTS marks DOUBLE PRECISION;"))
+            await conn.execute(text("ALTER TABLE enrollments ADD COLUMN IF NOT EXISTS grade VARCHAR(5);"))
+            await conn.execute(text("ALTER TABLE enrollments ADD COLUMN IF NOT EXISTS grade_point DOUBLE PRECISION;"))
     except Exception as e:
         print(f"⚠️ DB startup schema check note: {e}")
     yield

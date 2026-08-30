@@ -7,6 +7,8 @@ import { SingleAttendanceDialog } from "@/components/attendance/SingleAttendance
 import { BatchAttendanceDialog } from "@/components/attendance/BatchAttendanceDialog";
 import { CalendarCheck, Loader2, Search, X, ChevronLeft, ChevronRight, ChevronDown, Plus, CheckSquare, Trash2, CalendarDays } from "lucide-react";
 
+import { useAuth } from "@/context/AuthContext";
+
 const STATUS_COLORS: Record<string, string> = {
   PRESENT: "bg-emerald-900/30 text-emerald-400 border-emerald-800/50",
   LATE: "bg-amber-900/30 text-amber-400 border-amber-800/50",
@@ -14,6 +16,9 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function AttendancePage() {
+  const { user } = useAuth();
+  const isTeacher = user?.role === "TEACHER";
+
   const [data, setData] = useState<{ total: number; items: AttendanceLog[] } | null>(null);
   const [studentsMap, setStudentsMap] = useState<Record<string, Student>>({});
   const [coursesMap, setCoursesMap] = useState<Record<string, Course>>({});
@@ -36,8 +41,11 @@ export default function AttendancePage() {
   const limit = 10;
 
   useEffect(() => {
-    coursesApi.list({ limit: 100 }).then((res) => setCourses(res.items)).catch(() => {});
-  }, []);
+    coursesApi.list({
+      limit: 100,
+      ...(isTeacher && user?.teacher_id ? { teacher_id: user.teacher_id } : {}),
+    }).then((res) => setCourses(res.items)).catch(() => {});
+  }, [isTeacher, user?.teacher_id]);
 
   const fetchAttendance = useCallback(async () => {
     setIsLoading(true);
@@ -52,11 +60,15 @@ export default function AttendancePage() {
       if (filterCourse) params.course_code = filterCourse;
       if (filterDateFrom) params.date_from = filterDateFrom;
       if (filterDateTo) params.date_to = filterDateTo;
+      if (isTeacher && user?.teacher_id) params.teacher_id = user.teacher_id;
 
       const [attRes, stRes, crsRes] = await Promise.all([
         attendanceApi.list(params),
         studentsApi.list({ limit: 200 }),
-        coursesApi.list({ limit: 100 }),
+        coursesApi.list({
+          limit: 100,
+          ...(isTeacher && user?.teacher_id ? { teacher_id: user.teacher_id } : {}),
+        }),
       ]);
 
       setData(attRes);
@@ -72,7 +84,7 @@ export default function AttendancePage() {
     } finally {
       setIsLoading(false);
     }
-  }, [search, filterStatus, filterCourse, filterDateFrom, filterDateTo, page]);
+  }, [search, filterStatus, filterCourse, filterDateFrom, filterDateTo, page, isTeacher, user?.teacher_id]);
 
   useEffect(() => {
     fetchAttendance();

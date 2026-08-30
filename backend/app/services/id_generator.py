@@ -10,13 +10,14 @@ from app.models.student import Student
 CONFIG_FILE = Path(__file__).parent.parent / "id_config.json"
 
 DEFAULT_CONFIG = {
-    "student_id_template": "STU-{YEAR}-{DEPT}-{SEQ:04d}",
-    "prefix": "STU",
+    "student_id_template": "{PREFIX}-{SEQ:04d}",
+    "prefix": "STU-2026",
     "seq_padding": 4,
-    "roll_prefix": "R",
-    "roll_padding": 3,
-    "teacher_prefix": "TCH",
+    "roll_prefix": "MUB-",
+    "roll_padding": 4,
+    "teacher_prefix": "TCH-2026",
     "teacher_padding": 3,
+    "teacher_include_dept": False,
 }
 
 
@@ -38,10 +39,9 @@ def save_id_config(config: dict) -> dict:
     return updated
 
 
-def preview_student_id(template: str, prefix: str = "STU", dept_code: str = "CST", seq: int = 1) -> str:
+def preview_student_id(template: str, prefix: str = "STU-2026", dept_code: str | None = None, seq: int = 1) -> str:
     """Preview rendered Student ID string for a given template."""
     current_year = datetime.now().strftime("%Y")
-    dept = (dept_code or "GEN").upper()
 
     def replace_seq(match):
         fmt = match.group(1) or "d"
@@ -50,21 +50,28 @@ def preview_student_id(template: str, prefix: str = "STU", dept_code: str = "CST
         except Exception:
             return str(seq).zfill(4)
 
-    rendered = template.replace("{PREFIX}", prefix).replace("{YEAR}", current_year).replace("{DEPT}", dept)
+    rendered = template.replace("{PREFIX}", prefix).replace("{YEAR}", current_year)
+    if dept_code and dept_code.strip():
+        rendered = rendered.replace("{DEPT}", dept_code.strip().upper())
+    else:
+        rendered = rendered.replace("-{DEPT}-", "-").replace("{DEPT}-", "").replace("-{DEPT}", "").replace("{DEPT}", "")
+
     rendered = re.sub(r"\{SEQ:?([^}]*)\}", replace_seq, rendered)
     return rendered
 
 
-def preview_roll_number(prefix: str = "R", padding: int = 3, seq: int = 1) -> str:
+def preview_roll_number(prefix: str = "MUB-", padding: int = 4, seq: int = 1) -> str:
     """Preview rendered Roll Number: prefix + zero-padded sequence."""
     return f"{prefix}{str(seq).zfill(padding)}"
 
 
-def preview_teacher_id(prefix: str = "TCH", padding: int = 3, dept_code: str = "CST", seq: int = 1) -> str:
-    """Preview rendered Teacher ID: prefix-YEAR-DEPT-zero-padded sequence."""
-    current_year = datetime.now().strftime("%Y")
-    dept = (dept_code or "GEN").upper()
-    return f"{prefix}-{current_year}-{dept}-{str(seq).zfill(padding)}"
+def preview_teacher_id(prefix: str = "TCH-2026", padding: int = 3, dept_code: str | None = None, seq: int = 1, include_dept: bool = False) -> str:
+    """Preview rendered Teacher ID: prefix-DEPT-zero-padded sequence."""
+    clean_prefix = prefix.rstrip("-")
+    if include_dept and dept_code and dept_code.strip():
+        dept = dept_code.strip().upper()
+        return f"{clean_prefix}-{dept}-{str(seq).zfill(padding)}"
+    return f"{clean_prefix}-{str(seq).zfill(padding)}"
 
 
 async def generate_student_id(
@@ -74,13 +81,16 @@ async def generate_student_id(
 ) -> str:
     config = load_id_config()
     template = custom_template or config.get("student_id_template", DEFAULT_CONFIG["student_id_template"])
-    prefix = config.get("prefix", "STU")
+    prefix = config.get("prefix", "STU-2026")
 
     current_year = datetime.now().strftime("%Y")
-    dept = (dept_code or "GEN").upper()
 
     base_prefix = template.split("{SEQ")[0]
-    base_prefix_rendered = base_prefix.replace("{PREFIX}", prefix).replace("{YEAR}", current_year).replace("{DEPT}", dept)
+    base_prefix_rendered = base_prefix.replace("{PREFIX}", prefix).replace("{YEAR}", current_year)
+    if dept_code and dept_code.strip():
+        base_prefix_rendered = base_prefix_rendered.replace("{DEPT}", dept_code.strip().upper())
+    else:
+        base_prefix_rendered = base_prefix_rendered.replace("-{DEPT}-", "-").replace("{DEPT}-", "").replace("-{DEPT}", "").replace("{DEPT}", "")
 
     query = select(Student.student_id).where(
         Student.student_id.like(f"{base_prefix_rendered}%")
@@ -102,7 +112,7 @@ async def generate_student_id(
                 pass
 
     next_seq = max_seq + 1
-    return preview_student_id(template, prefix=prefix, dept_code=dept, seq=next_seq)
+    return preview_student_id(template, prefix=prefix, dept_code=dept_code, seq=next_seq)
 
 
 async def generate_roll_number(
@@ -146,12 +156,14 @@ async def generate_teacher_id(
     dept_code: str | None = None,
 ) -> str:
     config = load_id_config()
-    prefix_base = config.get("teacher_prefix", DEFAULT_CONFIG["teacher_prefix"])
+    prefix_base = config.get("teacher_prefix", "TCH-2026").rstrip("-")
     padding = config.get("teacher_padding", DEFAULT_CONFIG["teacher_padding"])
 
-    current_year = datetime.now().strftime("%Y")
-    dept = (dept_code or "GEN").upper()
-    prefix = f"{prefix_base}-{current_year}-{dept}-"
+    if dept_code and dept_code.strip():
+        dept = dept_code.strip().upper()
+        prefix = f"{prefix_base}-{dept}-"
+    else:
+        prefix = f"{prefix_base}-"
 
     query = select(Teacher.teacher_id).where(
         Teacher.teacher_id.like(f"{prefix}%")
@@ -173,4 +185,4 @@ async def generate_teacher_id(
                 pass
 
     next_seq = max_seq + 1
-    return preview_teacher_id(prefix=prefix_base, padding=padding, dept_code=dept, seq=next_seq)
+    return preview_teacher_id(prefix=prefix_base, padding=padding, dept_code=dept_code, seq=next_seq)

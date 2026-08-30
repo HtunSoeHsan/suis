@@ -15,30 +15,32 @@ export default function SettingsPage() {
   const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Form states
-  const [prefix, setPrefix] = useState("STU");
+  const [prefix, setPrefix] = useState("STU-2026");
   const [seqPadding, setSeqPadding] = useState(4);
-  const [template, setTemplate] = useState("STU-{YEAR}-{DEPT}-{SEQ:04d}");
+  const [template, setTemplate] = useState("{PREFIX}-{SEQ:04d}");
 
-  const [rollPrefix, setRollPrefix] = useState("R");
-  const [rollPadding, setRollPadding] = useState(3);
+  const [rollPrefix, setRollPrefix] = useState("MUB-");
+  const [rollPadding, setRollPadding] = useState(4);
 
-  const [teacherPrefix, setTeacherPrefix] = useState("TCH");
+  const [teacherPrefix, setTeacherPrefix] = useState("TCH-2026");
   const [teacherPadding, setTeacherPadding] = useState(3);
+  const [teacherIncludeDept, setTeacherIncludeDept] = useState(false);
 
   const fetchSettings = () => {
     setLoading(true);
     settingsApi.getIDFormat()
       .then((idRes) => {
         setConfig(idRes);
-        setPrefix(idRes.prefix ?? "STU");
+        setPrefix(idRes.prefix ?? "STU-2026");
         setSeqPadding(idRes.seq_padding ?? 4);
-        setTemplate(idRes.student_id_template ?? "STU-{YEAR}-{DEPT}-{SEQ:04d}");
+        setTemplate(idRes.student_id_template ?? "{PREFIX}-{SEQ:04d}");
 
-        setRollPrefix(idRes.roll_prefix ?? "R");
-        setRollPadding(idRes.roll_padding ?? 3);
+        setRollPrefix(idRes.roll_prefix ?? "MUB-");
+        setRollPadding(idRes.roll_padding ?? 4);
 
-        setTeacherPrefix(idRes.teacher_prefix ?? "TCH");
+        setTeacherPrefix(idRes.teacher_prefix ?? "TCH-2026");
         setTeacherPadding(idRes.teacher_padding ?? 3);
+        setTeacherIncludeDept(idRes.teacher_include_dept ?? false);
       })
       .catch((e: unknown) => {
         setMsg({ type: "error", text: (e as Error).message });
@@ -55,14 +57,16 @@ export default function SettingsPage() {
     setSaving(true);
     setMsg(null);
     try {
+      const generatedTemplate = `{PREFIX}-{SEQ:0${seqPadding}d}`;
       const updated = await settingsApi.updateIDFormat({
-        student_id_template: template,
+        student_id_template: generatedTemplate,
         prefix,
         seq_padding: seqPadding,
         roll_prefix: rollPrefix,
         roll_padding: rollPadding,
         teacher_prefix: teacherPrefix,
         teacher_padding: teacherPadding,
+        teacher_include_dept: teacherIncludeDept,
       });
       setConfig(updated);
       setMsg({ type: "success", text: "Central System ID & Code format rules updated successfully!" });
@@ -74,18 +78,16 @@ export default function SettingsPage() {
   };
 
   // Preview computations
-  const currentYear = new Date().getFullYear().toString();
   const renderStudentPreview = () => {
-    const pad = "1".padStart(seqPadding, "0");
-    return template
-      .replace("{PREFIX}", prefix)
-      .replace("{YEAR}", currentYear)
-      .replace("{DEPT}", "CST")
-      .replace(/\{SEQ:?[^}]*\}/, pad);
+    const cleanPrefix = prefix.endsWith("-") ? prefix.slice(0, -1) : prefix;
+    return `${cleanPrefix}-${strPad(1, seqPadding)}`;
   };
 
   const renderRollPreview = () => `${rollPrefix}${strPad(1, rollPadding)}`;
-  const renderTeacherPreview = () => `${teacherPrefix}-${currentYear}-CST-${strPad(1, teacherPadding)}`;
+  const renderTeacherPreview = () => {
+    const cleanPrefix = teacherPrefix.endsWith("-") ? teacherPrefix.slice(0, -1) : teacherPrefix;
+    return `${cleanPrefix}-${strPad(1, teacherPadding)}`;
+  };
 
   const strPad = (n: number, p: number) => n.toString().padStart(p, "0");
 
@@ -150,14 +152,14 @@ export default function SettingsPage() {
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-medium text-slate-400 mb-1.5">ID Prefix</label>
                 <input
                   type="text"
                   value={prefix}
                   onChange={(e) => setPrefix(e.target.value)}
-                  placeholder="STU"
+                  placeholder="STU-2026"
                   className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm font-mono text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-600/50"
                 />
               </div>
@@ -175,17 +177,6 @@ export default function SettingsPage() {
                     </option>
                   ))}
                 </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">Format Template</label>
-                <input
-                  type="text"
-                  value={template}
-                  onChange={(e) => setTemplate(e.target.value)}
-                  placeholder="STU-{YEAR}-{DEPT}-{SEQ:04d}"
-                  className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm font-mono text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-600/50"
-                />
               </div>
             </div>
           </div>
@@ -260,7 +251,7 @@ export default function SettingsPage() {
                   type="text"
                   value={teacherPrefix}
                   onChange={(e) => setTeacherPrefix(e.target.value)}
-                  placeholder="TCH"
+                  placeholder="TCH-2026"
                   className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm font-mono text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-600/50"
                 />
               </div>

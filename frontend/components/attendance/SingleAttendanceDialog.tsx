@@ -10,13 +10,26 @@ interface SingleAttendanceDialogProps {
   onSuccess: () => void;
 }
 
+import { useAuth } from "@/context/AuthContext";
+import { enrollmentsApi } from "@/lib/api";
+
+interface SingleAttendanceDialogProps {
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
 export function SingleAttendanceDialog({ onClose, onSuccess }: SingleAttendanceDialogProps) {
+  const { user } = useAuth();
+  const isTeacher = user?.role === "TEACHER";
+
   const [students, setStudents] = useState<Student[]>([]);
+  const [enrolledStudents, setEnrolledStudents] = useState<Student[]>([]);
   const [semesters, setSemesters] = useState<Semester[]>([]);
   const [selectedSemesterId, setSelectedSemesterId] = useState<number | "ALL">("ALL");
   const [courses, setCourses] = useState<Course[]>([]);
 
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [isLoadingEnrolled, setIsLoadingEnrolled] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,16 +39,17 @@ export function SingleAttendanceDialog({ onClose, onSuccess }: SingleAttendanceD
 
   useEffect(() => {
     Promise.all([
-      studentsApi.list({ limit: 200 }),
+      studentsApi.list({ limit: 500 }),
       semestersApi.list({ limit: 100 }),
-      coursesApi.list({ limit: 200 }),
+      coursesApi.list({
+        limit: 200,
+        ...(isTeacher && user?.teacher_id ? { teacher_id: user.teacher_id } : {}),
+      }),
     ])
       .then(([stRes, semRes, crsRes]) => {
         setStudents(stRes.items);
         setSemesters(semRes.items);
         setCourses(crsRes.items);
-
-        if (stRes.items.length > 0) setStudentId(stRes.items[0].student_id);
 
         const activeSem = semRes.items.find((s) => s.is_active) ?? semRes.items[0];
         if (activeSem) {
@@ -44,9 +58,10 @@ export function SingleAttendanceDialog({ onClose, onSuccess }: SingleAttendanceD
       })
       .catch((err: unknown) => setError((err as Error).message))
       .finally(() => setIsLoadingData(false));
-  }, []);
+  }, [isTeacher, user?.teacher_id]);
 
   const filteredCourses = courses.filter((c) => {
+    if (isTeacher && user?.teacher_id && c.teacher_id !== user.teacher_id) return false;
     if (selectedSemesterId === "ALL") return true;
     return c.semester_id === selectedSemesterId;
   });
@@ -61,6 +76,32 @@ export function SingleAttendanceDialog({ onClose, onSuccess }: SingleAttendanceD
       setCourseCode("");
     }
   }, [selectedSemesterId, filteredCourses]);
+
+  // Fetch enrolled students whenever courseCode changes
+  useEffect(() => {
+    if (!courseCode) {
+      setEnrolledStudents([]);
+      setStudentId("");
+      return;
+    }
+
+    setIsLoadingEnrolled(true);
+    enrollmentsApi.list({ course_code: courseCode, limit: 200 })
+      .then((enrRes) => {
+        const enrolledStudentIds = new Set(enrRes.items.map((e) => e.student_id));
+        const matched = students.filter((s) => enrolledStudentIds.has(s.student_id));
+        setEnrolledStudents(matched.length > 0 ? matched : students);
+        if (matched.length > 0) {
+          setStudentId(matched[0].student_id);
+        } else if (students.length > 0) {
+          setStudentId(students[0].student_id);
+        }
+      })
+      .catch(() => {
+        setEnrolledStudents(students);
+      })
+      .finally(() => setIsLoadingEnrolled(false));
+  }, [courseCode, students]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,7 +167,7 @@ export function SingleAttendanceDialog({ onClose, onSuccess }: SingleAttendanceD
                   className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                   required
                 >
-                  {students.map((s) => (
+                  {enrolledStudents.map((s) => (
                     <option key={s.student_id} value={s.student_id}>
                       {s.roll_number} — {s.full_name} ({s.student_id})
                     </option>

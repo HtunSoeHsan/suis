@@ -5,6 +5,8 @@ import { attendanceApi, coursesApi, enrollmentsApi, studentsApi, semestersApi } 
 import type { Course, Student, Semester } from "@/types";
 import { X, Loader2, CalendarCheck, CheckCircle2, XCircle, Clock, CheckSquare, CalendarDays } from "lucide-react";
 
+import { useAuth } from "@/context/AuthContext";
+
 interface BatchAttendanceDialogProps {
   onClose: () => void;
   onSuccess: () => void;
@@ -16,6 +18,9 @@ interface StudentAttendanceRow {
 }
 
 export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDialogProps) {
+  const { user } = useAuth();
+  const isTeacher = user?.role === "TEACHER";
+
   const [semesters, setSemesters] = useState<Semester[]>([]);
   const [selectedSemesterId, setSelectedSemesterId] = useState<number | "ALL">("ALL");
 
@@ -36,7 +41,10 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
   useEffect(() => {
     Promise.all([
       semestersApi.list({ limit: 100 }),
-      coursesApi.list({ limit: 200 }),
+      coursesApi.list({
+        limit: 200,
+        ...(isTeacher && user?.teacher_id ? { teacher_id: user.teacher_id } : {}),
+      }),
     ])
       .then(([semRes, crsRes]) => {
         setSemesters(semRes.items);
@@ -49,10 +57,11 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
       })
       .catch((err: unknown) => setError((err as Error).message))
       .finally(() => setIsLoadingCourses(false));
-  }, []);
+  }, [isTeacher, user?.teacher_id]);
 
-  // Filter courses strictly by selected semester
+  // Filter courses strictly by selected semester & teacher assignment
   const filteredCourses = courses.filter((c) => {
+    if (isTeacher && user?.teacher_id && c.teacher_id !== user.teacher_id) return false;
     if (selectedSemesterId === "ALL") return true;
     return c.semester_id === selectedSemesterId;
   });

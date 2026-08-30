@@ -3,9 +3,32 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_
 from app.database import get_db
 from app.models.enrollment import Enrollment
-from app.schemas.enrollment import EnrollmentCreate, EnrollmentOut, EnrollmentListOut
+from app.schemas.enrollment import EnrollmentCreate, EnrollmentOut, EnrollmentListOut, EnrollmentGradeUpdate
 
 router = APIRouter(prefix="/api/enrollments", tags=["Enrollments"])
+
+
+def calculate_grade_info(marks: float | None, grade: str | None) -> tuple[str | None, float | None]:
+    if marks is not None:
+        m = float(marks)
+        if m >= 80: return ("A", 4.0)
+        elif m >= 75: return ("A-", 3.7)
+        elif m >= 70: return ("B+", 3.3)
+        elif m >= 65: return ("B", 3.0)
+        elif m >= 60: return ("B-", 2.7)
+        elif m >= 55: return ("C+", 2.3)
+        elif m >= 50: return ("C", 2.0)
+        elif m >= 40: return ("D", 1.0)
+        else: return ("F", 0.0)
+    elif grade is not None and isinstance(grade, str):
+        g = grade.upper().strip()
+        mapping = {
+            "A+": 4.0, "A": 4.0, "A-": 3.7,
+            "B+": 3.3, "B": 3.0, "B-": 2.7,
+            "C+": 2.3, "C": 2.0, "D": 1.0, "F": 0.0
+        }
+        return (g, mapping.get(g, 0.0))
+    return (None, None)
 
 
 from app.models.student import Student
@@ -146,3 +169,28 @@ async def delete_enrollment(enrollment_id: int, db: AsyncSession = Depends(get_d
         raise HTTPException(status_code=404, detail="Enrollment record not found.")
     await db.delete(enr)
     await db.flush()
+
+
+@router.patch("/{enrollment_id}/grade", response_model=EnrollmentOut)
+async def update_enrollment_grade(
+    enrollment_id: int,
+    body: EnrollmentGradeUpdate,
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(Enrollment).where(Enrollment.enrollment_id == enrollment_id))
+    enr = result.scalar_one_or_none()
+    if not enr:
+        raise HTTPException(status_code=404, detail="Enrollment record not found.")
+
+    calc_grade, calc_point = calculate_grade_info(body.marks, body.grade)
+    enr.marks = body.marks
+    if calc_grade:
+        enr.grade = calc_grade
+        enr.grade_point = calc_point
+    elif body.grade:
+        enr.grade = body.grade.upper()
+        enr.grade_point = calc_point or 0.0
+
+    await db.flush()
+    await db.refresh(enr)
+    return enr

@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 from datetime import datetime
-from sqlalchemy import String, Integer, BigInteger, ForeignKey, UniqueConstraint
+from sqlalchemy import String, Integer, Float, BigInteger, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 from app.database import Base
@@ -23,6 +23,9 @@ class Enrollment(Base):
     student_id: Mapped[str] = mapped_column(String(50), ForeignKey("students.student_id", ondelete="CASCADE"), nullable=False)
     course_code: Mapped[str] = mapped_column(String(20), ForeignKey("courses.course_code", ondelete="CASCADE"), nullable=False)
     semester_id: Mapped[int] = mapped_column(Integer, ForeignKey("semesters.semester_id", ondelete="CASCADE"), nullable=False)
+    marks: Mapped[float | None] = mapped_column(Float, nullable=True)
+    grade: Mapped[str | None] = mapped_column(String(5), nullable=True)
+    grade_point: Mapped[float | None] = mapped_column(Float, nullable=True)
     enrolled_at: Mapped[datetime] = mapped_column(TIMESTAMPTZ, default=datetime.utcnow)
 
     # Relationships

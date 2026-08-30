@@ -28,6 +28,8 @@ async def _check_active_semesters_limit(db: AsyncSession, exclude_semester_id: i
 async def list_semesters(
     search: str | None = Query(None, description="Search by academic year or term"),
     is_active: bool | None = None,
+    sort_by: str | None = Query("academic_year", description="Sort field: academic_year, term, start_date, is_active, semester_id"),
+    order: str | None = Query("desc", description="Sort direction: asc or desc"),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=500),
     db: AsyncSession = Depends(get_db),
@@ -46,7 +48,25 @@ async def list_semesters(
     total_result = await db.execute(select(func.count()).select_from(query.subquery()))
     total = total_result.scalar_one()
 
-    result = await db.execute(query.order_by(Semester.academic_year.desc(), Semester.term).offset(skip).limit(limit))
+    # Dynamic sorting
+    is_desc = (order or "desc").lower() == "desc"
+    field_map = {
+        "academic_year": Semester.academic_year,
+        "term": Semester.term,
+        "start_date": Semester.start_date,
+        "is_active": Semester.is_active,
+        "semester_id": Semester.semester_id,
+    }
+    col = field_map.get((sort_by or "academic_year").lower(), Semester.academic_year)
+    
+    if is_desc:
+        sort_clause = col.desc()
+    else:
+        sort_clause = col.asc()
+
+    result = await db.execute(
+        query.order_by(sort_clause, Semester.term.asc() if is_desc else Semester.term.desc()).offset(skip).limit(limit)
+    )
     items = result.scalars().all()
 
     return SemesterListOut(total=total, items=list(items))

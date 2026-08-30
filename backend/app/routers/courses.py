@@ -14,6 +14,7 @@ async def list_courses(
     dept_code: str | None = Query(None, description="Filter by department code"),
     semester_id: int | None = Query(None, description="Filter by semester ID"),
     major: str | None = Query(None, description="Filter by major"),
+    teacher_id: str | None = Query(None, description="Filter by assigned teacher ID"),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
     db: AsyncSession = Depends(get_db),
@@ -32,6 +33,8 @@ async def list_courses(
         query = query.where(Course.semester_id == semester_id)
     if major:
         query = query.where(Course.major == major)
+    if teacher_id:
+        query = query.where(Course.teacher_id == teacher_id)
 
     total_result = await db.execute(select(func.count()).select_from(query.subquery()))
     total = total_result.scalar_one()

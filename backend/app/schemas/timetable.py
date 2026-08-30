@@ -11,6 +11,7 @@ class AcademicTimetableBase(BaseModel):
     room_id: str = Field(..., max_length=20, examples=["ROOM-101"])
     slot_id: int = Field(..., examples=[1])
     day_of_week: str = Field(..., max_length=10, examples=["Monday"])
+    academic_year: Optional[int] = Field(None, examples=[3], description="Academic year group this class targets, e.g. 1, 2, 3, 4")
 
 
 class AcademicTimetableCreate(AcademicTimetableBase):

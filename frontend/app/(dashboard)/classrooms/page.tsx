@@ -6,8 +6,11 @@ import type { Classroom } from "@/types";
 import { ClassroomFormDialog } from "@/components/classrooms/ClassroomFormDialog";
 import { Plus, Search, X, Loader2, DoorOpen, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
+import { useAuth } from "@/context/AuthContext";
 
 export default function ClassroomsPage() {
+  const { user } = useAuth();
+  const isTeacher = user?.role === "TEACHER";
   const [data, setData] = useState<{ total: number; items: Classroom[] } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -84,17 +87,26 @@ export default function ClassroomsPage() {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <DoorOpen className="w-6 h-6 text-rose-400" /> Classrooms & Halls
-          </h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <DoorOpen className="w-6 h-6 text-rose-400" /> Classrooms & Halls
+            </h2>
+            {isTeacher && (
+              <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-semibold">
+                View Only Mode
+              </span>
+            )}
+          </div>
           <p className="text-sm text-slate-400 mt-0.5">{data?.total ?? 0} total campus learning spaces</p>
         </div>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-sm font-medium transition-colors shadow-lg shadow-rose-900/30"
-        >
-          <Plus className="w-4 h-4" /> Add Room
-        </button>
+        {!isTeacher && (
+          <button
+            onClick={() => setShowCreate(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-sm font-medium transition-colors shadow-lg shadow-rose-900/30"
+          >
+            <Plus className="w-4 h-4" /> Add Room
+          </button>
+        )}
       </div>
 
       {/* Filters row */}
@@ -116,22 +128,23 @@ export default function ClassroomsPage() {
         </div>
 
         {/* Room Type Filters */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-xs text-slate-500 font-medium">Type:</span>
           {[
             { value: "", label: "All" },
-            { value: "LECTURE", label: "Lecture Hall" },
-            { value: "LAB", label: "Lab" },
-            { value: "EXAM", label: "Exam Hall" },
-            { value: "SEMINAR", label: "Seminar Room" },
+            { value: "Classroom", label: "Classroom" },
+            { value: "Lecture Hall", label: "Lecture Hall" },
+            { value: "Lab", label: "Lab" },
+            { value: "Seminar Room", label: "Seminar Room" },
+            { value: "Auditorium", label: "Auditorium" },
           ].map(({ value, label }) => (
             <button
               key={value}
               onClick={() => { setFilterType(value); setPage(0); }}
               className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
                 filterType === value
-                  ? "bg-rose-600 border-rose-500 text-white"
-                  : "border-slate-700 text-slate-400 hover:border-slate-500"
+                  ? "bg-rose-600 border-rose-500 text-white shadow-md shadow-rose-900/30"
+                  : "border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200"
               }`}
             >
               {label}
@@ -152,7 +165,10 @@ export default function ClassroomsPage() {
           <table className="w-full text-sm">
             <thead className="border-b border-slate-800 bg-slate-950/50">
               <tr className="text-left text-slate-500 text-xs uppercase tracking-wider">
-                {["Room ID", "Room Name", "Building", "Type", "Capacity", "Actions"].map((h) => (
+                {(isTeacher
+                  ? ["Room ID", "Room Name", "Building", "Type", "Capacity"]
+                  : ["Room ID", "Room Name", "Building", "Type", "Capacity", "Actions"]
+                ).map((h) => (
                   <th key={h} className="px-4 py-3 font-medium">{h}</th>
                 ))}
               </tr>
@@ -160,9 +176,9 @@ export default function ClassroomsPage() {
             <tbody className="divide-y divide-slate-800/60">
               {data?.items.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-slate-500">
+                  <td colSpan={isTeacher ? 5 : 6} className="text-center py-12 text-slate-500">
                     No classrooms found.{" "}
-                    <button onClick={() => setShowCreate(true)} className="text-rose-400 hover:underline">Add one?</button>
+                    {!isTeacher && <button onClick={() => setShowCreate(true)} className="text-rose-400 hover:underline">Add one?</button>}
                   </td>
                 </tr>
               ) : data?.items.map((c) => (
@@ -176,24 +192,26 @@ export default function ClassroomsPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 font-mono text-slate-300">{c.capacity} seats</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setEditRoom(c)}
-                        className="p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-rose-400 transition-colors"
-                        title="Edit Room"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(c)}
-                        className="p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-red-400 transition-colors"
-                        title="Delete Room"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </td>
+                  {!isTeacher && (
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setEditRoom(c)}
+                          className="p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-rose-400 transition-colors"
+                          title="Edit Room"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(c)}
+                          className="p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-red-400 transition-colors"
+                          title="Delete Room"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

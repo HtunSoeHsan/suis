@@ -18,6 +18,7 @@ const EMPTY = {
   teacher_id: "",
   semester_id: "",
   major: "CST",
+  academic_year: "1",
 };
 
 const MAJOR_OPTIONS = [
@@ -50,6 +51,7 @@ export function CourseFormDialog({ course, onClose }: Props) {
         teacher_id: course.teacher_id ?? "",
         semester_id: course.semester_id?.toString() ?? "",
         major: course.major ?? "CST",
+        academic_year: course.academic_year?.toString() ?? "1",
       });
     }
   }, [course]);
@@ -70,6 +72,7 @@ export function CourseFormDialog({ course, onClose }: Props) {
         teacher_id: form.teacher_id || undefined,
         semester_id: form.semester_id ? parseInt(form.semester_id) : undefined,
         major: form.major || undefined,
+        academic_year: form.academic_year ? parseInt(form.academic_year) : 1,
       };
       if (course) {
         await coursesApi.update(course.course_code, payload);
@@ -123,24 +126,43 @@ export function CourseFormDialog({ course, onClose }: Props) {
             />
           </div>
 
-          {/* Major */}
-          <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">Major (ဘာသာရပ်)</label>
-            <div className="relative">
-              <select
-                value={form.major}
-                onChange={(e) => {
-                  set("major", e.target.value);
-                  if (e.target.value) set("dept_code", e.target.value);
-                }}
-                className={`${inputCls} appearance-none pr-9`}
-              >
-                <option value="">-- All Majors --</option>
-                {MAJOR_OPTIONS.map((m) => (
-                  <option key={m.value} value={m.value}>{m.label}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+          {/* Major & Academic Year */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-slate-400 mb-1.5">Major (ဘာသာရပ်)</label>
+              <div className="relative">
+                <select
+                  value={form.major}
+                  onChange={(e) => {
+                    set("major", e.target.value);
+                    if (e.target.value) set("dept_code", e.target.value);
+                  }}
+                  className={`${inputCls} appearance-none pr-9`}
+                >
+                  <option value="">-- All Majors --</option>
+                  {MAJOR_OPTIONS.map((m) => (
+                    <option key={m.value} value={m.value}>{m.label}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-400 mb-1.5">Target Year Level *</label>
+              <div className="relative">
+                <select
+                  value={form.academic_year}
+                  onChange={(e) => set("academic_year", e.target.value)}
+                  className={`${inputCls} appearance-none pr-9 font-semibold text-violet-300`}
+                >
+                  <option value="1">Year 1 (First Year)</option>
+                  <option value="2">Year 2 (Second Year)</option>
+                  <option value="3">Year 3 (Third Year)</option>
+                  <option value="4">Year 4 (Fourth / Final)</option>
+                  <option value="5">Year 5 (Master / Honor)</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              </div>
             </div>
           </div>
 

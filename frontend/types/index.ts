@@ -83,6 +83,7 @@ export interface Course {
   teacher_id?: string | null;
   semester_id?: number | null;
   major?: string | null;
+  academic_year?: number | null;
 }
 
 export interface Semester {
@@ -99,7 +100,40 @@ export interface Enrollment {
   student_id: string;
   course_code: string;
   semester_id: number;
+  marks?: number | null;
+  grade?: string | null;
+  grade_point?: number | null;
   enrolled_at: string;
+}
+
+export interface CourseGradeItem {
+  enrollment_id: number;
+  course_code: string;
+  course_name: string;
+  credit_hours: number;
+  marks?: number | null;
+  grade?: string | null;
+  grade_point?: number | null;
+}
+
+export interface SemesterGPASummary {
+  semester_id: number;
+  academic_year: string;
+  term: string;
+  is_active: boolean;
+  total_credits: number;
+  weighted_points: number;
+  gpa: number;
+  courses: CourseGradeItem[];
+}
+
+export interface StudentGPASummary {
+  student_id: string;
+  full_name: string;
+  cgpa: number;
+  total_earned_credits: number;
+  total_attempted_credits: number;
+  semesters: SemesterGPASummary[];
 }
 
 export interface BatchEnrollmentResponse {
@@ -133,6 +167,7 @@ export interface AcademicTimetable {
   room_id: string;
   slot_id: number;
   day_of_week: string;
+  academic_year?: number | null;
 }
 
 export interface ExamTimetable {
@@ -163,6 +198,7 @@ export interface IDConfig {
   roll_padding: number;
   teacher_prefix?: string;
   teacher_padding?: number;
+  teacher_include_dept?: boolean;
   preview_example: string;
   preview_roll_example: string;
   preview_teacher_example?: string;

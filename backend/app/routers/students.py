@@ -147,3 +147,84 @@ async def delete_student(student_id: str, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Student not found.")
     await db.delete(student)
     await db.flush()
+
+
+from app.models.enrollment import Enrollment
+from app.models.semester import Semester
+from app.models.course import Course
+
+@router.get("/{student_id}/gpa")
+async def get_student_gpa(student_id: str, db: AsyncSession = Depends(get_db)):
+    st_res = await db.execute(select(Student).where(Student.student_id == student_id))
+    student = st_res.scalar_one_or_none()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found.")
+
+    query = (
+        select(Enrollment, Course, Semester)
+        .join(Course, Enrollment.course_code == Course.course_code)
+        .join(Semester, Enrollment.semester_id == Semester.semester_id)
+        .where(Enrollment.student_id == student_id)
+        .order_by(Semester.semester_id.desc(), Course.course_code)
+    )
+    result = await db.execute(query)
+    rows = result.all()
+
+    semesters_data = {}
+    total_earned_credits = 0.0
+    total_weighted_points = 0.0
+    total_attempted_credits = 0.0
+
+    for enr, crs, sem in rows:
+        sem_id = sem.semester_id
+        if sem_id not in semesters_data:
+            semesters_data[sem_id] = {
+                "semester_id": sem_id,
+                "academic_year": sem.academic_year,
+                "term": sem.term,
+                "is_active": sem.is_active,
+                "total_credits": 0,
+                "weighted_points": 0.0,
+                "gpa": 0.0,
+                "courses": [],
+            }
+
+        credits = crs.credit_hours or 0
+        g_point = enr.grade_point
+
+        course_item = {
+            "enrollment_id": enr.enrollment_id,
+            "course_code": crs.course_code,
+            "course_name": crs.course_name,
+            "credit_hours": credits,
+            "marks": enr.marks,
+            "grade": enr.grade,
+            "grade_point": g_point,
+        }
+        semesters_data[sem_id]["courses"].append(course_item)
+        semesters_data[sem_id]["total_credits"] += credits
+        total_attempted_credits += credits
+
+        if g_point is not None:
+            semesters_data[sem_id]["weighted_points"] += (g_point * credits)
+            total_weighted_points += (g_point * credits)
+            total_earned_credits += credits
+
+    semester_list = []
+    for sem_id, sem_info in semesters_data.items():
+        if sem_info["total_credits"] > 0:
+            sem_info["gpa"] = round(sem_info["weighted_points"] / sem_info["total_credits"], 2)
+        else:
+            sem_info["gpa"] = 0.0
+        semester_list.append(sem_info)
+
+    cgpa = round(total_weighted_points / total_earned_credits, 2) if total_earned_credits > 0 else 0.0
+
+    return {
+        "student_id": student.student_id,
+        "full_name": student.full_name,
+        "cgpa": cgpa,
+        "total_earned_credits": total_earned_credits,
+        "total_attempted_credits": total_attempted_credits,
+        "semesters": semester_list,
+    }

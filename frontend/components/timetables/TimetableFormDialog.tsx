@@ -52,18 +52,48 @@ export function TimetableFormDialog({ defaultType = "academic", onClose }: Props
       setTimeSlots(tsRes.items);
       setSemesters(semRes.items);
 
-      if (cRes.items.length > 0) setCourseCode(cRes.items[0].course_code);
-      if (tRes.items.length > 0) {
-        setTeacherId(tRes.items[0].teacher_id);
-        setSupervisorTeacherId(tRes.items[0].teacher_id);
+      if (cRes.items.length > 0) {
+        const firstCourse = cRes.items[0];
+        setCourseCode(firstCourse.course_code);
+        if (firstCourse.teacher_id) {
+          setTeacherId(firstCourse.teacher_id);
+          setSupervisorTeacherId(firstCourse.teacher_id);
+        } else if (tRes.items.length > 0) {
+          setTeacherId(tRes.items[0].teacher_id);
+          setSupervisorTeacherId(tRes.items[0].teacher_id);
+        }
+        if (firstCourse.semester_id) {
+          setSemesterId(firstCourse.semester_id.toString());
+        } else {
+          const activeSem = semRes.items.find((s) => s.is_active) ?? semRes.items[0];
+          if (activeSem) setSemesterId(activeSem.semester_id.toString());
+        }
+      } else {
+        if (tRes.items.length > 0) {
+          setTeacherId(tRes.items[0].teacher_id);
+          setSupervisorTeacherId(tRes.items[0].teacher_id);
+        }
+        const activeSem = semRes.items.find((s) => s.is_active) ?? semRes.items[0];
+        if (activeSem) setSemesterId(activeSem.semester_id.toString());
       }
       if (rRes.items.length > 0) setRoomId(rRes.items[0].room_id);
       if (tsRes.items.length > 0) setSlotId(tsRes.items[0].slot_id.toString());
-
-      const activeSem = semRes.items.find((s) => s.is_active) ?? semRes.items[0];
-      if (activeSem) setSemesterId(activeSem.semester_id.toString());
     }).catch(() => {});
   }, []);
+
+  const handleCourseChange = (code: string) => {
+    setCourseCode(code);
+    const selectedCourse = courses.find((c) => c.course_code === code);
+    if (selectedCourse) {
+      if (selectedCourse.teacher_id) {
+        setTeacherId(selectedCourse.teacher_id);
+        setSupervisorTeacherId(selectedCourse.teacher_id);
+      }
+      if (selectedCourse.semester_id) {
+        setSemesterId(selectedCourse.semester_id.toString());
+      }
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,7 +130,7 @@ export function TimetableFormDialog({ defaultType = "academic", onClose }: Props
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-md">
+      <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-2xl">
         <div className="flex items-center justify-between p-5 border-b border-slate-800">
           <h3 className="font-semibold text-white">
             {scheduleType === "academic" ? "Add Academic Class Schedule" : "Add Exam Schedule"}
@@ -208,14 +238,18 @@ export function TimetableFormDialog({ defaultType = "academic", onClose }: Props
             <label className="block text-xs font-medium text-slate-400 mb-1.5">Course Subject *</label>
             <select
               value={courseCode}
-              onChange={(e) => setCourseCode(e.target.value)}
+              onChange={(e) => handleCourseChange(e.target.value)}
               className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-600/50"
             >
-              {courses.map((c) => (
-                <option key={c.course_code} value={c.course_code}>
-                  {c.course_code} — {c.course_name}
-                </option>
-              ))}
+              {courses.map((c) => {
+                const teacher = teachers.find((t) => t.teacher_id === c.teacher_id);
+                const teacherLabel = teacher ? ` (${teacher.full_name})` : c.teacher_id ? ` (${c.teacher_id})` : " (No Teacher)";
+                return (
+                  <option key={c.course_code} value={c.course_code}>
+                    {c.course_code} — {c.course_name}{teacherLabel}
+                  </option>
+                );
+              })}
             </select>
           </div>
 

@@ -2,12 +2,12 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useCamera } from "@/hooks/useCamera";
-import { visionApi } from "@/lib/api";
-import type { FaceRetrieveInfoResponse } from "@/types";
+import { studentsApi, visionApi } from "@/lib/api";
+import type { FaceRetrieveInfoResponse, StudentGPASummary } from "@/types";
 import {
   ScanFace, Loader2, CheckCircle2, XCircle, AlertTriangle, Play, Square,
   User, GraduationCap, Users, BookOpen, Clock, Brain,
-  Phone, Hash, Activity, ChevronDown, ChevronUp,
+  Phone, Hash, Activity, ChevronDown, ChevronUp, Award
 } from "lucide-react";
 
 type ScanStatus = "idle" | "scanning" | "identified" | "unknown" | "error";
@@ -96,13 +96,11 @@ function SectionCard({ title, icon: Icon, children, defaultOpen = true }: {
 }
 
 function ProfileField({ label, value }: { label: string; value?: string | number | boolean | null }) {
-  if (value === null || value === undefined || value === "") return null;
+  const displayVal = (value === null || value === undefined || value === "") ? "—" : value;
   return (
-    <div className="flex items-start justify-between gap-3 py-1.5 border-b border-slate-800/50 last:border-0">
-      <span className="text-xs text-slate-500 flex-shrink-0">{label}</span>
-      <span className="text-xs text-slate-200 font-medium text-right">
-        {typeof value === "boolean" ? (value ? "✓ Yes" : "✗ No") : String(value)}
-      </span>
+    <div className="flex items-center justify-between py-1.5 border-b border-slate-800/40 text-xs">
+      <span className="text-slate-500 font-medium">{label}</span>
+      <span className="text-slate-200 font-semibold text-right">{displayVal}</span>
     </div>
   );
 }
@@ -111,6 +109,7 @@ export default function FaceScannerPage() {
   const { videoRef, state: camState, startCamera, stopCamera, captureFrame } = useCamera();
   const [scanStatus, setScanStatus] = useState<ScanStatus>("idle");
   const [result, setResult] = useState<FaceRetrieveInfoResponse | null>(null);
+  const [gpaData, setGpaData] = useState<StudentGPASummary | null>(null);
   const [error, setError] = useState("");
   const [autoMode, setAutoMode] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -120,10 +119,17 @@ export default function FaceScannerPage() {
     if (!frame) return;
     setScanStatus("scanning");
     setError("");
+    setGpaData(null);
     try {
       const res = await visionApi.retrieveInfo(frame);
       setResult(res);
       setScanStatus(res.identified ? "identified" : "unknown");
+
+      if (res.identified && res.target_type === "student" && res.profile?.student_id) {
+        studentsApi.getGPA(res.profile.student_id as string)
+          .then((gpa) => setGpaData(gpa))
+          .catch(() => {});
+      }
     } catch (e: unknown) {
       setError((e as Error).message);
       setScanStatus("error");
@@ -308,6 +314,11 @@ export default function FaceScannerPage() {
                           : "bg-sky-500/15 text-sky-300 border-sky-500/30"}`}>
                         {result.target_type}
                       </span>
+                      {isStudent && gpaData && (
+                        <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold font-mono bg-amber-950/80 text-amber-300 border border-amber-600/50">
+                          CGPA: {gpaData.cgpa.toFixed(2)} / 4.00
+                        </span>
+                      )}
                     </div>
                     <p className="text-sm text-slate-400 mt-0.5">{profile.dept_code as string} Department</p>
 
@@ -333,16 +344,23 @@ export default function FaceScannerPage() {
                     <>
                       <ProfileField label="Student ID" value={profile.student_id as string} />
                       <ProfileField label="Full Name" value={profile.full_name as string} />
-                      <ProfileField label="Department" value={profile.dept_code as string} />
-                      <ProfileField label="Academic Year" value={`Year ${profile.academic_year}`} />
-                      <ProfileField label="Roll Number" value={profile.roll_number as string} />
-                      <ProfileField label="Phone" value={profile.phone as string} />
                       <ProfileField label="Email" value={profile.email as string} />
                       <ProfileField label="NRC Number" value={profile.nrc_number as string} />
                       <ProfileField label="Gender" value={profile.gender as string} />
+                      <ProfileField label="Date of Birth" value={profile.date_of_birth as string} />
                       <ProfileField label="Blood Type" value={profile.blood_type as string} />
+                      <ProfileField label="Address" value={profile.address as string} />
+                      <ProfileField label="Guardian Name" value={profile.guardian_name as string} />
+                      <ProfileField label="Guardian Phone" value={profile.guardian_phone as string} />
+                      <ProfileField label="Department" value={profile.dept_code as string} />
+                      <ProfileField label="Major" value={profile.major as string} />
+                      <ProfileField label="Academic Year" value={profile.academic_year !== undefined && profile.academic_year !== null ? `Year ${profile.academic_year}` : null} />
+                      <ProfileField label="Roll Number" value={profile.roll_number as string} />
+                      <ProfileField label="Section" value={profile.section as string} />
+                      <ProfileField label="Phone" value={profile.phone as string} />
+                      <ProfileField label="Admission Year" value={profile.admission_year as number} />
                       <ProfileField label="Status" value={profile.status as string} />
-                      <ProfileField label="Attendance Rate" value={`${profile.attendance_rate}%`} />
+                      <ProfileField label="Attendance Rate" value={profile.attendance_rate !== undefined && profile.attendance_rate !== null ? `${profile.attendance_rate}%` : null} />
                       <ProfileField label="Face Registered" value={profile.is_face_registered as boolean} />
                     </>
                   ) : (
@@ -351,13 +369,69 @@ export default function FaceScannerPage() {
                       <ProfileField label="Full Name" value={profile.full_name as string} />
                       <ProfileField label="Department" value={profile.dept_code as string} />
                       <ProfileField label="Designation" value={profile.designation as string} />
+                      <ProfileField label="Qualification" value={profile.qualification as string} />
+                      <ProfileField label="Specialization" value={profile.specialization as string} />
+                      <ProfileField label="Joining Date" value={profile.joining_date as string} />
                       <ProfileField label="Phone" value={profile.phone as string} />
                       <ProfileField label="Email" value={profile.email as string} />
+                      <ProfileField label="NRC Number" value={profile.nrc_number as string} />
+                      <ProfileField label="Gender" value={profile.gender as string} />
+                      <ProfileField label="Address" value={profile.address as string} />
+                      <ProfileField label="Status" value={profile.status as string} />
                       <ProfileField label="Face Registered" value={profile.is_face_registered as boolean} />
                     </>
                   )}
                 </div>
               </SectionCard>
+
+              {/* Academic Performance & GPA Breakdown Card */}
+              {isStudent && gpaData && (
+                <SectionCard title={`Academic Performance (CGPA: ${gpaData.cgpa.toFixed(2)})`} icon={Award}>
+                  <div className="mt-2 space-y-3">
+                    <div className="flex items-center justify-between text-xs p-3 bg-slate-900/80 border border-slate-800 rounded-xl">
+                      <div>
+                        <span className="text-slate-400 font-medium">Cumulative GPA:</span>
+                        <span className="ml-2 font-mono font-bold text-amber-400 text-sm">{gpaData.cgpa.toFixed(2)} / 4.00</span>
+                      </div>
+                      <div className="text-slate-400">
+                        <span>Earned Credits: </span>
+                        <span className="font-mono font-bold text-slate-200">{gpaData.total_earned_credits} cr</span>
+                      </div>
+                    </div>
+
+                    {gpaData.semesters.map((sem) => (
+                      <div key={sem.semester_id} className="p-3 bg-slate-900/60 border border-slate-800/80 rounded-xl space-y-2">
+                        <div className="flex items-center justify-between text-xs border-b border-slate-800 pb-1.5">
+                          <span className="font-bold text-white">{sem.academic_year} ({sem.term})</span>
+                          <span className="px-2 py-0.5 rounded bg-violet-950 text-violet-300 border border-violet-800/60 font-mono font-bold text-xs">
+                            GPA: {sem.gpa.toFixed(2)}
+                          </span>
+                        </div>
+                        <div className="divide-y divide-slate-800/40 text-xs">
+                          {sem.courses.map((c) => (
+                            <div key={c.enrollment_id} className="py-1 flex items-center justify-between">
+                              <div>
+                                <span className="font-mono text-cyan-400 font-bold mr-2">{c.course_code}</span>
+                                <span className="text-slate-300 font-medium">{c.course_name}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-[11px] text-slate-400 font-mono">{c.credit_hours} cr</span>
+                                {c.grade ? (
+                                  <span className="px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-300 border border-emerald-700/60 font-bold font-mono text-[10px]">
+                                    {c.grade} ({c.grade_point?.toFixed(1) ?? "—"})
+                                  </span>
+                                ) : (
+                                  <span className="text-slate-500 italic text-[10px]">Ungraded</span>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </SectionCard>
+              )}
 
               {/* Enrolled Courses */}
               {result.courses && result.courses.length > 0 && (

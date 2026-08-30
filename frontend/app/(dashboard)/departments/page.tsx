@@ -5,9 +5,13 @@ import { departmentsApi, teachersApi } from "@/lib/api";
 import type { Department, Teacher } from "@/types";
 import { DepartmentFormDialog } from "@/components/departments/DepartmentFormDialog";
 import { Plus, Search, X, Loader2, Building2, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 export default function DepartmentsPage() {
+  const { user } = useAuth();
+  const isTeacher = user?.role === "TEACHER";
+
   const [data, setData] = useState<{ total: number; items: Department[] } | null>(null);
   const [teachersMap, setTeachersMap] = useState<Record<string, Teacher>>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -82,17 +86,26 @@ export default function DepartmentsPage() {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Building2 className="w-6 h-6 text-sky-400" /> Departments
-          </h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <Building2 className="w-6 h-6 text-sky-400" /> Departments
+            </h2>
+            {isTeacher && (
+              <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-semibold">
+                View Only Mode
+              </span>
+            )}
+          </div>
           <p className="text-sm text-slate-400 mt-0.5">{data?.total ?? 0} total academic departments</p>
         </div>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-sm font-medium transition-colors shadow-lg shadow-sky-900/30"
-        >
-          <Plus className="w-4 h-4" /> Add Department
-        </button>
+        {!isTeacher && (
+          <button
+            onClick={() => setShowCreate(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-sm font-medium transition-colors shadow-lg shadow-sky-900/30"
+          >
+            <Plus className="w-4 h-4" /> Add Department
+          </button>
+        )}
       </div>
 
       {/* Search bar */}
@@ -123,7 +136,10 @@ export default function DepartmentsPage() {
           <table className="w-full text-sm">
             <thead className="border-b border-slate-800 bg-slate-950/50">
               <tr className="text-left text-slate-500 text-xs uppercase tracking-wider">
-                {["Dept Code", "Department Name", "Location", "Head of Department", "Actions"].map((h) => (
+                {(isTeacher
+                  ? ["Dept Code", "Department Name", "Location", "Head of Department"]
+                  : ["Dept Code", "Department Name", "Location", "Head of Department", "Actions"]
+                ).map((h) => (
                   <th key={h} className="px-4 py-3 font-medium">{h}</th>
                 ))}
               </tr>
@@ -131,9 +147,9 @@ export default function DepartmentsPage() {
             <tbody className="divide-y divide-slate-800/60">
               {data?.items.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-12 text-slate-500">
+                  <td colSpan={isTeacher ? 4 : 5} className="text-center py-12 text-slate-500">
                     No departments found.{" "}
-                    <button onClick={() => setShowCreate(true)} className="text-sky-400 hover:underline">Add one?</button>
+                    {!isTeacher && <button onClick={() => setShowCreate(true)} className="text-sky-400 hover:underline">Add one?</button>}
                   </td>
                 </tr>
               ) : data?.items.map((d) => {
@@ -160,24 +176,26 @@ export default function DepartmentsPage() {
                         <span className="text-slate-500 text-xs italic">Unassigned</span>
                       )}
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setEditDept(d)}
-                          className="p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-sky-400 transition-colors"
-                          title="Edit Department"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(d)}
-                          className="p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-red-400 transition-colors"
-                          title="Delete Department"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
+                    {!isTeacher && (
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setEditDept(d)}
+                            className="p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-sky-400 transition-colors"
+                            title="Edit Department"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(d)}
+                            className="p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-red-400 transition-colors"
+                            title="Delete Department"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 );
               })}

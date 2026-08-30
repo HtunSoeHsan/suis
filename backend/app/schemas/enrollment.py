@@ -8,11 +8,19 @@ class EnrollmentBase(BaseModel):
     student_id: str = Field(..., max_length=50, examples=["STU-2026-1001"])
     course_code: str = Field(..., max_length=20, examples=["CS-401"])
     semester_id: int = Field(..., examples=[1])
+    marks: Optional[float] = Field(None, ge=0, le=100, examples=[85.5])
+    grade: Optional[str] = Field(None, max_length=5, examples=["A"])
+    grade_point: Optional[float] = Field(None, ge=0, le=4.0, examples=[4.0])
 
 
 class EnrollmentCreate(EnrollmentBase):
     promote_academic_year: Optional[int] = Field(None, ge=1, le=5, description="Optionally update student's academic year upon enrollment")
     update_major: Optional[str] = Field(None, max_length=20, description="Optionally update student's major upon enrollment (e.g. CS, CT)")
+
+
+class EnrollmentGradeUpdate(BaseModel):
+    marks: Optional[float] = Field(None, ge=0, le=100, examples=[85.5])
+    grade: Optional[str] = Field(None, max_length=5, examples=["A"])
 
 
 class EnrollmentOut(EnrollmentBase):

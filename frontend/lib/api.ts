@@ -110,6 +110,7 @@ export const studentsApi = {
       method: "POST",
       body: JSON.stringify({ image_base64 }),
     }),
+  getGPA: (id: string) => apiFetch<import("@/types").StudentGPASummary>(`/api/students/${id}/gpa`),
 };
 
 // ─── Teachers ─────────────────────────────────────────────────────────────────
@@ -256,6 +257,11 @@ export const enrollmentsApi = {
     }),
   delete: (id: number) =>
     apiFetch<void>(`/api/enrollments/${id}`, { method: "DELETE" }),
+  updateGrade: (id: number, data: { marks?: number; grade?: string }) =>
+    apiFetch<import("@/types").Enrollment>(`/api/enrollments/${id}/grade`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
 };
 
 // ─── Classrooms ───────────────────────────────────────────────────────────────
@@ -352,6 +358,7 @@ export const settingsApi = {
     roll_padding: number;
     teacher_prefix?: string;
     teacher_padding?: number;
+    teacher_include_dept?: boolean;
   }) =>
     apiFetch<import("@/types").IDConfig>("/api/settings/id-format", {
       method: "POST",

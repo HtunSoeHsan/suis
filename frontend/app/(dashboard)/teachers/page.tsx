@@ -13,6 +13,8 @@ import { TeacherDetailDialog } from "@/components/teachers/TeacherDetailDialog";
 import { useTeachers } from "@/hooks/useTeachers";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
+import { useAuth } from "@/context/AuthContext";
+
 const STATUS_COLORS: Record<string, string> = {
   Active: "bg-emerald-900/30 text-emerald-400 border-emerald-800/50",
   "On Leave": "bg-amber-900/30 text-amber-400 border-amber-800/50",
@@ -21,6 +23,9 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function TeachersPage() {
+  const { user } = useAuth();
+  const isTeacher = user?.role === "TEACHER";
+
   const [search, setSearch] = useState("");
   const [filterDept, setFilterDept] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
@@ -86,15 +91,24 @@ export default function TeachersPage() {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white">Faculty & Teachers</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-bold text-white">Faculty & Teachers</h2>
+            {isTeacher && (
+              <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-semibold">
+                View Only Mode
+              </span>
+            )}
+          </div>
           <p className="text-sm text-slate-400 mt-0.5">{data?.total ?? 0} total faculty members</p>
         </div>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition-colors shadow-lg shadow-indigo-900/30"
-        >
-          <Plus className="w-4 h-4" /> Add Teacher
-        </button>
+        {!isTeacher && (
+          <button
+            onClick={() => setShowCreate(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition-colors shadow-lg shadow-indigo-900/30"
+          >
+            <Plus className="w-4 h-4" /> Add Teacher
+          </button>
+        )}
       </div>
 
       {/* Filters row */}
@@ -243,27 +257,31 @@ export default function TeachersPage() {
                           >
                             <Eye className="w-4 h-4" />
                           </button>
-                          <button
-                            onClick={() => setEnrollTarget(t)}
-                            title="Enroll / Re-enroll face"
-                            className="p-1.5 rounded-md hover:bg-emerald-900/30 hover:text-emerald-400 text-slate-500 transition-colors"
-                          >
-                            <Camera className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => setEditTarget(t)}
-                            title="Edit"
-                            className="p-1.5 rounded-md hover:bg-indigo-900/30 hover:text-indigo-400 text-slate-500 transition-colors"
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(t)}
-                            title="Delete"
-                            className="p-1.5 rounded-md hover:bg-red-900/30 hover:text-red-400 text-slate-500 transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          {!isTeacher && (
+                            <>
+                              <button
+                                onClick={() => setEnrollTarget(t)}
+                                title="Enroll / Re-enroll face"
+                                className="p-1.5 rounded-md hover:bg-emerald-900/30 hover:text-emerald-400 text-slate-500 transition-colors"
+                              >
+                                <Camera className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => setEditTarget(t)}
+                                title="Edit"
+                                className="p-1.5 rounded-md hover:bg-indigo-900/30 hover:text-indigo-400 text-slate-500 transition-colors"
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(t)}
+                                title="Delete"
+                                className="p-1.5 rounded-md hover:bg-red-900/30 hover:text-red-400 text-slate-500 transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>

@@ -5,9 +5,13 @@ import { coursesApi, teachersApi, departmentsApi, semestersApi } from "@/lib/api
 import type { Course, Teacher, Department, Semester } from "@/types";
 import { CourseFormDialog } from "@/components/courses/CourseFormDialog";
 import { Plus, Search, X, Loader2, BookOpen, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 
 export default function CoursesPage() {
+  const { user } = useAuth();
+  const isTeacher = user?.role === "TEACHER";
+
   const [data, setData] = useState<{ total: number; items: Course[] } | null>(null);
   const [teachersMap, setTeachersMap] = useState<Record<string, Teacher>>({});
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -69,6 +73,7 @@ export default function CoursesPage() {
           limit,
           ...(filterDept ? { dept_code: filterDept } : {}),
           ...(filterSemester ? { semester_id: Number(filterSemester) } : {}),
+          ...(isTeacher && user?.teacher_id ? { teacher_id: user.teacher_id } : {}),
         }),
         teachersApi.list({ limit: 100 }),
       ]);
@@ -81,7 +86,7 @@ export default function CoursesPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [search, filterDept, filterSemester, page]);
+  }, [search, filterDept, filterSemester, page, isTeacher, user?.teacher_id]);
 
   useEffect(() => {
     fetchCourses();
@@ -114,17 +119,26 @@ export default function CoursesPage() {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <BookOpen className="w-6 h-6 text-amber-400" /> Courses & Curriculum
-          </h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <BookOpen className="w-6 h-6 text-amber-400" /> Courses & Curriculum
+            </h2>
+            {isTeacher && (
+              <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-semibold">
+                View Only Mode
+              </span>
+            )}
+          </div>
           <p className="text-sm text-slate-400 mt-0.5">{data?.total ?? 0} total curriculum courses</p>
         </div>
-        <button
-          onClick={() => setShowCreate(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-colors shadow-lg shadow-amber-900/30"
-        >
-          <Plus className="w-4 h-4" /> Add Course
-        </button>
+        {!isTeacher && (
+          <button
+            onClick={() => setShowCreate(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-colors shadow-lg shadow-amber-900/30"
+          >
+            <Plus className="w-4 h-4" /> Add Course
+          </button>
+        )}
       </div>
 
       {/* Filters row */}
@@ -192,7 +206,10 @@ export default function CoursesPage() {
           <table className="w-full text-sm">
             <thead className="border-b border-slate-800 bg-slate-950/50">
               <tr className="text-left text-slate-500 text-xs uppercase tracking-wider">
-                {["Course Code", "Course Name", "Semester", "Department", "Credits", "Assigned Teacher", "Actions"].map((h) => (
+                {(isTeacher
+                  ? ["Course Code", "Course Name", "Semester", "Department", "Credits", "Assigned Teacher"]
+                  : ["Course Code", "Course Name", "Semester", "Department", "Credits", "Assigned Teacher", "Actions"]
+                ).map((h) => (
                   <th key={h} className="px-4 py-3 font-medium">{h}</th>
                 ))}
               </tr>
@@ -200,9 +217,9 @@ export default function CoursesPage() {
             <tbody className="divide-y divide-slate-800/60">
               {data?.items.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-12 text-slate-500">
+                  <td colSpan={isTeacher ? 6 : 7} className="text-center py-12 text-slate-500">
                     No courses found.{" "}
-                    <button onClick={() => setShowCreate(true)} className="text-amber-400 hover:underline">Add one?</button>
+                    {!isTeacher && <button onClick={() => setShowCreate(true)} className="text-amber-400 hover:underline">Add one?</button>}
                   </td>
                 </tr>
               ) : data?.items.map((c) => {
@@ -248,24 +265,26 @@ export default function CoursesPage() {
                         <span className="text-slate-500 text-xs italic">Unassigned</span>
                       )}
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setEditCourse(c)}
-                          className="p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-amber-400 transition-colors"
-                          title="Edit Course"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(c)}
-                          className="p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-red-400 transition-colors"
-                          title="Delete Course"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
+                    {!isTeacher && (
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setEditCourse(c)}
+                            className="p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-amber-400 transition-colors"
+                            title="Edit Course"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(c)}
+                            className="p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-red-400 transition-colors"
+                            title="Delete Course"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 );
               })}

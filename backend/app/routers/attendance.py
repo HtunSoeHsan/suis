@@ -10,6 +10,7 @@ router = APIRouter(prefix="/api/attendance", tags=["Attendance"])
 
 
 from app.models.student import Student
+from app.models.course import Course
 from sqlalchemy import or_
 
 @router.get("", response_model=AttendanceLogListOut)
@@ -17,6 +18,7 @@ async def list_attendance(
     search: str | None = Query(None, description="Search by student name, ID, or roll number"),
     student_id: str | None = Query(None, description="Filter by student ID"),
     course_code: str | None = Query(None, description="Filter by course code"),
+    teacher_id: str | None = Query(None, description="Filter by assigned teacher ID"),
     status: str | None = Query(None, description="Filter by status: PRESENT, LATE, ABSENT"),
     date_from: date | None = None,
     date_to: date | None = None,
@@ -38,6 +40,9 @@ async def list_attendance(
 
     if course_code and isinstance(course_code, str):
         query = query.where(AttendanceLog.course_code == course_code)
+    if teacher_id and isinstance(teacher_id, str):
+        teacher_courses = select(Course.course_code).where(Course.teacher_id == teacher_id)
+        query = query.where(AttendanceLog.course_code.in_(teacher_courses))
     if status and isinstance(status, str):
         query = query.where(AttendanceLog.status == status.upper())
     if date_from:

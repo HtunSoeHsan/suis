@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { Student, Enrollment, Course } from "@/types";
-import { enrollmentsApi, coursesApi } from "@/lib/api";
+import type { Student, Enrollment, Course, StudentGPASummary } from "@/types";
+import { enrollmentsApi, coursesApi, studentsApi } from "@/lib/api";
 import {
   X, GraduationCap, User, Phone, BookOpen, Calendar,
   CheckCircle2, Clock, Pencil, Camera, Mail, Hash, MapPin,
-  HeartPulse, Shield, FileText, Activity
+  HeartPulse, Shield, FileText, Activity, Award, TrendingUp
 } from "lucide-react";
+
+import { useAuth } from "@/context/AuthContext";
 
 interface Props {
   student: Student;
@@ -24,20 +26,26 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export function StudentDetailDialog({ student, onClose, onEdit, onFaceEnroll }: Props) {
+  const { user } = useAuth();
+  const isTeacher = user?.role === "TEACHER";
+
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [courses, setCourses] = useState<Record<string, Course>>({});
+  const [gpaData, setGpaData] = useState<StudentGPASummary | null>(null);
   const [loadingEnrollments, setLoadingEnrollments] = useState(true);
 
   useEffect(() => {
     Promise.all([
       enrollmentsApi.list({ student_id: student.student_id, limit: 100 }),
       coursesApi.list({ limit: 100 }),
+      studentsApi.getGPA(student.student_id).catch(() => null),
     ])
-      .then(([enrRes, crsRes]) => {
+      .then(([enrRes, crsRes, gpaRes]) => {
         setEnrollments(enrRes.items);
         const cMap: Record<string, Course> = {};
         crsRes.items.forEach((c) => { cMap[c.course_code] = c; });
         setCourses(cMap);
+        if (gpaRes) setGpaData(gpaRes);
       })
       .catch(() => {})
       .finally(() => setLoadingEnrollments(false));
@@ -194,7 +202,75 @@ export function StudentDetailDialog({ student, onClose, onEdit, onFaceEnroll }: 
             )}
           </div>
 
-          {/* Guardian & Additional Information */}
+          {/* Academic Performance & Semester GPA Breakdown */}
+          <div className="space-y-3 pt-3 border-t border-slate-800">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                <Award className="w-4 h-4 text-amber-400" /> Academic Performance &amp; Semester GPA
+              </h3>
+              {gpaData && (
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 rounded-full bg-amber-950/80 border border-amber-600/50 text-amber-300 text-xs font-bold font-mono">
+                    CGPA: {gpaData.cgpa.toFixed(2)} / 4.00
+                  </span>
+                  <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 text-[11px] font-medium">
+                    {gpaData.total_earned_credits} Credits Earned
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {gpaData && gpaData.semesters.length > 0 ? (
+              <div className="space-y-3">
+                {gpaData.semesters.map((sem) => (
+                  <div key={sem.semester_id} className="bg-slate-950/80 border border-slate-800 rounded-xl overflow-hidden p-3.5 space-y-2">
+                    <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-white">{sem.academic_year} — {sem.term}</span>
+                        {sem.is_active && (
+                          <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-300 border border-emerald-700/60 font-semibold">ACTIVE</span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-slate-400 font-mono">{sem.total_credits} Credits</span>
+                        <span className="px-2 py-0.5 rounded bg-violet-950 text-violet-300 border border-violet-800/60 font-mono text-xs font-bold">
+                          GPA: {sem.gpa.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="divide-y divide-slate-800/40">
+                      {sem.courses.map((c) => (
+                        <div key={c.enrollment_id} className="py-1.5 flex items-center justify-between text-xs">
+                          <div>
+                            <span className="font-mono text-cyan-400 font-bold mr-2">{c.course_code}</span>
+                            <span className="text-slate-300 font-medium">{c.course_name}</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="text-[11px] text-slate-400 font-mono">{c.credit_hours} cr</span>
+                            {c.marks !== null && c.marks !== undefined && (
+                              <span className="text-[11px] text-slate-400 font-mono">{c.marks}%</span>
+                            )}
+                            {c.grade ? (
+                              <span className="px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-700/60 text-emerald-300 font-bold font-mono text-[11px]">
+                                {c.grade} ({c.grade_point?.toFixed(1) ?? "—"})
+                              </span>
+                            ) : (
+                              <span className="text-slate-500 italic text-[11px]">Ungraded</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-4 bg-slate-950/60 border border-slate-800 rounded-xl text-center text-slate-500 text-xs">
+                No semester GPA records calculated yet.
+              </div>
+            )}
+          </div>
           <div className="space-y-3 pt-3 border-t border-slate-800">
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
               <Shield className="w-4 h-4 text-violet-400" /> Guardian &amp; Additional Information
@@ -235,25 +311,27 @@ export function StudentDetailDialog({ student, onClose, onEdit, onFaceEnroll }: 
             Close
           </button>
 
-          <div className="flex items-center gap-2">
-            {onFaceEnroll && (
-              <button
-                onClick={() => { onClose(); onFaceEnroll(); }}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600/20 border border-emerald-600/40 text-emerald-300 text-sm font-semibold hover:bg-emerald-600/30 transition-colors"
-              >
-                <Camera className="w-4 h-4" /> Face Biometrics
-              </button>
-            )}
+          {!isTeacher && (
+            <div className="flex items-center gap-2">
+              {onFaceEnroll && (
+                <button
+                  onClick={() => { onClose(); onFaceEnroll(); }}
+                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600/20 border border-emerald-600/40 text-emerald-300 text-sm font-semibold hover:bg-emerald-600/30 transition-colors"
+                >
+                  <Camera className="w-4 h-4" /> Face Biometrics
+                </button>
+              )}
 
-            {onEdit && (
-              <button
-                onClick={() => { onClose(); onEdit(); }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition-colors shadow-lg shadow-violet-900/30"
-              >
-                <Pencil className="w-4 h-4" /> Edit Profile
-              </button>
-            )}
-          </div>
+              {onEdit && (
+                <button
+                  onClick={() => { onClose(); onEdit(); }}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold transition-colors shadow-lg shadow-violet-900/30"
+                >
+                  <Pencil className="w-4 h-4" /> Edit Profile
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

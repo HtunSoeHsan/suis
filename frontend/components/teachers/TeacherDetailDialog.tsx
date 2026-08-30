@@ -8,6 +8,8 @@ import {
   CheckCircle2, Clock, Pencil, Camera, Briefcase, Award, Calendar, Shield
 } from "lucide-react";
 
+import { useAuth } from "@/context/AuthContext";
+
 interface Props {
   teacher: Teacher;
   onClose: () => void;
@@ -23,6 +25,9 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export function TeacherDetailDialog({ teacher, onClose, onEdit, onFaceEnroll }: Props) {
+  const { user } = useAuth();
+  const isTeacher = user?.role === "TEACHER";
+
   const [assignedCourses, setAssignedCourses] = useState<Course[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
 
@@ -203,25 +208,27 @@ export function TeacherDetailDialog({ teacher, onClose, onEdit, onFaceEnroll }: 
             Close
           </button>
 
-          <div className="flex items-center gap-2">
-            {onFaceEnroll && (
-              <button
-                onClick={() => { onClose(); onFaceEnroll(); }}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600/20 border border-emerald-600/40 text-emerald-300 text-sm font-semibold hover:bg-emerald-600/30 transition-colors"
-              >
-                <Camera className="w-4 h-4" /> Face Biometrics
-              </button>
-            )}
+          {!isTeacher && (
+            <div className="flex items-center gap-2">
+              {onFaceEnroll && (
+                <button
+                  onClick={() => { onClose(); onFaceEnroll(); }}
+                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-600/20 border border-emerald-600/40 text-emerald-300 text-sm font-semibold hover:bg-emerald-600/30 transition-colors"
+                >
+                  <Camera className="w-4 h-4" /> Face Biometrics
+                </button>
+              )}
 
-            {onEdit && (
-              <button
-                onClick={() => { onClose(); onEdit(); }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold transition-colors shadow-lg shadow-sky-900/30"
-              >
-                <Pencil className="w-4 h-4" /> Edit Profile
-              </button>
-            )}
-          </div>
+              {onEdit && (
+                <button
+                  onClick={() => { onClose(); onEdit(); }}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold transition-colors shadow-lg shadow-sky-900/30"
+                >
+                  <Pencil className="w-4 h-4" /> Edit Profile
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

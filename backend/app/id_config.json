@@ -1,8 +1,10 @@
 {
-  "student_id_template": "STU-{YEAR}-{DEPT}-{SEQ:04d}",
-  "prefix": "STU",
+  "student_id_template": "{PREFIX}-{SEQ:04d}",
+  "prefix": "STU-2026",
   "seq_padding": 4,
   "roll_prefix": "MUB-",
   "roll_padding": 4,
-  "roll_number_template": "{YEAR_SHORT}{DEPT}-{SEQ:03d}"
+  "teacher_prefix": "TCH-2026",
+  "teacher_padding": 3,
+  "teacher_include_dept": false
 }

@@ -72,6 +72,7 @@ async def delete_academic_timetable(timetable_id: int, db: AsyncSession = Depend
 async def list_exam_timetables(
     semester_id: int | None = Query(None),
     course_code: str | None = Query(None),
+    supervisor_teacher_id: str | None = Query(None),
     room_id: str | None = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
@@ -83,6 +84,8 @@ async def list_exam_timetables(
         filters.append(ExamTimetable.semester_id == semester_id)
     if course_code:
         filters.append(ExamTimetable.course_code == course_code)
+    if supervisor_teacher_id:
+        filters.append(ExamTimetable.supervisor_teacher_id == supervisor_teacher_id)
     if room_id:
         filters.append(ExamTimetable.room_id == room_id)
 
