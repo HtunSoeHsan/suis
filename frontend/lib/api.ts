@@ -25,7 +25,15 @@ async function apiFetch<T>(
     if (text) {
       try {
         const errJson = JSON.parse(text);
-        errDetail = errJson.detail || errJson.message || errDetail;
+        let rawDetail = errJson.detail ?? errJson.message ?? errDetail;
+        if (typeof rawDetail === "object" && rawDetail !== null) {
+          if (Array.isArray(rawDetail)) {
+            rawDetail = rawDetail.map((d: Record<string, unknown>) => String(d.msg || JSON.stringify(d))).join("; ");
+          } else {
+            rawDetail = String((rawDetail as Record<string, unknown>).msg || JSON.stringify(rawDetail));
+          }
+        }
+        errDetail = String(rawDetail);
       } catch {
         errDetail = text;
       }

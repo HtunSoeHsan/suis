@@ -95,9 +95,9 @@ export default function EnrollmentsPage() {
 
       const [enrRes, stRes, crsRes, semRes] = await Promise.all([
         enrollmentsApi.list(params),
-        studentsApi.list({ limit: 100 }),
-        coursesApi.list({ limit: 100 }),
-        semestersApi.list({ limit: 100 }),
+        studentsApi.list({ limit: 2000 }),
+        coursesApi.list({ limit: 1000 }),
+        semestersApi.list({ limit: 500 }),
       ]);
 
       setData(enrRes);

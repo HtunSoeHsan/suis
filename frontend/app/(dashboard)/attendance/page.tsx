@@ -64,9 +64,9 @@ export default function AttendancePage() {
 
       const [attRes, stRes, crsRes] = await Promise.all([
         attendanceApi.list(params),
-        studentsApi.list({ limit: 200 }),
+        studentsApi.list({ limit: 2000 }),
         coursesApi.list({
-          limit: 100,
+          limit: 1000,
           ...(isTeacher && user?.teacher_id ? { teacher_id: user.teacher_id } : {}),
         }),
       ]);
