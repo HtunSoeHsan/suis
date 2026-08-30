@@ -46,7 +46,7 @@ async def list_students(
     is_face_registered: bool | None = None,
     unlinked: bool = Query(False, description="If true, only return students without a linked user account"),
     skip: int = Query(0, ge=0),
-    limit: int = Query(20, ge=1, le=500),
+    limit: int = Query(20, ge=1, le=5000),
     db: AsyncSession = Depends(get_db),
 ):
     query = select(Student)

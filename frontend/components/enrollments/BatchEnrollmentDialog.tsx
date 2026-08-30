@@ -36,22 +36,29 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
   const [resultMsg, setResultMsg] = useState("");
 
   useEffect(() => {
-    Promise.all([
+    Promise.allSettled([
       departmentsApi.list({ limit: 100 }),
       semestersApi.list({ limit: 100 }),
       coursesApi.list({ limit: 500 }),
-      studentsApi.list({ limit: 1000 }),
+      studentsApi.list({ limit: 500 }),
     ])
       .then(([dRes, semRes, cRes, sRes]) => {
-        setDepartments(dRes.items);
-        setSemesters(semRes.items);
-        setAllCourses(cRes.items);
-        setAllStudents(sRes.items);
+        if (dRes.status === "fulfilled") setDepartments(dRes.value.items);
+        if (semRes.status === "fulfilled") {
+          setSemesters(semRes.value.items);
+          const activeSem = semRes.value.items.find((s) => s.is_active) ?? semRes.value.items[0];
+          if (activeSem) setSemesterId(activeSem.semester_id.toString());
+        }
+        if (cRes.status === "fulfilled") setAllCourses(cRes.value.items);
+        if (sRes.status === "fulfilled") setAllStudents(sRes.value.items);
 
-        const activeSem = semRes.items.find((s) => s.is_active) ?? semRes.items[0];
-        if (activeSem) setSemesterId(activeSem.semester_id.toString());
+        const errors = [dRes, semRes, cRes, sRes]
+          .filter((r): r is PromiseRejectedResult => r.status === "rejected")
+          .map((r) => (r.reason as Error)?.message || "Data loading issue");
+        if (errors.length > 0) {
+          setError(errors.join("; "));
+        }
       })
-      .catch((e: unknown) => setError((e as Error).message))
       .finally(() => setLoading(false));
   }, []);
 

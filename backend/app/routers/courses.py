@@ -16,7 +16,7 @@ async def list_courses(
     major: str | None = Query(None, description="Filter by major"),
     teacher_id: str | None = Query(None, description="Filter by assigned teacher ID"),
     skip: int = Query(0, ge=0),
-    limit: int = Query(50, ge=1, le=200),
+    limit: int = Query(50, ge=1, le=5000),
     db: AsyncSession = Depends(get_db),
 ):
     query = select(Course)
