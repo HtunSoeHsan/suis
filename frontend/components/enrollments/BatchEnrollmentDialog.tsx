@@ -39,8 +39,8 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
     Promise.all([
       departmentsApi.list({ limit: 100 }),
       semestersApi.list({ limit: 100 }),
-      coursesApi.list({ limit: 200 }),
-      studentsApi.list({ limit: 200 }),
+      coursesApi.list({ limit: 500 }),
+      studentsApi.list({ limit: 1000 }),
     ])
       .then(([dRes, semRes, cRes, sRes]) => {
         setDepartments(dRes.items);
@@ -77,9 +77,17 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
   });
 
   const filteredStudents = allStudents.filter((s) => {
-    const sMajor = s.major ?? s.dept_code;
-    const matchMajor = studentMajorFilter === "ALL" || sMajor === studentMajorFilter;
-    const matchYear = studentYearFilter === "ALL" || s.academic_year === studentYearFilter;
+    const sMajor = (s.major ?? s.dept_code ?? "").toUpperCase();
+    const filterMajor = studentMajorFilter.toUpperCase();
+    const matchMajor =
+      studentMajorFilter === "ALL" ||
+      sMajor === filterMajor ||
+      sMajor.includes(filterMajor);
+
+    const matchYear =
+      studentYearFilter === "ALL" ||
+      String(s.academic_year) === String(studentYearFilter);
+
     return matchMajor && matchYear;
   });
 
