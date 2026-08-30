@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, update, or_
+from sqlalchemy import select, func, update, or_, Integer
 from app.database import get_db
 from app.models.semester import Semester
 from app.schemas.semester import SemesterCreate, SemesterUpdate, SemesterOut, SemesterListOut
@@ -48,25 +48,31 @@ async def list_semesters(
     total_result = await db.execute(select(func.count()).select_from(query.subquery()))
     total = total_result.scalar_one()
 
-    # Dynamic sorting
+    # Dynamic sorting with natural numeric term extraction
     is_desc = (order or "desc").lower() == "desc"
-    field_map = {
-        "academic_year": Semester.academic_year,
-        "term": Semester.term,
-        "start_date": Semester.start_date,
-        "is_active": Semester.is_active,
-        "semester_id": Semester.semester_id,
-    }
-    col = field_map.get((sort_by or "academic_year").lower(), Semester.academic_year)
-    
-    if is_desc:
-        sort_clause = col.desc()
-    else:
-        sort_clause = col.asc()
+    term_num = func.cast(func.nullif(func.regexp_replace(Semester.term, r'[^0-9]', '', 'g'), ''), Integer)
 
-    result = await db.execute(
-        query.order_by(sort_clause, Semester.term.asc() if is_desc else Semester.term.desc()).offset(skip).limit(limit)
-    )
+    sort_field = (sort_by or "academic_year").lower()
+
+    if sort_field == "term":
+        primary_sort = term_num.desc() if is_desc else term_num.asc()
+        secondary_sort = Semester.academic_year.desc()
+        query = query.order_by(primary_sort, secondary_sort)
+    elif sort_field == "academic_year":
+        primary_sort = Semester.academic_year.desc() if is_desc else Semester.academic_year.asc()
+        secondary_sort = term_num.asc()
+        query = query.order_by(primary_sort, secondary_sort)
+    else:
+        field_map = {
+            "start_date": Semester.start_date,
+            "is_active": Semester.is_active,
+            "semester_id": Semester.semester_id,
+        }
+        col = field_map.get(sort_field, Semester.academic_year)
+        primary_sort = col.desc() if is_desc else col.asc()
+        query = query.order_by(primary_sort, Semester.academic_year.desc(), term_num.asc())
+
+    result = await db.execute(query.offset(skip).limit(limit))
     items = result.scalars().all()
 
     return SemesterListOut(total=total, items=list(items))
