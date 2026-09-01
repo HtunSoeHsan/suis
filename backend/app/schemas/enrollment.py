@@ -19,8 +19,7 @@ class EnrollmentCreate(EnrollmentBase):
 
 
 class EnrollmentGradeUpdate(BaseModel):
-    marks: Optional[float] = Field(None, ge=0, le=100, examples=[85.5])
-    grade: Optional[str] = Field(None, max_length=5, examples=["A"])
+    grade_point: Optional[float] = Field(None, ge=0, le=4.0, examples=[3.7])
 
 
 class EnrollmentOut(EnrollmentBase):

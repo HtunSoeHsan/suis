@@ -5,7 +5,7 @@ import { enrollmentsApi, studentsApi, coursesApi, semestersApi } from "@/lib/api
 import type { Enrollment, Student, Course, Semester } from "@/types";
 import { EnrollmentFormDialog } from "@/components/enrollments/EnrollmentFormDialog";
 import { BatchEnrollmentDialog } from "@/components/enrollments/BatchEnrollmentDialog";
-import { Plus, Search, X, Loader2, UserCheck, Trash2, Layers, ChevronLeft, ChevronRight, ChevronDown, Pencil } from "lucide-react";
+import { Plus, Search, X, Loader2, UserCheck, Trash2, Layers, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { useAuth } from "@/context/AuthContext";
 
@@ -31,11 +31,6 @@ export default function EnrollmentsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [showBatch, setShowBatch] = useState(false);
 
-  const [gradeModalEnr, setGradeModalEnr] = useState<Enrollment | null>(null);
-  const [gradeMarksInput, setGradeMarksInput] = useState<string>("");
-  const [gradeInput, setGradeInput] = useState<string>("");
-  const [isSavingGrade, setIsSavingGrade] = useState(false);
-
   const [modalConfig, setModalConfig] = useState<{
     isOpen: boolean;
     title?: string;
@@ -45,25 +40,6 @@ export default function EnrollmentsPage() {
     variant?: "danger" | "warning" | "info";
     isLoading?: boolean;
   }>({ isOpen: false, message: "" });
-
-  const handleSaveGrade = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!gradeModalEnr) return;
-    setIsSavingGrade(true);
-    try {
-      const marksVal = gradeMarksInput.trim() !== "" ? parseFloat(gradeMarksInput) : undefined;
-      await enrollmentsApi.updateGrade(gradeModalEnr.enrollment_id, {
-        marks: marksVal,
-        grade: gradeInput.trim() || undefined,
-      });
-      setGradeModalEnr(null);
-      fetchEnrollments();
-    } catch (err: unknown) {
-      showAlert((err as Error).message, "Grade Update Failed");
-    } finally {
-      setIsSavingGrade(false);
-    }
-  };
 
   const limit = 10;
 
@@ -247,8 +223,8 @@ export default function EnrollmentsPage() {
             <thead className="border-b border-slate-800 bg-slate-950/50">
               <tr className="text-left text-slate-500 text-xs uppercase tracking-wider">
                 {(isTeacher
-                  ? ["Student Profile", "Enrolled Course", "Academic Term", "Marks / Grade", "Enrolled Date"]
-                  : ["Student Profile", "Enrolled Course", "Academic Term", "Marks / Grade", "Enrolled Date", "Actions"]
+                  ? ["Student Profile", "Enrolled Course", "Academic Term", "Enrolled Date"]
+                  : ["Student Profile", "Enrolled Course", "Academic Term", "Enrolled Date", "Actions"]
                 ).map((h) => (
                   <th key={h} className="px-4 py-3 font-medium">{h}</th>
                 ))}
@@ -257,7 +233,7 @@ export default function EnrollmentsPage() {
             <tbody className="divide-y divide-slate-800/60">
               {data?.items.length === 0 ? (
                 <tr>
-                  <td colSpan={isTeacher ? 5 : 6} className="text-center py-12 text-slate-500">
+                  <td colSpan={isTeacher ? 4 : 5} className="text-center py-12 text-slate-500">
                     No course enrollments found.{" "}
                     {!isTeacher && <button onClick={() => setShowBatch(true)} className="text-teal-400 hover:underline">Batch Enroll Students?</button>}
                   </td>
@@ -302,32 +278,6 @@ export default function EnrollmentsPage() {
                       ) : (
                         <span className="font-mono text-slate-400 text-xs">Term #{e.semester_id}</span>
                       )}
-                    </td>
-                    {/* Marks / Grade column */}
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        {e.grade ? (
-                          <span className="px-2.5 py-1 rounded-lg bg-emerald-950/80 border border-emerald-700/60 text-emerald-300 font-bold font-mono text-xs inline-flex items-center gap-1">
-                            {e.grade} ({e.grade_point?.toFixed(1) ?? "—"})
-                            {e.marks !== null && e.marks !== undefined && (
-                              <span className="text-[11px] text-slate-400 font-normal ml-1">· {e.marks}%</span>
-                            )}
-                          </span>
-                        ) : (
-                          <span className="text-slate-500 italic text-xs">Ungraded</span>
-                        )}
-                        <button
-                          onClick={() => {
-                            setGradeModalEnr(e);
-                            setGradeMarksInput(e.marks !== null && e.marks !== undefined ? e.marks.toString() : "");
-                            setGradeInput(e.grade || "");
-                          }}
-                          className="p-1 rounded text-slate-400 hover:text-amber-300 hover:bg-slate-800 transition-colors text-xs flex items-center gap-1 font-semibold"
-                          title="Assign or Edit Student Grade"
-                        >
-                          <Pencil className="w-3.5 h-3.5 text-amber-400" />
-                        </button>
-                      </div>
                     </td>
                     <td className="px-4 py-3 text-slate-300 text-xs">{formatDate(e.enrolled_at)}</td>
                     {!isTeacher && (
@@ -386,97 +336,6 @@ export default function EnrollmentsPage() {
           onClose={() => setShowBatch(false)}
           onSuccess={fetchEnrollments}
         />
-      )}
-
-      {/* Grade / Marks Assign Modal */}
-      {gradeModalEnr && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/50">
-              <div>
-                <h3 className="font-bold text-white text-base">Assign Marks &amp; Grade</h3>
-                <p className="text-xs text-slate-400">
-                  {studentsMap[gradeModalEnr.student_id]?.full_name || gradeModalEnr.student_id} — {gradeModalEnr.course_code}
-                </p>
-              </div>
-              <button onClick={() => setGradeModalEnr(null)} className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveGrade} className="p-6 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                  Marks (%) (0 - 100)
-                </label>
-                <input
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  max="100"
-                  value={gradeMarksInput}
-                  onChange={(e) => {
-                    setGradeMarksInput(e.target.value);
-                    const val = parseFloat(e.target.value);
-                    if (!isNaN(val)) {
-                      if (val >= 80) setGradeInput("A");
-                      else if (val >= 75) setGradeInput("A-");
-                      else if (val >= 70) setGradeInput("B+");
-                      else if (val >= 65) setGradeInput("B");
-                      else if (val >= 60) setGradeInput("B-");
-                      else if (val >= 55) setGradeInput("C+");
-                      else if (val >= 50) setGradeInput("C");
-                      else if (val >= 40) setGradeInput("D");
-                      else setGradeInput("F");
-                    }
-                  }}
-                  placeholder="e.g. 85.5"
-                  className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm font-mono text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
-                />
-                <p className="text-[11px] text-slate-500 mt-1">Entering marks automatically computes Grade &amp; Grade Point (4.0 Scale).</p>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                  Letter Grade
-                </label>
-                <select
-                  value={gradeInput}
-                  onChange={(e) => setGradeInput(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm font-mono font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
-                >
-                  <option value="">-- Select Grade --</option>
-                  <option value="A">A (4.00 — 80-100%)</option>
-                  <option value="A-">A- (3.70 — 75-79%)</option>
-                  <option value="B+">B+ (3.30 — 70-74%)</option>
-                  <option value="B">B (3.00 — 65-69%)</option>
-                  <option value="B-">B- (2.70 — 60-64%)</option>
-                  <option value="C+">C+ (2.30 — 55-59%)</option>
-                  <option value="C">C (2.00 — 50-54%)</option>
-                  <option value="D">D (1.00 — 40-49%)</option>
-                  <option value="F">F (0.00 — Below 40%)</option>
-                </select>
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setGradeModalEnr(null)}
-                  className="flex-1 py-2 rounded-xl border border-slate-700 text-slate-300 text-sm hover:bg-slate-800 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSavingGrade}
-                  className="flex-1 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
-                >
-                  {isSavingGrade ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Grade"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
       )}
 
       <ConfirmModal

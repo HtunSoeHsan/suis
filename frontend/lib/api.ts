@@ -265,7 +265,7 @@ export const enrollmentsApi = {
     }),
   delete: (id: number) =>
     apiFetch<void>(`/api/enrollments/${id}`, { method: "DELETE" }),
-  updateGrade: (id: number, data: { marks?: number; grade?: string }) =>
+  updateGrade: (id: number, data: { grade_point?: number }) =>
     apiFetch<import("@/types").Enrollment>(`/api/enrollments/${id}/grade`, {
       method: "PATCH",
       body: JSON.stringify(data),

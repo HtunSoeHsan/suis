@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { studentsApi, enrollmentsApi } from "@/lib/api";
-import type { Student, StudentGPASummary, Enrollment } from "@/types";
+import { studentsApi, enrollmentsApi, semestersApi, coursesApi } from "@/lib/api";
+import type { Student, StudentGPASummary, Enrollment, Semester, Course } from "@/types";
 import {
   Plus, Search, Trash2, Pencil, Camera, CheckCircle2, Clock,
   ChevronLeft, ChevronRight, X, Loader2, Settings2, BookOpen, UserCheck, ShieldAlert, Eye, Award
@@ -46,13 +46,16 @@ export default function StudentsPage() {
   // GPA State
   const [gpaMap, setGpaMap] = useState<Record<string, StudentGPASummary>>({});
 
+
   // Quick Grade Entry Modal State
   const [gradeModalStudent, setGradeModalStudent] = useState<Student | null>(null);
   const [studentEnrollments, setStudentEnrollments] = useState<Enrollment[]>([]);
-  const [loadingEnrollments, setLoadingEnrollments] = useState(false);
+  const [gradeModalSemesters, setGradeModalSemesters] = useState<Semester[]>([]);
+  const [gradeModalCourses, setGradeModalCourses] = useState<Course[]>([]);
+  const [selectedSemesterId, setSelectedSemesterId] = useState<number | "">("");
   const [selectedEnrollmentId, setSelectedEnrollmentId] = useState<number | "">("");
-  const [marksInput, setMarksInput] = useState("");
-  const [gradeInput, setGradeInput] = useState("");
+  const [gpaInput, setGpaInput] = useState("");
+  const [loadingEnrollments, setLoadingEnrollments] = useState(false);
   const [isSavingGrade, setIsSavingGrade] = useState(false);
   const [gradeError, setGradeError] = useState<string | null>(null);
 
@@ -101,21 +104,31 @@ export default function StudentsPage() {
     ).then(() => setGpaMap(gMap));
   }, [data?.items]);
 
+
   const openGradeModal = async (st: Student) => {
     setGradeModalStudent(st);
     setLoadingEnrollments(true);
     setGradeError(null);
+    setSelectedSemesterId("");
     setSelectedEnrollmentId("");
-    setMarksInput("");
-    setGradeInput("");
+    setGpaInput("");
     try {
-      const enrRes = await enrollmentsApi.list({ student_id: st.student_id, limit: 100 });
-      setStudentEnrollments(enrRes.items);
-      if (enrRes.items.length > 0) {
-        const first = enrRes.items[0];
-        setSelectedEnrollmentId(first.enrollment_id);
-        setMarksInput(first.marks !== null && first.marks !== undefined ? first.marks.toString() : "");
-        setGradeInput(first.grade || "");
+      const [enrRes, semRes, crsRes] = await Promise.all([
+        enrollmentsApi.list({ student_id: st.student_id, limit: 100 }),
+        semestersApi.list({ limit: 100 }),
+        coursesApi.list({ limit: 200 }),
+      ]);
+      const enrollments = enrRes.items;
+      setStudentEnrollments(enrollments);
+      setGradeModalSemesters(semRes.items);
+      setGradeModalCourses(crsRes.items);
+
+      // Auto-select first semester and its first course
+      if (enrollments.length > 0) {
+        const firstSemId = enrollments[0].semester_id;
+        setSelectedSemesterId(firstSemId);
+        setSelectedEnrollmentId(enrollments[0].enrollment_id);
+        setGpaInput(enrollments[0].grade_point?.toString() ?? "");
       }
     } catch (e: unknown) {
       setGradeError((e as Error).message);
@@ -124,31 +137,39 @@ export default function StudentsPage() {
     }
   };
 
-  const handleEnrollmentChange = (enrId: number) => {
+  const handleSemesterChange = (semId: number) => {
+    setSelectedSemesterId(semId);
+    const first = studentEnrollments.find((e) => e.semester_id === semId);
+    if (first) {
+      setSelectedEnrollmentId(first.enrollment_id);
+      setGpaInput(first.grade_point?.toString() ?? "");
+    } else {
+      setSelectedEnrollmentId("");
+      setGpaInput("");
+    }
+  };
+
+  const handleCourseChange = (enrId: number) => {
     setSelectedEnrollmentId(enrId);
     const target = studentEnrollments.find((e) => e.enrollment_id === enrId);
-    if (target) {
-      setMarksInput(target.marks !== null && target.marks !== undefined ? target.marks.toString() : "");
-      setGradeInput(target.grade || "");
-    }
+    setGpaInput(target?.grade_point?.toString() ?? "");
   };
 
   const handleSaveGrade = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedEnrollmentId) {
-      setGradeError("Please select a course enrollment to assign grade.");
+      setGradeError("Course ရွေးချယ်ပေးပါ။");
+      return;
+    }
+    const gpa = parseFloat(gpaInput);
+    if (isNaN(gpa) || gpa < 0 || gpa > 4.0) {
+      setGradeError("GPA သည် 0.00 မှ 4.00 အတွင်း ဖြစ်ရပါမည်။");
       return;
     }
     setIsSavingGrade(true);
     setGradeError(null);
     try {
-      const marksVal = marksInput.trim() !== "" ? parseFloat(marksInput) : undefined;
-      await enrollmentsApi.updateGrade(Number(selectedEnrollmentId), {
-        marks: marksVal,
-        grade: gradeInput.trim() || undefined,
-      });
-
-      // Refresh GPA for this student
+      await enrollmentsApi.updateGrade(Number(selectedEnrollmentId), { grade_point: gpa });
       if (gradeModalStudent) {
         const updatedGPA = await studentsApi.getGPA(gradeModalStudent.student_id);
         setGpaMap((prev) => ({ ...prev, [gradeModalStudent.student_id]: updatedGPA }));
@@ -559,137 +580,115 @@ export default function StudentsPage() {
         />
       )}
 
-      {/* Quick Grade Entry Modal */}
-      {gradeModalStudent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/50">
-              <div>
-                <h3 className="font-bold text-white text-base">Assign Marks &amp; Grade (GPA)</h3>
-                <p className="text-xs text-slate-400">
-                  {gradeModalStudent.full_name} (<code className="font-mono text-amber-400">{gradeModalStudent.student_id}</code>)
-                </p>
-              </div>
-              <button onClick={() => setGradeModalStudent(null)} className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      {/* GPA Entry Modal */}
+      {gradeModalStudent && (() => {
+        const uniqueSemIds = [...new Set(studentEnrollments.map((e) => e.semester_id))];
+        const coursesInSem = studentEnrollments.filter((e) => e.semester_id === selectedSemesterId);
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
 
-            {loadingEnrollments ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-6 h-6 animate-spin text-amber-400" />
-              </div>
-            ) : studentEnrollments.length === 0 ? (
-              <div className="p-6 text-center space-y-3">
-                <p className="text-sm text-slate-400">
-                  This student is not currently enrolled in any course. Please enroll the student first.
-                </p>
-                <button
-                  onClick={() => setGradeModalStudent(null)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-200 text-xs font-semibold hover:bg-slate-700 transition-colors"
-                >
-                  Close
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-slate-950/50">
+                <div>
+                  <h3 className="font-bold text-white text-sm">GPA ထည့်မည်</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    {gradeModalStudent.full_name} · <code className="font-mono text-amber-400">{gradeModalStudent.student_id}</code>
+                  </p>
+                </div>
+                <button onClick={() => setGradeModalStudent(null)} className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors">
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-            ) : (
-              <form onSubmit={handleSaveGrade} className="p-6 space-y-4">
-                {gradeError && (
-                  <div className="p-3 bg-red-950/60 border border-red-800/80 rounded-xl text-xs text-red-300 font-medium">
-                    {gradeError}
+
+              {loadingEnrollments ? (
+                <div className="flex items-center justify-center py-10">
+                  <Loader2 className="w-5 h-5 animate-spin text-amber-400" />
+                </div>
+              ) : studentEnrollments.length === 0 ? (
+                <div className="p-6 text-center space-y-3">
+                  <p className="text-sm text-slate-400">Course တစ်ခုမှ enroll မလုပ်ရသေး။</p>
+                  <button onClick={() => setGradeModalStudent(null)} className="px-4 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs hover:bg-slate-700 transition-colors">Close</button>
+                </div>
+              ) : (
+                <form onSubmit={handleSaveGrade} className="p-5 space-y-4">
+                  {gradeError && (
+                    <div className="p-2.5 bg-red-950/60 border border-red-800/70 rounded-xl text-xs text-red-300">{gradeError}</div>
+                  )}
+
+                  {/* Semester */}
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Semester</label>
+                    <select
+                      value={selectedSemesterId}
+                      onChange={(e) => handleSemesterChange(Number(e.target.value))}
+                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                    >
+                      {uniqueSemIds.map((semId) => {
+                        const sem = gradeModalSemesters.find((s) => s.semester_id === semId);
+                        return (
+                          <option key={semId} value={semId}>
+                            {sem ? `${sem.academic_year} · ${sem.term}` : `Semester #${semId}`}
+                          </option>
+                        );
+                      })}
+                    </select>
                   </div>
-                )}
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                    Select Enrolled Course &amp; Semester
-                  </label>
-                  <select
-                    value={selectedEnrollmentId}
-                    onChange={(e) => handleEnrollmentChange(Number(e.target.value))}
-                    className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs font-mono text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
-                  >
-                    {studentEnrollments.map((enr) => (
-                      <option key={enr.enrollment_id} value={enr.enrollment_id}>
-                        {enr.course_code} — Term #{enr.semester_id} {enr.grade ? `(Current Grade: ${enr.grade})` : "(Ungraded)"}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                  {/* Course */}
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Course</label>
+                    <select
+                      value={selectedEnrollmentId}
+                      onChange={(e) => handleCourseChange(Number(e.target.value))}
+                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm font-mono text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                    >
+                      {coursesInSem.map((enr) => {
+                        const crs = gradeModalCourses.find((c) => c.course_code === enr.course_code);
+                        const courseLabel = crs ? `${enr.course_code} — ${crs.course_name}` : enr.course_code;
+                        return (
+                          <option key={enr.enrollment_id} value={enr.enrollment_id}>
+                            {courseLabel}
+                            {enr.grade_point != null ? ` (GPA: ${enr.grade_point.toFixed(2)})` : " (မထည့်ရသေး)"}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                    Marks (%) (0 - 100)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    max="100"
-                    value={marksInput}
-                    onChange={(e) => {
-                      setMarksInput(e.target.value);
-                      const val = parseFloat(e.target.value);
-                      if (!isNaN(val)) {
-                        if (val >= 80) setGradeInput("A");
-                        else if (val >= 75) setGradeInput("A-");
-                        else if (val >= 70) setGradeInput("B+");
-                        else if (val >= 65) setGradeInput("B");
-                        else if (val >= 60) setGradeInput("B-");
-                        else if (val >= 55) setGradeInput("C+");
-                        else if (val >= 50) setGradeInput("C");
-                        else if (val >= 40) setGradeInput("D");
-                        else setGradeInput("F");
-                      }
-                    }}
-                    placeholder="e.g. 85.5"
-                    className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm font-mono text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
-                  />
-                  <p className="text-[11px] text-slate-500 mt-1">Entering marks automatically computes Letter Grade &amp; Grade Point (4.0 Scale).</p>
-                </div>
+                  {/* GPA */}
+                  <div>
+                    <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">GPA (0.00 – 4.00)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="4.0"
+                      value={gpaInput}
+                      onChange={(e) => setGpaInput(e.target.value)}
+                      placeholder="e.g. 3.70"
+                      className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xl font-mono font-bold text-amber-300 text-center focus:outline-none focus:ring-2 focus:ring-amber-500/40 placeholder:text-slate-600 placeholder:text-base placeholder:font-normal"
+                      autoFocus
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                    Letter Grade
-                  </label>
-                  <select
-                    value={gradeInput}
-                    onChange={(e) => setGradeInput(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm font-mono font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
-                  >
-                    <option value="">-- Select Grade --</option>
-                    <option value="A">A (4.00 — 80-100%)</option>
-                    <option value="A-">A- (3.70 — 75-79%)</option>
-                    <option value="B+">B+ (3.30 — 70-74%)</option>
-                    <option value="B">B (3.00 — 65-69%)</option>
-                    <option value="B-">B- (2.70 — 60-64%)</option>
-                    <option value="C+">C+ (2.30 — 55-59%)</option>
-                    <option value="C">C (2.00 — 50-54%)</option>
-                    <option value="D">D (1.00 — 40-49%)</option>
-                    <option value="F">F (0.00 — Below 40%)</option>
-                  </select>
-                </div>
-
-                <div className="flex gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setGradeModalStudent(null)}
-                    className="flex-1 py-2 rounded-xl border border-slate-700 text-slate-300 text-sm hover:bg-slate-800 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSavingGrade}
-                    className="flex-1 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
-                  >
-                    {isSavingGrade ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Grade"}
-                  </button>
-                </div>
-              </form>
-            )}
+                  {/* Buttons */}
+                  <div className="flex gap-3 pt-1">
+                    <button type="button" onClick={() => setGradeModalStudent(null)}
+                      className="flex-1 py-2 rounded-xl border border-slate-700 text-slate-300 text-sm hover:bg-slate-800 transition-colors">
+                      Cancel
+                    </button>
+                    <button type="submit" disabled={isSavingGrade}
+                      className="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-900 text-sm font-bold transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2">
+                      {isSavingGrade ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save GPA"}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       <ConfirmModal
         isOpen={modalConfig.isOpen}

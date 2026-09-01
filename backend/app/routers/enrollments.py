@@ -182,14 +182,7 @@ async def update_enrollment_grade(
     if not enr:
         raise HTTPException(status_code=404, detail="Enrollment record not found.")
 
-    calc_grade, calc_point = calculate_grade_info(body.marks, body.grade)
-    enr.marks = body.marks
-    if calc_grade:
-        enr.grade = calc_grade
-        enr.grade_point = calc_point
-    elif body.grade:
-        enr.grade = body.grade.upper()
-        enr.grade_point = calc_point or 0.0
+    enr.grade_point = body.grade_point
 
     await db.flush()
     await db.refresh(enr)
