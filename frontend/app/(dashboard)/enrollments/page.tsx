@@ -276,7 +276,7 @@ export default function EnrollmentsPage() {
                           {semester.is_active && <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">ACTIVE TERM</span>}
                         </div>
                       ) : (
-                        <span className="font-mono text-slate-400 text-xs">Term #{e.semester_id}</span>
+                        <span className="font-mono text-slate-400 text-xs">Semester #{e.semester_id}</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-slate-300 text-xs">{formatDate(e.enrolled_at)}</td>

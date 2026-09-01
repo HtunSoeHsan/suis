@@ -132,7 +132,6 @@ export function ClassroomFormDialog({ classroom, onClose }: Props) {
                 <option value="Lecture Hall">Lecture Hall</option>
                 <option value="Lab">Lab</option>
                 <option value="Seminar Room">Seminar Room</option>
-                <option value="Auditorium">Auditorium</option>
               </select>
             </div>
           </div>

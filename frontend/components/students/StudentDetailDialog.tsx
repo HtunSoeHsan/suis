@@ -176,6 +176,8 @@ export function StudentDetailDialog({ student, onClose, onEdit, onFaceEnroll }: 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
                 {enrollments.map((enr) => {
                   const course = courses[enr.course_code];
+                  const matchingSem = gpaData?.semesters.find((s) => s.semester_id === enr.semester_id);
+                  const semBadgeLabel = matchingSem ? matchingSem.term : `Semester #${enr.semester_id}`;
                   return (
                     <div
                       key={enr.enrollment_id}
@@ -185,7 +187,7 @@ export function StudentDetailDialog({ student, onClose, onEdit, onFaceEnroll }: 
                         <div className="flex items-center gap-2">
                           <span className="font-mono font-bold text-teal-400 text-xs">{enr.course_code}</span>
                           <span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-mono">
-                            Term #{enr.semester_id}
+                            {semBadgeLabel}
                           </span>
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">

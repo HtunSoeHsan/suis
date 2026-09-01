@@ -136,7 +136,6 @@ export default function ClassroomsPage() {
             { value: "Lecture Hall", label: "Lecture Hall" },
             { value: "Lab", label: "Lab" },
             { value: "Seminar Room", label: "Seminar Room" },
-            { value: "Auditorium", label: "Auditorium" },
           ].map(({ value, label }) => (
             <button
               key={value}

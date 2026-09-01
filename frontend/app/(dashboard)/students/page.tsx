@@ -273,12 +273,6 @@ export default function StudentsPage() {
               </button>
             )}
             <button
-              onClick={() => setShowConfig(true)}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300 text-sm font-medium transition-colors shadow-sm"
-            >
-              <Settings2 className="w-4 h-4 text-violet-400" /> ID Format Rules
-            </button>
-            <button
               onClick={() => setShowCreate(true)}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium transition-colors shadow-lg shadow-violet-900/30"
             >
