@@ -37,6 +37,7 @@ export interface Student {
   admission_year?: number | null;
   status?: "Active" | "Graduated" | "Suspended" | "Dropped" | null;
   major?: string | null;
+  cgpa?: number | null;
 
   attendance_rate: number;
   is_face_registered: boolean;

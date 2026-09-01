@@ -23,6 +23,7 @@ class StudentBase(BaseModel):
     admission_year: Optional[int] = Field(None, ge=2000, le=2035)
     status: Optional[Literal["Active", "Graduated", "Suspended", "Dropped"]] = "Active"
     major: Optional[str] = Field(None, max_length=100)
+    cgpa: Optional[float] = Field(None, ge=0.0, le=4.0, examples=[3.5])
 
     user_id: Optional[str] = Field(None, max_length=50)
 
@@ -52,6 +53,7 @@ class StudentUpdate(BaseModel):
     admission_year: Optional[int] = Field(None, ge=2000, le=2035)
     status: Optional[Literal["Active", "Graduated", "Suspended", "Dropped"]] = None
     major: Optional[str] = Field(None, max_length=100)
+    cgpa: Optional[float] = Field(None, ge=0.0, le=4.0)
 
     attendance_rate: Optional[float] = None
     is_face_registered: Optional[bool] = None

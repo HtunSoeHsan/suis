@@ -16,6 +16,7 @@ const EMPTY = {
   email: "", nrc_number: "", gender: "Male", date_of_birth: "",
   blood_type: "", address: "", guardian_name: "", guardian_phone: "",
   admission_year: new Date().getFullYear().toString(), status: "Active", major: "CST",
+  cgpa: "",
 };
 
 const SECTIONS = [
@@ -74,6 +75,7 @@ export function StudentFormDialog({ student, onClose }: Props) {
         admission_year: student.admission_year?.toString() ?? new Date().getFullYear().toString(),
         status: student.status ?? "Active",
         major: student.major ?? "",
+        cgpa: student.cgpa != null ? student.cgpa.toString() : "",
       });
 
       enrollmentsApi.list({ student_id: student.student_id, limit: 100 }).then((res) => {
@@ -121,6 +123,7 @@ export function StudentFormDialog({ student, onClose }: Props) {
         admission_year: form.admission_year ? parseInt(form.admission_year) : undefined,
         status: (form.status || "Active") as any,
         major: form.major || undefined,
+        cgpa: form.cgpa ? parseFloat(form.cgpa) : undefined,
       };
 
       let targetStudentId = student?.student_id;
@@ -271,8 +274,8 @@ export function StudentFormDialog({ student, onClose }: Props) {
                 </div>
               </div>
 
-              {/* Roll Number & Status */}
-              <div className="grid grid-cols-2 gap-3">
+              {/* Roll Number, Status & CGPA */}
+              <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-slate-400 mb-1.5">Roll Number</label>
                   <input type="text" value={form.roll_number}
@@ -287,6 +290,12 @@ export function StudentFormDialog({ student, onClose }: Props) {
                     <option value="Suspended">Suspended (ကျောင်းနား)</option>
                     <option value="Dropped">Dropped (ကျောင်းထွက်)</option>
                   </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-400 mb-1.5">CGPA (0.00 – 4.00)</label>
+                  <input type="number" step="0.01" min="0" max="4.0" value={form.cgpa}
+                    onChange={(e) => set("cgpa", e.target.value)}
+                    placeholder="e.g. 3.50" className={inputClass} />
                 </div>
               </div>
 

@@ -41,6 +41,7 @@ class Student(Base):
     major: Mapped[str | None] = mapped_column(String(100))
 
     attendance_rate: Mapped[float] = mapped_column(Float, default=100.0)
+    cgpa: Mapped[float | None] = mapped_column(Float, default=0.0)
     face_embedding: Mapped[list | None] = mapped_column(Vector(512))
     is_face_registered: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMPTZ, default=datetime.utcnow)

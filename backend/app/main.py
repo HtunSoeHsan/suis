@@ -28,6 +28,7 @@ async def lifespan(app: FastAPI):
             await conn.execute(text("ALTER TABLE enrollments ADD COLUMN IF NOT EXISTS marks DOUBLE PRECISION;"))
             await conn.execute(text("ALTER TABLE enrollments ADD COLUMN IF NOT EXISTS grade VARCHAR(5);"))
             await conn.execute(text("ALTER TABLE enrollments ADD COLUMN IF NOT EXISTS grade_point DOUBLE PRECISION;"))
+            await conn.execute(text("ALTER TABLE students ADD COLUMN IF NOT EXISTS cgpa DOUBLE PRECISION DEFAULT 0.0;"))
 
     except Exception as e:
         print(f"⚠️ DB startup schema check note: {e}")

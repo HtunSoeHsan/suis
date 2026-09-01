@@ -119,6 +119,11 @@ export const studentsApi = {
       body: JSON.stringify({ image_base64 }),
     }),
   getGPA: (id: string) => apiFetch<import("@/types").StudentGPASummary>(`/api/students/${id}/gpa`),
+  updateSemesterGPA: (id: string, data: { semester_id: number; gpa: number }) =>
+    apiFetch<import("@/types").Student>(`/api/students/${id}/semester-gpa`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
 };
 
 // ─── Teachers ─────────────────────────────────────────────────────────────────

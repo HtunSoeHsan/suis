@@ -31,14 +31,14 @@ const navItems: { href: string; label: string; icon: React.ElementType; roles?: 
   { href: "/departments", label: "Departments",     icon: Building2,      roles: ["ADMIN", "TEACHER"] },
   { href: "/courses",     label: "Courses",         icon: BookOpen },
   { href: "/semesters",   label: "Semesters",       icon: Calendar,       roles: ["ADMIN", "TEACHER"] },
-  { href: "/enrollments", label: "Enrollments",     icon: UserCheck,      roles: ["ADMIN", "TEACHER"] },
+  { href: "/enrollments", label: "Enrollments",     icon: UserCheck,      roles: ["ADMIN"] },
   { href: "/classrooms",  label: "Classrooms",      icon: DoorOpen,       roles: ["ADMIN", "TEACHER"] },
   { href: "/timetables",  label: "Timetables",      icon: CalendarRange },
   { href: "/attendance",  label: "Attendance",      icon: CalendarCheck },
-  { href: "/chatbot",     label: "AI Chatbot",      icon: MessageSquareText },
-  { href: "/face-scanner",label: "Face Scanner",    icon: ScanFace },
+  { href: "/chatbot",     label: "AI Chatbot",      icon: MessageSquareText, roles: ["ADMIN"] },
+  { href: "/face-scanner",label: "Face Scanner",    icon: ScanFace,        roles: ["ADMIN"] },
   { href: "/users",       label: "User Management", icon: UserCog,        roles: ["ADMIN"] },
-  { href: "/settings",    label: "Settings",        icon: Settings2,      roles: ["ADMIN", "TEACHER"] },
+  { href: "/settings",    label: "Settings",        icon: Settings2,      roles: ["ADMIN"] },
 ];
 
 export function Sidebar() {

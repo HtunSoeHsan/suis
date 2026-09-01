@@ -173,27 +173,34 @@ export function StudentDetailDialog({ student, onClose, onEdit, onFaceEnroll }: 
                 No courses enrolled for this student yet.
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
                 {enrollments.map((enr) => {
                   const course = courses[enr.course_code];
                   return (
                     <div
                       key={enr.enrollment_id}
-                      className="p-3 bg-slate-950/80 border border-slate-800 rounded-xl flex items-center justify-between"
+                      className="p-3 bg-slate-950/80 border border-slate-800 rounded-xl flex items-center justify-between gap-2"
                     >
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <span className="font-mono font-bold text-teal-400 text-xs">{enr.course_code}</span>
                           <span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-mono">
                             Term #{enr.semester_id}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-200 font-medium mt-0.5">
-                          {course ? course.course_name : "Course Details"}
-                        </p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <p className="text-xs text-slate-200 font-medium truncate">
+                            {course ? course.course_name : "Course Details"}
+                          </p>
+                          {enr.grade_point != null && (
+                            <span className="px-1.5 py-0.2 rounded bg-amber-950/80 border border-amber-600/50 text-amber-300 font-bold font-mono text-[10px] shrink-0">
+                              GPA: {enr.grade_point.toFixed(2)}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       {course && (
-                        <span className="text-[10px] text-slate-500 font-medium">{course.credit_hours} hrs</span>
+                        <span className="text-[10px] text-slate-500 font-medium shrink-0">{course.credit_hours} hrs</span>
                       )}
                     </div>
                   );
@@ -202,22 +209,17 @@ export function StudentDetailDialog({ student, onClose, onEdit, onFaceEnroll }: 
             )}
           </div>
 
-          {/* Academic Performance & Semester GPA Breakdown */}
+          {/* Academic Performance */}
           <div className="space-y-3 pt-3 border-t border-slate-800">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                <Award className="w-4 h-4 text-amber-400" /> Academic Performance &amp; Semester GPA
+                <Award className="w-4 h-4 text-amber-400" /> Academic Performance
               </h3>
-              {gpaData && (
-                <div className="flex items-center gap-2">
-                  <span className="px-3 py-1 rounded-full bg-amber-950/80 border border-amber-600/50 text-amber-300 text-xs font-bold font-mono">
-                    CGPA: {gpaData.cgpa.toFixed(2)} / 4.00
-                  </span>
-                  <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 text-[11px] font-medium">
-                    {gpaData.total_earned_credits} Credits Earned
-                  </span>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1 rounded-full bg-amber-950/80 border border-amber-600/50 text-amber-300 text-xs font-bold font-mono">
+                  CGPA: {student.cgpa ? student.cgpa.toFixed(2) : "0.00"} / 4.00
+                </span>
+              </div>
             </div>
 
             {gpaData && gpaData.semesters.length > 0 ? (
@@ -233,43 +235,32 @@ export function StudentDetailDialog({ student, onClose, onEdit, onFaceEnroll }: 
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-slate-400 font-mono">{sem.total_credits} Credits</span>
-                        <span className="px-2 py-0.5 rounded bg-violet-950 text-violet-300 border border-violet-800/60 font-mono text-xs font-bold">
-                          GPA: {sem.gpa.toFixed(2)}
+                        <span className="px-2.5 py-1 rounded bg-amber-950/80 text-amber-300 border border-amber-600/50 font-mono text-xs font-bold">
+                          Semester GPA: {sem.gpa.toFixed(2)}
                         </span>
                       </div>
                     </div>
 
                     <div className="divide-y divide-slate-800/40">
                       {sem.courses.map((c) => (
-                        <div key={c.enrollment_id} className="py-1.5 flex items-center justify-between text-xs">
-                          <div>
-                            <span className="font-mono text-cyan-400 font-bold mr-2">{c.course_code}</span>
-                            <span className="text-slate-300 font-medium">{c.course_name}</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span className="text-[11px] text-slate-400 font-mono">{c.credit_hours} cr</span>
-                            {c.marks !== null && c.marks !== undefined && (
-                              <span className="text-[11px] text-slate-400 font-mono">{c.marks}%</span>
-                            )}
-                            {c.grade ? (
-                              <span className="px-2 py-0.5 rounded bg-emerald-950/80 border border-emerald-700/60 text-emerald-300 font-bold font-mono text-[11px]">
-                                {c.grade} ({c.grade_point?.toFixed(1) ?? "—"})
+                        <div key={c.enrollment_id} className="py-2 flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-cyan-400 font-bold">{c.course_code}</span>
+                            <span className="text-slate-200 font-medium">{c.course_name}</span>
+                            {c.grade_point != null && (
+                              <span className="px-2 py-0.5 rounded bg-amber-950/80 border border-amber-600/50 text-amber-300 font-bold font-mono text-[11px]">
+                                GPA: {c.grade_point.toFixed(2)}
                               </span>
-                            ) : (
-                              <span className="text-slate-500 italic text-[11px]">Ungraded</span>
                             )}
                           </div>
+                          <span className="text-[11px] text-slate-400 font-mono">{c.credit_hours} cr</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 ))}
               </div>
-            ) : (
-              <div className="p-4 bg-slate-950/60 border border-slate-800 rounded-xl text-center text-slate-500 text-xs">
-                No semester GPA records calculated yet.
-              </div>
-            )}
+            ) : null}
           </div>
           <div className="space-y-3 pt-3 border-t border-slate-800">
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">

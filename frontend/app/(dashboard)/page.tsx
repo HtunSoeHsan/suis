@@ -109,7 +109,7 @@ export default function DashboardPage() {
 
   const visibleStatCards = isAdmin
     ? statCards
-    : statCards.filter((c) => c.href !== "/students" && c.href !== "/teachers");
+    : statCards.filter((c) => c.href !== "/face-scanner");
 
   const quickLinks = [
     {
@@ -152,7 +152,7 @@ export default function DashboardPage() {
 
   const visibleQuickLinks = isAdmin
     ? quickLinks
-    : quickLinks.filter((l) => l.href !== "/students" && l.href !== "/teachers");
+    : quickLinks.filter((l) => l.href !== "/chatbot" && l.href !== "/face-scanner");
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-10">
@@ -180,23 +180,25 @@ export default function DashboardPage() {
               Unified AI command center with instant Text-to-SQL analytics, real-time biometric identification, and automated attendance tracking.
             </p>
 
-            <div className="flex flex-wrap items-center gap-3 pt-2">
-              <Link
-                href="/chatbot"
-                className="group relative inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-sm font-semibold transition-all shadow-lg shadow-violet-900/50 hover:shadow-violet-800/80 hover:-translate-y-0.5"
-              >
-                <MessageSquareText className="w-4 h-4" />
-                <span>Launch AI Assistant</span>
-                <ArrowRight className="w-4 h-4 text-violet-200 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <Link
-                href="/face-scanner"
-                className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 text-slate-200 text-sm font-semibold transition-all backdrop-blur-md hover:-translate-y-0.5"
-              >
-                <ScanFace className="w-4 h-4 text-emerald-400" />
-                <span>Open Biometric Scanner</span>
-              </Link>
-            </div>
+            {isAdmin && (
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                <Link
+                  href="/chatbot"
+                  className="group relative inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-sm font-semibold transition-all shadow-lg shadow-violet-900/50 hover:shadow-violet-800/80 hover:-translate-y-0.5"
+                >
+                  <MessageSquareText className="w-4 h-4" />
+                  <span>Launch AI Assistant</span>
+                  <ArrowRight className="w-4 h-4 text-violet-200 group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <Link
+                  href="/face-scanner"
+                  className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 text-slate-200 text-sm font-semibold transition-all backdrop-blur-md hover:-translate-y-0.5"
+                >
+                  <ScanFace className="w-4 h-4 text-emerald-400" />
+                  <span>Open Biometric Scanner</span>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>

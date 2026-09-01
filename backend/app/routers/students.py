@@ -139,6 +139,43 @@ async def update_student(
     return student
 
 
+from pydantic import BaseModel, Field
+from sqlalchemy import and_
+
+class SemesterGPAUpdate(BaseModel):
+    semester_id: int
+    gpa: float = Field(..., ge=0.0, le=4.0)
+
+@router.patch("/{student_id}/semester-gpa", response_model=StudentOut)
+async def update_student_semester_gpa(
+    student_id: str, body: SemesterGPAUpdate, db: AsyncSession = Depends(get_db)
+):
+    st_res = await db.execute(select(Student).where(Student.student_id == student_id))
+    student = st_res.scalar_one_or_none()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found.")
+
+    # Update all enrollments for this student in this semester with grade_point = body.gpa
+    enr_res = await db.execute(
+        select(Enrollment).where(
+            and_(
+                Enrollment.student_id == student_id,
+                Enrollment.semester_id == body.semester_id
+            )
+        )
+    )
+    enrollments = enr_res.scalars().all()
+    for enr in enrollments:
+        enr.grade_point = body.gpa
+
+    # Update student's manual cgpa
+    student.cgpa = body.gpa
+
+    await db.flush()
+    await db.refresh(student)
+    return student
+
+
 @router.delete("/{student_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_student(student_id: str, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Student).where(Student.student_id == student_id))
