@@ -44,7 +44,7 @@ export default function AttendancePage() {
     coursesApi.list({
       limit: 100,
       ...(isTeacher && user?.teacher_id ? { teacher_id: user.teacher_id } : {}),
-    }).then((res) => setCourses(res.items)).catch(() => {});
+    }).then((res) => setCourses(res.items)).catch(() => { });
   }, [isTeacher, user?.teacher_id]);
 
   const fetchAttendance = useCallback(async () => {
@@ -161,11 +161,10 @@ export default function AttendancePage() {
             <button
               key={st}
               onClick={() => { setFilterStatus(st); setPage(0); }}
-              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
-                filterStatus === st
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${filterStatus === st
                   ? st === "" ? "bg-slate-700 border-slate-500 text-white" : `${STATUS_COLORS[st]} border-current`
                   : "border-slate-700 text-slate-400 hover:border-slate-500"
-              }`}
+                }`}
             >
               {st === "" ? "All" : st}
             </button>
@@ -196,11 +195,10 @@ export default function AttendancePage() {
             <button
               key={sec || "all"}
               onClick={() => { setFilterSection(sec); setPage(0); }}
-              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
-                filterSection === sec
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${filterSection === sec
                   ? "bg-violet-900/40 border-violet-500 text-violet-300"
                   : "border-slate-700 text-slate-400 hover:border-slate-500"
-              }`}
+                }`}
             >
               {sec === "" ? "All" : `§${sec}`}
             </button>
@@ -289,64 +287,64 @@ export default function AttendancePage() {
                   const course = coursesMap[a.course_code];
                   const isManual = a.confidence_score === 1.0 || a.confidence_score === null;
 
-                return (
-                  <tr key={a.log_id} className="hover:bg-slate-800/30 transition-colors group">
-                    <td className="px-4 py-3 font-mono text-slate-500 text-xs">#{a.log_id}</td>
-                    <td className="px-4 py-3">
-                      {student ? (
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-violet-900/50 border border-violet-700/60 flex items-center justify-center text-violet-300 font-bold text-xs">
-                            {student.full_name.charAt(0)}
+                  return (
+                    <tr key={a.log_id} className="hover:bg-slate-800/30 transition-colors group">
+                      <td className="px-4 py-3 font-mono text-slate-500 text-xs">#{a.log_id}</td>
+                      <td className="px-4 py-3">
+                        {student ? (
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-full bg-violet-900/50 border border-violet-700/60 flex items-center justify-center text-violet-300 font-bold text-xs">
+                              {student.full_name.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-slate-200 text-xs">{student.full_name}</p>
+                              <p className="text-[11px] text-slate-400"><span className="font-mono text-violet-400">{student.student_id}</span> · Roll: {student.roll_number}</p>
+                            </div>
                           </div>
+                        ) : (
+                          <span className="font-mono text-violet-400 text-xs">{a.student_id}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        {course ? (
                           <div>
-                            <p className="font-semibold text-slate-200 text-xs">{student.full_name}</p>
-                            <p className="text-[11px] text-slate-400"><span className="font-mono text-violet-400">{student.student_id}</span> · Roll: {student.roll_number}</p>
+                            <p className="font-semibold text-slate-200 text-xs">{course.course_name}</p>
+                            <p className="text-[11px] font-mono text-amber-400">{course.course_code}</p>
                           </div>
-                        </div>
-                      ) : (
-                        <span className="font-mono text-violet-400 text-xs">{a.student_id}</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      {course ? (
-                        <div>
-                          <p className="font-semibold text-slate-200 text-xs">{course.course_name}</p>
-                          <p className="text-[11px] font-mono text-amber-400">{course.course_code}</p>
-                        </div>
-                      ) : (
-                        <span className="font-mono text-amber-400 text-xs">{a.course_code}</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-slate-400 text-xs">{formatTime(a.verified_at)}</td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border uppercase tracking-wider font-semibold ${STATUS_COLORS[a.status] ?? "bg-slate-800 text-slate-400"}`}>
-                        {a.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-xs">
-                      {isManual ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 text-[11px]">
-                          Manual Entry
+                        ) : (
+                          <span className="font-mono text-amber-400 text-xs">{a.course_code}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-slate-400 text-xs">{formatTime(a.verified_at)}</td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border uppercase tracking-wider font-semibold ${STATUS_COLORS[a.status] ?? "bg-slate-800 text-slate-400"}`}>
+                          {a.status}
                         </span>
-                      ) : (
-                        <span className="font-mono text-emerald-400 font-medium">
-                          Face AI ({((a.confidence_score ?? 0) * 100).toFixed(1)}%)
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <button
-                        onClick={() => handleDelete(a)}
-                        className="p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-red-400 transition-colors"
-                        title="Delete Attendance Log"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                );
-              });
-            })()}
+                      </td>
+                      <td className="px-4 py-3 text-xs">
+                        {isManual ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 text-[11px]">
+                            Manual Entry
+                          </span>
+                        ) : (
+                          <span className="font-mono text-emerald-400 font-medium">
+                            Face AI ({((a.confidence_score ?? 0) * 100).toFixed(1)}%)
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <button
+                          onClick={() => handleDelete(a)}
+                          className="p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-red-400 transition-colors"
+                          title="Delete Attendance Log"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                });
+              })()}
             </tbody>
           </table>
         )}

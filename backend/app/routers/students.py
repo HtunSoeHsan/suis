@@ -255,12 +255,12 @@ async def get_student_gpa(student_id: str, db: AsyncSession = Depends(get_db)):
             sem_info["gpa"] = 0.0
         semester_list.append(sem_info)
 
-    cgpa = round(total_weighted_points / total_earned_credits, 2) if total_earned_credits > 0 else 0.0
+    final_cgpa = student.cgpa if (student.cgpa is not None and student.cgpa > 0) else cgpa
 
     return {
         "student_id": student.student_id,
         "full_name": student.full_name,
-        "cgpa": cgpa,
+        "cgpa": final_cgpa,
         "total_earned_credits": total_earned_credits,
         "total_attempted_credits": total_attempted_credits,
         "semesters": semester_list,

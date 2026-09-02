@@ -314,9 +314,9 @@ export default function FaceScannerPage() {
                           : "bg-sky-500/15 text-sky-300 border-sky-500/30"}`}>
                         {result.target_type}
                       </span>
-                      {isStudent && gpaData && (
+                      {isStudent && (
                         <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold font-mono bg-amber-950/80 text-amber-300 border border-amber-600/50">
-                          CGPA: {gpaData.cgpa.toFixed(2)} / 4.00
+                          CGPA: {(profile.cgpa as number | undefined)?.toFixed(2) ?? "0.00"} / 4.00
                         </span>
                       )}
                     </div>
@@ -360,7 +360,6 @@ export default function FaceScannerPage() {
                       <ProfileField label="Phone" value={profile.phone as string} />
                       <ProfileField label="Admission Year" value={profile.admission_year as number} />
                       <ProfileField label="Status" value={profile.status as string} />
-                      <ProfileField label="Attendance Rate" value={profile.attendance_rate !== undefined && profile.attendance_rate !== null ? `${profile.attendance_rate}%` : null} />
                       <ProfileField label="Face Registered" value={profile.is_face_registered as boolean} />
                     </>
                   ) : (
@@ -386,12 +385,12 @@ export default function FaceScannerPage() {
 
               {/* Academic Performance & GPA Breakdown Card */}
               {isStudent && gpaData && (
-                <SectionCard title={`Academic Performance (CGPA: ${gpaData.cgpa.toFixed(2)})`} icon={Award}>
+                <SectionCard title={`Academic Performance (CGPA: ${(profile.cgpa as number | undefined)?.toFixed(2) ?? "0.00"})`} icon={Award}>
                   <div className="mt-2 space-y-3">
                     <div className="flex items-center justify-between text-xs p-3 bg-slate-900/80 border border-slate-800 rounded-xl">
                       <div>
                         <span className="text-slate-400 font-medium">Cumulative GPA:</span>
-                        <span className="ml-2 font-mono font-bold text-amber-400 text-sm">{gpaData.cgpa.toFixed(2)} / 4.00</span>
+                        <span className="ml-2 font-mono font-bold text-amber-400 text-sm">{(profile.cgpa as number | undefined)?.toFixed(2) ?? "0.00"} / 4.00</span>
                       </div>
                       <div className="text-slate-400">
                         <span>Earned Credits: </span>
@@ -403,27 +402,23 @@ export default function FaceScannerPage() {
                       <div key={sem.semester_id} className="p-3 bg-slate-900/60 border border-slate-800/80 rounded-xl space-y-2">
                         <div className="flex items-center justify-between text-xs border-b border-slate-800 pb-1.5">
                           <span className="font-bold text-white">{sem.academic_year} ({sem.term})</span>
-                          <span className="px-2 py-0.5 rounded bg-violet-950 text-violet-300 border border-violet-800/60 font-mono font-bold text-xs">
-                            GPA: {sem.gpa.toFixed(2)}
+                          <span className="px-2 py-0.5 rounded bg-amber-950/80 text-amber-300 border border-amber-600/50 font-mono font-bold text-xs">
+                            Semester GPA: {sem.gpa.toFixed(2)}
                           </span>
                         </div>
                         <div className="divide-y divide-slate-800/40 text-xs">
                           {sem.courses.map((c) => (
-                            <div key={c.enrollment_id} className="py-1 flex items-center justify-between">
-                              <div>
-                                <span className="font-mono text-cyan-400 font-bold mr-2">{c.course_code}</span>
-                                <span className="text-slate-300 font-medium">{c.course_name}</span>
-                              </div>
+                            <div key={c.enrollment_id} className="py-1.5 flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <span className="text-[11px] text-slate-400 font-mono">{c.credit_hours} cr</span>
-                                {c.grade ? (
-                                  <span className="px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-300 border border-emerald-700/60 font-bold font-mono text-[10px]">
-                                    {c.grade} ({c.grade_point?.toFixed(1) ?? "—"})
+                                <span className="font-mono text-cyan-400 font-bold">{c.course_code}</span>
+                                <span className="text-slate-300 font-medium">{c.course_name}</span>
+                                {c.grade_point != null && (
+                                  <span className="px-1.5 py-0.2 rounded bg-amber-950/80 border border-amber-600/50 text-amber-300 font-bold font-mono text-[10px]">
+                                    GPA: {c.grade_point.toFixed(2)}
                                   </span>
-                                ) : (
-                                  <span className="text-slate-500 italic text-[10px]">Ungraded</span>
                                 )}
                               </div>
+                              <span className="text-[11px] text-slate-400 font-mono">{c.credit_hours} cr</span>
                             </div>
                           ))}
                         </div>

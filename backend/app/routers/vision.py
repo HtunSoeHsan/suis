@@ -270,6 +270,7 @@ async def face_retrieve_info(body: FaceEnrollRequest, db: AsyncSession = Depends
                 "phone": s.phone,
                 "admission_year": s.admission_year,
                 "status": s.status,
+                "cgpa": s.cgpa,
                 "attendance_rate": s.attendance_rate,
                 "is_face_registered": s.is_face_registered,
             }

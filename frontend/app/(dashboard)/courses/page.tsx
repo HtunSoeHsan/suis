@@ -59,7 +59,7 @@ export default function CoursesPage() {
       const sMap: Record<number, Semester> = {};
       sRes.items.forEach((s) => { sMap[s.semester_id] = s; });
       setSemestersMap(sMap);
-    }).catch(() => {});
+    }).catch(() => { });
   }, []);
 
   const fetchCourses = useCallback(async () => {
