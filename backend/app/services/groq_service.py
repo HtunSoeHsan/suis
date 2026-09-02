@@ -37,16 +37,16 @@ TABLE students:
   email VARCHAR(100), nrc_number VARCHAR(50), gender VARCHAR(10), date_of_birth DATE, blood_type VARCHAR(5),
   address TEXT, guardian_name VARCHAR(100), guardian_phone VARCHAR(20), admission_year INT,
   status VARCHAR(20) ('ACTIVE'|'INACTIVE'|'GRADUATED'|'SUSPENDED'|'DROPPED'),
-  attendance_rate FLOAT, is_face_registered BOOL
+  cgpa FLOAT (0.00 to 4.00), attendance_rate FLOAT, is_face_registered BOOL
 
 TABLE semesters:
-  semester_id INT PK, academic_year VARCHAR(20) (e.g. '2025-2026'), term VARCHAR(20) (e.g. 'First Semester'), start_date DATE, end_date DATE, is_active BOOL
+  semester_id INT PK, academic_year VARCHAR(20) (e.g. '2025-2026'), term VARCHAR(20) (e.g. 'First Semester', 'Second Semester', 'Semester 1', 'Semester 2'), start_date DATE, end_date DATE, is_active BOOL
 
 TABLE courses:
   course_code VARCHAR(20) PK (e.g. 'CST-101'), dept_code VARCHAR(20) FK, course_name VARCHAR(100), credit_hours INT, teacher_id VARCHAR(50) FK
 
 TABLE enrollments:
-  enrollment_id BIGINT PK, student_id VARCHAR(50) FK, course_code VARCHAR(20) FK, semester_id INT FK, enrolled_at TIMESTAMPTZ
+  enrollment_id BIGINT PK, student_id VARCHAR(50) FK, course_code VARCHAR(20) FK, semester_id INT FK, grade VARCHAR(10) (letter grade e.g. 'A', 'B+'), grade_point FLOAT (numeric GPA 0.00 to 4.00), marks FLOAT, enrolled_at TIMESTAMPTZ
 
 TABLE classrooms:
   room_id VARCHAR(20) PK (e.g. 'ROOM-101'), room_name VARCHAR(100), building VARCHAR(100), capacity INT, room_type VARCHAR(30) ('LECTURE_HALL'|'LAB'|'EXAM_HALL'|'SEMINAR')
@@ -84,8 +84,10 @@ IMPORTANT RULES:
 - Return ONLY a raw SQL SELECT statement. No explanation, no markdown fences.
 - Never use DROP, DELETE, UPDATE, INSERT, CREATE, ALTER, TRUNCATE or any DML/DDL.
 - Limit results to 100 rows unless user specifies a larger count.
+- GPA QUERIES & CALCULATIONS (CRITICAL): `enrollments.grade` is a VARCHAR letter string (e.g. 'A', 'B+'). NEVER use `AVG(grade)` because `AVG()` cannot run on VARCHAR text. Always use `enrollments.grade_point` (numeric float 0.00-4.00) or `students.cgpa` (float 0.00-4.00) for GPA calculations (e.g. `AVG(enrollments.grade_point)` or `students.cgpa`).
+- SEMESTER TERM MATCHING: `semesters.term` can contain values like 'Semester 1', 'Semester 2', 'First Semester', 'Second Semester'. When filtering by semester/term, use ILIKE matching (e.g. `semesters.term ILIKE '%Semester 2%' OR semesters.term ILIKE '%Second Semester%'`).
 - NAME SEARCHING & WILDCARDS: All name queries on `full_name` MUST use `ILIKE '%<name>%'` with leading and trailing `%` wildcards (never exact `=`). DB names often contain prefixes like 'Mg', 'Ma', 'U', 'Daw', 'Ko' (e.g., 'Mg Aung Aung').
-- MYANMAR NAME TRANSLITERATION: All names in the database are stored in ENGLISH text (e.g., 'Aung Aung', 'Kyaw Kyaw', 'Mg Mg', 'Thida', 'Su Su', 'Htet Htet'). If the user query contains a name written in Myanmar script (e.g., "အောင်အောင်", "ကျော်ကျော်", "မောင်မောင်", "သီတာ", "ထက်ထက်"), you MUST translate/transliterate the name to English in the SQL `ILIKE '%<English Name>%'` clause (e.g. `ILIKE '%Aung Aung%'`). You may include multiple common English transliterations with OR if helpful (e.g. `(full_name ILIKE '%Aung Aung%' OR full_name ILIKE '%Mg Mg%')`).
+- MYANMAR NAME TRANSLITERATION: All names in the database are stored in ENGLISH text (e.g., 'Aung Aung', 'Kyaw Kyaw', 'Mg Mg', 'Thida', 'Su Su', 'Htet Htet', 'Ei Ei Phyo'). If the user query contains a name written in Myanmar script (e.g., "အောင်အောင်", "ကျော်ကျော်", "မောင်မောင်", "အိအိဖြိုး"), you MUST translate/transliterate the name to English in the SQL `ILIKE '%<English Name>%'` clause (e.g. `ILIKE '%Ei Ei Phyo%'`).
 - NO INVALID UNIONS (CRITICAL): Do NOT run `SELECT * FROM students UNION SELECT * FROM teachers` because `students` and `teachers` have different numbers of columns. If UNIONing across students and teachers, select explicitly named common columns, for example: `SELECT student_id AS person_id, full_name, dept_code, 'STUDENT' AS person_type FROM students WHERE full_name ILIKE '%Name%' UNION SELECT teacher_id AS person_id, full_name, dept_code, 'TEACHER' AS person_type FROM teachers WHERE full_name ILIKE '%Name%'`.
 """
 
@@ -231,12 +233,34 @@ class GroqChatService:
                         for row in rows
                     ]
                 except Exception as e:
-                    return {
-                        "answer": f"Sorry, I could not execute the query: {str(e)}",
-                        "sql_query": safe_sql,
-                        "raw_data": None,
-                        "query_type": "sql_query",
-                    }
+                    # Auto-repair common mistake: AVG(grade) -> AVG(grade_point)
+                    err_str = str(e).lower()
+                    if "avg(character varying)" in err_str or "avg(grade)" in safe_sql.lower():
+                        fixed_sql = safe_sql.replace("AVG(grade)", "AVG(grade_point)").replace("avg(grade)", "avg(grade_point)")
+                        try:
+                            result = await db.execute(text(fixed_sql))
+                            keys = list(result.keys())
+                            rows = [dict(zip(keys, row)) for row in result.fetchall()]
+                            rows_serializable = [
+                                {k: str(v) if not isinstance(v, (str, int, float, bool, type(None))) else v
+                                 for k, v in row.items()}
+                                for row in rows
+                            ]
+                            safe_sql = fixed_sql
+                        except Exception as inner_e:
+                            return {
+                                "answer": f"Sorry, I could not execute the query: {str(inner_e)}",
+                                "sql_query": fixed_sql,
+                                "raw_data": None,
+                                "query_type": "sql_query",
+                            }
+                    else:
+                        return {
+                            "answer": f"Sorry, I could not execute the query: {str(e)}",
+                            "sql_query": safe_sql,
+                            "raw_data": None,
+                            "query_type": "sql_query",
+                        }
 
                 # Pass 2: format result
                 context = f"User Question: {message}\nSQL Query: {safe_sql}\nResult ({len(rows)} rows): {json.dumps(rows_serializable[:20], indent=2)}"
