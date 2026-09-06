@@ -130,26 +130,26 @@ export function TimetableFormDialog({ defaultType = "academic", onClose }: Props
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-2xl">
-        <div className="flex items-center justify-between p-5 border-b border-slate-800">
-          <h3 className="font-semibold text-white">
+      <div className="bg-theme-surface border border-theme-border-hover rounded-2xl shadow-2xl w-full max-w-2xl">
+        <div className="flex items-center justify-between p-5 border-b border-theme-border">
+          <h3 className="font-semibold text-theme-text">
             {scheduleType === "academic" ? "Add Academic Class Schedule" : "Add Exam Schedule"}
           </h3>
-          <button onClick={onClose} className="text-slate-500 hover:text-slate-200 transition-colors">
+          <button onClick={onClose} className="text-theme-muted hover:text-theme-text transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Schedule Type Selector */}
         <div className="px-5 pt-4">
-          <div className="grid grid-cols-2 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-semibold">
+          <div className="grid grid-cols-2 bg-theme-base p-1 rounded-xl border border-theme-border text-xs font-semibold">
             <button
               type="button"
               onClick={() => setScheduleType("academic")}
               className={`py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 ${
                 scheduleType === "academic"
-                  ? "bg-cyan-600 text-white shadow-md"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-cyan-600 text-theme-text shadow-md"
+                  : "text-theme-sub hover:text-theme-text"
               }`}
             >
               <Calendar className="w-3.5 h-3.5" /> Class Schedule
@@ -159,8 +159,8 @@ export function TimetableFormDialog({ defaultType = "academic", onClose }: Props
               onClick={() => setScheduleType("exam")}
               className={`py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 ${
                 scheduleType === "exam"
-                  ? "bg-cyan-600 text-white shadow-md"
-                  : "text-slate-400 hover:text-slate-200"
+                  ? "bg-cyan-600 text-theme-text shadow-md"
+                  : "text-theme-sub hover:text-theme-text"
               }`}
             >
               <FileText className="w-3.5 h-3.5" /> Exam Schedule
@@ -173,11 +173,11 @@ export function TimetableFormDialog({ defaultType = "academic", onClose }: Props
             /* Academic fields */
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">Day of Week *</label>
+                <label className="block text-xs font-medium text-theme-sub mb-1.5">Day of Week *</label>
                 <select
                   value={dayOfWeek}
                   onChange={(e) => setDayOfWeek(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-600/50"
+                  className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-cyan-600/50"
                 >
                   {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].map((d) => (
                     <option key={d} value={d}>{d}</option>
@@ -185,11 +185,11 @@ export function TimetableFormDialog({ defaultType = "academic", onClose }: Props
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">Time Period *</label>
+                <label className="block text-xs font-medium text-theme-sub mb-1.5">Time Period *</label>
                 <select
                   value={slotId}
                   onChange={(e) => setSlotId(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-600/50"
+                  className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-cyan-600/50"
                 >
                   {timeSlots.map((ts) => (
                     <option key={ts.slot_id} value={ts.slot_id}>
@@ -203,31 +203,31 @@ export function TimetableFormDialog({ defaultType = "academic", onClose }: Props
             /* Exam fields */
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">Exam Date *</label>
+                <label className="block text-xs font-medium text-theme-sub mb-1.5">Exam Date *</label>
                 <input
                   type="date"
                   value={examDate}
                   onChange={(e) => setExamDate(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-600/50"
+                  className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-cyan-600/50"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Start Time *</label>
+                  <label className="block text-xs font-medium text-theme-sub mb-1.5">Start Time *</label>
                   <input
                     type="time"
                     value={startTime}
                     onChange={(e) => setStartTime(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-600/50 font-mono"
+                    className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-cyan-600/50 font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">End Time *</label>
+                  <label className="block text-xs font-medium text-theme-sub mb-1.5">End Time *</label>
                   <input
                     type="time"
                     value={endTime}
                     onChange={(e) => setEndTime(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-600/50 font-mono"
+                    className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-cyan-600/50 font-mono"
                   />
                 </div>
               </div>
@@ -235,11 +235,11 @@ export function TimetableFormDialog({ defaultType = "academic", onClose }: Props
           )}
 
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">Course Subject *</label>
+            <label className="block text-xs font-medium text-theme-sub mb-1.5">Course Subject *</label>
             <select
               value={courseCode}
               onChange={(e) => handleCourseChange(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-600/50"
+              className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-cyan-600/50"
             >
               {courses.map((c) => {
                 const teacher = teachers.find((t) => t.teacher_id === c.teacher_id);
@@ -255,13 +255,13 @@ export function TimetableFormDialog({ defaultType = "academic", onClose }: Props
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">
+              <label className="block text-xs font-medium text-theme-sub mb-1.5">
                 {scheduleType === "academic" ? "Teacher *" : "Supervisor Teacher"}
               </label>
               <select
                 value={scheduleType === "academic" ? teacherId : supervisorTeacherId}
                 onChange={(e) => scheduleType === "academic" ? setTeacherId(e.target.value) : setSupervisorTeacherId(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-600/50"
+                className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-cyan-600/50"
               >
                 {scheduleType === "exam" && <option value="">-- No Supervisor --</option>}
                 {teachers.map((t) => (
@@ -272,11 +272,11 @@ export function TimetableFormDialog({ defaultType = "academic", onClose }: Props
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">Class / Exam Hall *</label>
+              <label className="block text-xs font-medium text-theme-sub mb-1.5">Class / Exam Hall *</label>
               <select
                 value={roomId}
                 onChange={(e) => setRoomId(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-600/50"
+                className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-cyan-600/50"
               >
                 {classrooms.map((r) => (
                   <option key={r.room_id} value={r.room_id}>
@@ -288,11 +288,11 @@ export function TimetableFormDialog({ defaultType = "academic", onClose }: Props
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">Academic Semester *</label>
+            <label className="block text-xs font-medium text-theme-sub mb-1.5">Academic Semester *</label>
             <select
               value={semesterId}
               onChange={(e) => setSemesterId(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-600/50 font-mono"
+              className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-cyan-600/50 font-mono"
             >
               {semesters.map((sem) => (
                 <option key={sem.semester_id} value={sem.semester_id}>
@@ -304,13 +304,13 @@ export function TimetableFormDialog({ defaultType = "academic", onClose }: Props
 
           {error && <p className="text-sm text-red-400 bg-red-900/20 border border-red-800/50 rounded-lg px-3 py-2">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-slate-700 text-slate-300 text-sm hover:bg-slate-800 transition-colors">
+            <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-theme-border-hover text-theme-sub text-sm hover:bg-theme-elevated transition-colors">
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || !courseCode || !roomId || !semesterId || (scheduleType === "academic" && (!teacherId || !slotId))}
-              className="flex-1 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-medium transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
+              className="flex-1 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-theme-text text-sm font-medium transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Calendar className="w-4 h-4" />}
               {scheduleType === "academic" ? "Save Class Schedule" : "Save Exam Schedule"}

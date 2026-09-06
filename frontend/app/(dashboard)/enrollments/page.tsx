@@ -132,16 +132,16 @@ export default function EnrollmentsPage() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <h2 className="text-xl font-bold text-theme-text flex items-center gap-2">
               <UserCheck className="w-6 h-6 text-teal-400" /> Course Enrollments
             </h2>
             {isTeacher && (
-              <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-semibold">
+              <span className="px-2.5 py-0.5 rounded-full badge-amber border text-xs font-semibold">
                 View Only Mode
               </span>
             )}
           </div>
-          <p className="text-sm text-slate-400 mt-0.5">{data?.total ?? 0} total active student enrollments</p>
+          <p className="text-sm text-theme-sub mt-0.5">{data?.total ?? 0} total active student enrollments</p>
         </div>
         {!isTeacher && (
           <div className="flex items-center gap-3">
@@ -159,15 +159,15 @@ export default function EnrollmentsPage() {
       <div className="flex flex-wrap items-center gap-3">
         {/* Search by Student ID */}
         <div className="relative flex-1 min-w-48 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
           <input
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(0); }}
             placeholder="Search Student Name, ID, Roll No, or Course…"
-            className="w-full pl-9 pr-9 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-600/50"
+            className="w-full pl-9 pr-9 py-2 bg-theme-surface border border-theme-border-hover rounded-lg text-sm text-theme-text placeholder:text-theme-muted focus:outline-none focus:ring-2 focus:ring-teal-600/50"
           />
           {search && (
-            <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+            <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-sub">
               <X className="w-4 h-4" />
             </button>
           )}
@@ -178,7 +178,7 @@ export default function EnrollmentsPage() {
           <select
             value={filterSemester}
             onChange={(e) => { setFilterSemester(e.target.value ? parseInt(e.target.value) : ""); setPage(0); }}
-            className="w-full pl-3 pr-8 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-600/50 appearance-none"
+            className="w-full pl-3 pr-8 py-2 bg-theme-surface border border-theme-border-hover rounded-lg text-xs font-semibold text-theme-text focus:outline-none focus:ring-2 focus:ring-teal-600/50 appearance-none"
           >
             <option value="">All Semesters</option>
             {semesters.map((s) => (
@@ -187,7 +187,7 @@ export default function EnrollmentsPage() {
               </option>
             ))}
           </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-theme-sub pointer-events-none" />
         </div>
 
         {/* Course Filter Dropdown */}
@@ -195,7 +195,7 @@ export default function EnrollmentsPage() {
           <select
             value={filterCourse}
             onChange={(e) => { setFilterCourse(e.target.value); setPage(0); }}
-            className="w-full pl-3 pr-8 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-600/50 appearance-none"
+            className="w-full pl-3 pr-8 py-2 bg-theme-surface border border-theme-border-hover rounded-lg text-xs font-semibold text-theme-text focus:outline-none focus:ring-2 focus:ring-teal-600/50 appearance-none"
           >
             <option value="">All Courses</option>
             {courses
@@ -206,12 +206,12 @@ export default function EnrollmentsPage() {
                 </option>
               ))}
           </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-theme-sub pointer-events-none" />
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+      <div className="bg-theme-surface border border-theme-border rounded-xl overflow-hidden shadow-xl">
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-6 h-6 animate-spin text-teal-400" />
@@ -220,8 +220,8 @@ export default function EnrollmentsPage() {
           <div className="text-center py-16 text-red-400 text-sm">{error}</div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="border-b border-slate-800 bg-slate-950/50">
-              <tr className="text-left text-slate-500 text-xs uppercase tracking-wider">
+            <thead className="border-b border-theme-border bg-theme-base/50">
+              <tr className="text-left text-theme-sub text-xs uppercase tracking-wider">
                 {(isTeacher
                   ? ["Student Profile", "Enrolled Course", "Academic Term", "Enrolled Date"]
                   : ["Student Profile", "Enrolled Course", "Academic Term", "Enrolled Date", "Actions"]
@@ -230,10 +230,10 @@ export default function EnrollmentsPage() {
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-theme-border">
               {data?.items.length === 0 ? (
                 <tr>
-                  <td colSpan={isTeacher ? 4 : 5} className="text-center py-12 text-slate-500">
+                  <td colSpan={isTeacher ? 4 : 5} className="text-center py-12 text-theme-muted">
                     No course enrollments found.{" "}
                     {!isTeacher && <button onClick={() => setShowBatch(true)} className="text-teal-400 hover:underline">Batch Enroll Students?</button>}
                   </td>
@@ -243,7 +243,7 @@ export default function EnrollmentsPage() {
                 const course = coursesMap[e.course_code];
                 const semester = semestersMap[e.semester_id];
                 return (
-                  <tr key={e.enrollment_id} className="hover:bg-slate-800/30 transition-colors group">
+                  <tr key={e.enrollment_id} className="hover:bg-theme-elevated/30 transition-colors group">
                     <td className="px-4 py-3">
                       {student ? (
                         <div className="flex items-center gap-2">
@@ -251,8 +251,8 @@ export default function EnrollmentsPage() {
                             {student.full_name.charAt(0)}
                           </div>
                           <div>
-                            <p className="font-semibold text-slate-200 text-xs">{student.full_name}</p>
-                            <p className="text-[11px] text-slate-400"><span className="font-mono text-violet-400">{student.student_id}</span> · Roll: {student.roll_number}</p>
+                            <p className="font-semibold text-theme-text text-xs">{student.full_name}</p>
+                            <p className="text-[11px] text-theme-sub"><span className="font-mono text-violet-400">{student.student_id}</span> · Roll: {student.roll_number}</p>
                           </div>
                         </div>
                       ) : (
@@ -262,7 +262,7 @@ export default function EnrollmentsPage() {
                     <td className="px-4 py-3">
                       {course ? (
                         <div>
-                          <p className="font-semibold text-slate-200 text-xs">{course.course_name}</p>
+                          <p className="font-semibold text-theme-text text-xs">{course.course_name}</p>
                           <p className="text-[11px] font-mono text-amber-400">{course.course_code} · {course.dept_code} ({course.credit_hours} cr)</p>
                         </div>
                       ) : (
@@ -272,19 +272,19 @@ export default function EnrollmentsPage() {
                     <td className="px-4 py-3">
                       {semester ? (
                         <div>
-                          <p className="font-semibold text-slate-300 text-xs">{semester.academic_year} ({semester.term})</p>
+                          <p className="font-semibold text-theme-sub text-xs">{semester.academic_year} ({semester.term})</p>
                           {semester.is_active && <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">ACTIVE TERM</span>}
                         </div>
                       ) : (
-                        <span className="font-mono text-slate-400 text-xs">Semester #{e.semester_id}</span>
+                        <span className="font-mono text-theme-sub text-xs">Semester #{e.semester_id}</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-slate-300 text-xs">{formatDate(e.enrolled_at)}</td>
+                    <td className="px-4 py-3 text-theme-sub text-xs">{formatDate(e.enrolled_at)}</td>
                     {!isTeacher && (
                       <td className="px-4 py-3">
                         <button
                           onClick={() => handleDelete(e)}
-                          className="p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-red-400 transition-colors"
+                          className="p-1.5 rounded-md hover:bg-theme-elevated text-theme-sub hover:text-red-400 transition-colors"
                           title="Unenroll / Drop Course"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -301,20 +301,20 @@ export default function EnrollmentsPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between text-sm text-slate-400">
+        <div className="flex items-center justify-between text-sm text-theme-sub">
           <span>Page {page + 1} of {totalPages}</span>
           <div className="flex gap-2">
             <button
               disabled={page === 0}
               onClick={() => setPage((p) => p - 1)}
-              className="p-2 rounded-lg bg-slate-800 border border-slate-700 disabled:opacity-40 hover:bg-slate-700 transition-colors"
+              className="p-2 rounded-lg bg-theme-elevated border border-theme-border-hover disabled:opacity-40 hover:bg-theme-muted transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               disabled={page + 1 >= totalPages}
               onClick={() => setPage((p) => p + 1)}
-              className="p-2 rounded-lg bg-slate-800 border border-slate-700 disabled:opacity-40 hover:bg-slate-700 transition-colors"
+              className="p-2 rounded-lg bg-theme-elevated border border-theme-border-hover disabled:opacity-40 hover:bg-theme-muted transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>

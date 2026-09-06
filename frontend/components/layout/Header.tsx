@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import {
   Bell,
   LogOut,
@@ -35,14 +36,14 @@ const ROLE_META = {
   ADMIN: {
     icon: ShieldCheck,
     label: "System Administrator",
-    badgeClass: "bg-violet-500/15 text-violet-300 border-violet-500/30",
+    badgeClass: "badge-violet border",
     avatarClass: "from-violet-600 via-indigo-600 to-purple-700",
     glowClass: "shadow-violet-500/20",
   },
   TEACHER: {
     icon: UserCheck,
     label: "Faculty Member",
-    badgeClass: "bg-sky-500/15 text-sky-300 border-sky-500/30",
+    badgeClass: "badge-sky border",
     avatarClass: "from-sky-600 via-cyan-600 to-blue-700",
     glowClass: "shadow-sky-500/20",
   },
@@ -75,15 +76,18 @@ export function Header() {
   }, []);
 
   return (
-    <header className="h-16 border-b border-slate-800 bg-slate-950/80 backdrop-blur-sm sticky top-0 z-10 flex items-center justify-between px-6">
+    <header className="h-16 border-b border-theme-border bg-theme-surface/80 backdrop-blur-sm sticky top-0 z-10 flex items-center justify-between px-6 transition-colors duration-300">
       {/* Page Title */}
       <div>
-        <h1 className="text-lg font-semibold text-white">{title}</h1>
+        <h1 className="text-lg font-semibold text-theme-text">{title}</h1>
       </div>
 
       <div className="flex items-center gap-3">
+        {/* Theme Toggle */}
+        <ThemeToggle />
+
         {/* Notifications */}
-        <button className="relative w-9 h-9 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-200 hover:border-slate-700 transition-all">
+        <button className="relative w-9 h-9 rounded-lg bg-theme-surface border border-theme-border flex items-center justify-center text-theme-muted hover:text-theme-text hover:border-theme-border-hover transition-all">
           <Bell className="w-4 h-4" />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-sky-500 rounded-full" />
         </button>
@@ -93,7 +97,7 @@ export function Header() {
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-2.5 pl-3 pr-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 transition-all group"
+              className="flex items-center gap-2.5 pl-3 pr-2.5 py-1.5 rounded-xl bg-theme-surface border border-theme-border hover:border-theme-border-hover transition-all group"
             >
               {/* Avatar */}
               <div className={`w-7 h-7 rounded-lg bg-gradient-to-tr ${meta.avatarClass} flex items-center justify-center text-white text-xs font-bold shadow-md ${meta.glowClass}`}>
@@ -102,30 +106,30 @@ export function Header() {
 
               {/* Name & Role */}
               <div className="hidden sm:block text-left">
-                <p className="text-xs font-bold text-slate-200 leading-tight">
+                <p className="text-xs font-bold text-theme-text leading-tight">
                   {user.username}
                 </p>
                 <div className="flex items-center gap-1">
-                  <RoleIcon className="w-3 h-3 text-slate-500" />
-                  <span className="text-[10px] text-slate-500 font-medium">{meta.label}</span>
+                  <RoleIcon className="w-3 h-3 text-theme-muted" />
+                  <span className="text-[10px] text-theme-muted font-medium">{meta.label}</span>
                 </div>
               </div>
 
-              <ChevronDown className={`w-3.5 h-3.5 text-slate-500 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
+              <ChevronDown className={`w-3.5 h-3.5 text-theme-muted transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
             </button>
 
             {/* Dropdown Panel */}
             {dropdownOpen && (
-              <div className="absolute right-0 top-full mt-2 w-64 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+              <div className="absolute right-0 top-full mt-2 w-64 bg-theme-surface border border-theme-border rounded-2xl shadow-2xl shadow-black/30 overflow-hidden z-50">
                 {/* Profile Header */}
-                <div className="p-4 border-b border-slate-800">
+                <div className="p-4 border-b border-theme-border">
                   <div className="flex items-center gap-3">
                     <div className={`w-11 h-11 rounded-xl bg-gradient-to-tr ${meta.avatarClass} flex items-center justify-center text-white text-base font-bold shadow-lg ${meta.glowClass}`}>
                       {user.username.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-white truncate">{user.username}</p>
-                      <p className="text-xs text-slate-400 truncate">{user.email}</p>
+                      <p className="text-sm font-bold text-theme-text truncate">{user.username}</p>
+                      <p className="text-xs text-theme-sub truncate">{user.email}</p>
                       <span className={`inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${meta.badgeClass}`}>
                         <RoleIcon className="w-3 h-3" />
                         {user.role}
@@ -136,18 +140,18 @@ export function Header() {
 
                 {/* Menu Items */}
                 <div className="p-1.5 space-y-0.5">
-                  <div className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 text-xs">
+                  <div className="flex items-center gap-3 px-3 py-2 rounded-lg text-theme-sub text-xs">
                     <Mail className="w-3.5 h-3.5 flex-shrink-0" />
                     <span className="truncate">{user.email}</span>
                   </div>
-                  <div className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 text-xs">
+                  <div className="flex items-center gap-3 px-3 py-2 rounded-lg text-theme-sub text-xs">
                     <User className="w-3.5 h-3.5 flex-shrink-0" />
-                    <span>ID: <span className="text-slate-300 font-mono">{user.user_id}</span></span>
+                    <span>ID: <span className="text-theme-text font-mono">{user.user_id}</span></span>
                   </div>
                 </div>
 
                 {/* Divider + Logout */}
-                <div className="p-1.5 border-t border-slate-800">
+                <div className="p-1.5 border-t border-theme-border">
                   <button
                     onClick={() => {
                       setDropdownOpen(false);
@@ -165,7 +169,7 @@ export function Header() {
             )}
           </div>
         ) : (
-          <div className="w-32 h-9 rounded-xl bg-slate-900 animate-pulse" />
+          <div className="w-32 h-9 rounded-xl bg-theme-elevated animate-pulse" />
         )}
       </div>
     </header>

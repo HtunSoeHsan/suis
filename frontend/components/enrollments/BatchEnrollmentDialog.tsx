@@ -165,13 +165,13 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+      <div className="bg-theme-surface border border-theme-border-hover rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-slate-800 shrink-0">
-          <h3 className="font-semibold text-white flex items-center gap-2 text-lg">
+        <div className="flex items-center justify-between p-5 border-b border-theme-border shrink-0">
+          <h3 className="font-semibold text-theme-text flex items-center gap-2 text-lg">
             <Layers className="w-5 h-5 text-teal-400" /> Batch Course Enrollment
           </h3>
-          <button onClick={onClose} className="text-slate-500 hover:text-slate-200 transition-colors">
+          <button onClick={onClose} className="text-theme-muted hover:text-theme-text transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -183,14 +183,14 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
         ) : (
           <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto flex-1">
             {/* Step 1: Semester Selector */}
-            <div className="bg-slate-950/80 border border-slate-800 p-4 rounded-xl">
+            <div className="bg-theme-surface/80 border border-theme-border p-4 rounded-xl">
               <label className="block text-xs font-semibold text-teal-400 tracking-wider uppercase mb-2">
                 1. Target Academic Semester *
               </label>
               <select
                 value={semesterId}
                 onChange={(e) => setSemesterId(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm font-medium text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500/50 font-mono"
+                className="w-full px-3.5 py-2.5 bg-theme-elevated border border-theme-border-hover rounded-xl text-sm font-medium text-theme-text focus:outline-none focus:ring-2 focus:ring-teal-500/50 font-mono"
               >
                 {semesters.map((sem) => (
                   <option key={sem.semester_id} value={sem.semester_id}>
@@ -203,7 +203,7 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
             {/* Grid 2 Column: Step 2 Courses & Step 3 Students */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Step 2: Courses Selection */}
-              <div className="bg-slate-950/80 border border-slate-800 p-4 rounded-xl flex flex-col h-[340px]">
+              <div className="bg-theme-surface/80 border border-theme-border p-4 rounded-xl flex flex-col h-[340px]">
                 <div className="flex items-center justify-between mb-3 shrink-0">
                   <span className="text-xs font-semibold text-teal-400 tracking-wider uppercase flex items-center gap-1.5">
                     <BookOpen className="w-4 h-4" /> 2. Select Courses ({selectedCourseCodes.length})
@@ -222,7 +222,7 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
                   <select
                     value={courseDeptFilter}
                     onChange={(e) => setCourseDeptFilter(e.target.value)}
-                    className="w-full px-2.5 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-300 focus:outline-none"
+                    className="w-full px-2.5 py-1.5 bg-theme-elevated border border-theme-border-hover rounded-lg text-xs text-theme-sub focus:outline-none"
                   >
                     <option value="ALL">All Departments</option>
                     {departments.map((d) => (
@@ -236,7 +236,7 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
                 {/* Course List */}
                 <div className="overflow-y-auto space-y-1.5 pr-1 flex-1">
                   {filteredCourses.length === 0 ? (
-                    <p className="text-xs text-slate-500 py-8 text-center">No courses found</p>
+                    <p className="text-xs text-theme-muted py-8 text-center">No courses found</p>
                   ) : (
                     filteredCourses.map((c) => {
                       const isSelected = selectedCourseCodes.includes(c.course_code);
@@ -247,7 +247,7 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
                           className={`flex items-center justify-between p-2.5 rounded-lg border text-xs cursor-pointer transition-colors ${
                             isSelected
                               ? "bg-teal-950/40 border-teal-700/70 text-teal-200"
-                              : "bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800/80"
+                              : "bg-theme-surface border-theme-border text-theme-sub hover:bg-theme-elevated/80"
                           }`}
                         >
                           <div className="flex items-center gap-2 truncate pr-2">
@@ -256,10 +256,10 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
                             ) : (
                               <Square className="w-4 h-4 text-slate-600 shrink-0" />
                             )}
-                            <span className="font-mono font-bold text-slate-200">{c.course_code}</span>
-                            <span className="truncate text-slate-400">{c.course_name}</span>
+                            <span className="font-mono font-bold text-theme-text">{c.course_code}</span>
+                            <span className="truncate text-theme-sub">{c.course_name}</span>
                           </div>
-                          <span className="text-[10px] font-semibold bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded border border-slate-700 shrink-0">
+                          <span className="text-[10px] font-semibold bg-theme-elevated text-theme-sub px-1.5 py-0.5 rounded border border-theme-border-hover shrink-0">
                             {c.dept_code}
                           </span>
                         </div>
@@ -270,7 +270,7 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
               </div>
 
               {/* Step 3: Students Selection */}
-              <div className="bg-slate-950/80 border border-slate-800 p-4 rounded-xl flex flex-col h-[340px]">
+              <div className="bg-theme-surface/80 border border-theme-border p-4 rounded-xl flex flex-col h-[340px]">
                 <div className="flex items-center justify-between mb-3 shrink-0">
                   <span className="text-xs font-semibold text-teal-400 tracking-wider uppercase flex items-center gap-1.5">
                     <Users className="w-4 h-4" /> 3. Select Students ({selectedStudentIds.length})
@@ -289,7 +289,7 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
                   <select
                     value={studentMajorFilter}
                     onChange={(e) => setStudentMajorFilter(e.target.value)}
-                    className="w-full px-2 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-300 focus:outline-none"
+                    className="w-full px-2 py-1.5 bg-theme-elevated border border-theme-border-hover rounded-lg text-xs text-theme-sub focus:outline-none"
                   >
                     <option value="ALL">All Majors</option>
                     <option value="CST">CST</option>
@@ -303,7 +303,7 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
                         e.target.value === "ALL" ? "ALL" : parseInt(e.target.value)
                       )
                     }
-                    className="w-full px-2 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-300 focus:outline-none"
+                    className="w-full px-2 py-1.5 bg-theme-elevated border border-theme-border-hover rounded-lg text-xs text-theme-sub focus:outline-none"
                   >
                     <option value="ALL">All Years</option>
                     {[1, 2, 3, 4, 5].map((y) => (
@@ -317,7 +317,7 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
                 {/* Student List */}
                 <div className="overflow-y-auto space-y-1.5 pr-1 flex-1">
                   {filteredStudents.length === 0 ? (
-                    <p className="text-xs text-slate-500 py-8 text-center">No students found</p>
+                    <p className="text-xs text-theme-muted py-8 text-center">No students found</p>
                   ) : (
                     filteredStudents.map((s) => {
                       const isSelected = selectedStudentIds.includes(s.student_id);
@@ -328,7 +328,7 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
                           className={`flex items-center justify-between p-2.5 rounded-lg border text-xs cursor-pointer transition-colors ${
                             isSelected
                               ? "bg-teal-950/40 border-teal-700/70 text-teal-200"
-                              : "bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800/80"
+                              : "bg-theme-surface border-theme-border text-theme-sub hover:bg-theme-elevated/80"
                           }`}
                         >
                           <div className="flex items-center gap-2 truncate pr-2">
@@ -337,10 +337,10 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
                             ) : (
                               <Square className="w-4 h-4 text-slate-600 shrink-0" />
                             )}
-                            <span className="font-medium text-slate-200">{s.full_name}</span>
-                            <span className="font-mono text-[11px] text-slate-400">({s.roll_number})</span>
+                            <span className="font-medium text-theme-text">{s.full_name}</span>
+                            <span className="font-mono text-[11px] text-theme-sub">({s.roll_number})</span>
                           </div>
-                          <span className="text-[10px] font-semibold bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded border border-slate-700 shrink-0">
+                          <span className="text-[10px] font-semibold bg-theme-elevated text-theme-sub px-1.5 py-0.5 rounded border border-theme-border-hover shrink-0">
                             Yr {s.academic_year}
                           </span>
                         </div>
@@ -352,24 +352,24 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
             </div>
 
             {/* Step 4: Auto-Promote & Major Update Banner */}
-            <div className="p-3.5 bg-slate-950/80 border border-slate-800 rounded-xl space-y-3">
+            <div className="p-3.5 bg-theme-surface/80 border border-theme-border rounded-xl space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-300">
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-theme-sub">
                   <input
                     type="checkbox"
                     checked={autoPromote}
                     onChange={(e) => setAutoPromote(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-teal-500 focus:ring-teal-500/50"
+                    className="w-4 h-4 rounded border-theme-border-hover bg-theme-elevated text-teal-500 focus:ring-teal-500/50"
                   />
                   Promote Selected Students' Academic Year upon enrollment
                 </label>
                 {autoPromote && (
                   <div className="flex items-center gap-2 text-xs">
-                    <span className="text-slate-400">Promote to:</span>
+                    <span className="text-theme-sub">Promote to:</span>
                     <select
                       value={promoteYear}
                       onChange={(e) => setPromoteYear(parseInt(e.target.value))}
-                      className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-teal-300 font-bold focus:outline-none"
+                      className="px-2 py-1 bg-theme-elevated border border-theme-border-hover rounded text-xs text-teal-300 font-bold focus:outline-none"
                     >
                       {[1, 2, 3, 4, 5].map((y) => (
                         <option key={y} value={y}>
@@ -382,12 +382,12 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
               </div>
 
               {isSemester3 && (
-                <div className="flex items-center justify-between border-t border-slate-800/80 pt-2.5 text-xs animate-in fade-in duration-150">
-                  <span className="font-semibold text-slate-300">Update Student Major (အတန်းပြောင်းချိန် Major သိမ်းရန်):</span>
+                <div className="flex items-center justify-between border-t border-theme-border/80 pt-2.5 text-xs animate-in fade-in duration-150">
+                  <span className="font-semibold text-theme-sub">Update Student Major (အတန်းပြောင်းချိန် Major သိမ်းရန်):</span>
                   <select
                     value={updateMajor}
                     onChange={(e) => setUpdateMajor(e.target.value)}
-                    className="px-2.5 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-amber-300 font-bold focus:outline-none"
+                    className="px-2.5 py-1 bg-theme-elevated border border-theme-border-hover rounded text-xs text-amber-300 font-bold focus:outline-none"
                   >
                     <option value="NO_CHANGE">Keep Current Major</option>
                     <option value="CS">CS (Computer Science)</option>
@@ -424,14 +424,14 @@ export function BatchEnrollmentDialog({ initialStudentIds, onClose, onSuccess }:
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 py-2.5 rounded-xl border border-slate-700 text-slate-300 text-sm hover:bg-slate-800 transition-colors"
+                className="flex-1 py-2.5 rounded-xl border border-theme-border-hover text-theme-sub text-sm hover:bg-theme-elevated transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={submitting || selectedCourseCodes.length === 0 || selectedStudentIds.length === 0}
-                className="flex-1 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-sm font-medium transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2 shadow-lg shadow-teal-950"
+                className="flex-1 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-theme-text text-sm font-medium transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2 shadow-lg shadow-teal-950"
               >
                 {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
                 Batch Enroll ({totalCalculated})

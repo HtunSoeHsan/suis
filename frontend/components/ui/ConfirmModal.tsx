@@ -57,7 +57,7 @@ export function ConfirmModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35 backdrop-blur-[2px] animate-in fade-in duration-200">
       <div
-        className="bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform animate-in zoom-in-95 duration-200"
+        className="bg-theme-surface border border-theme-border-hover/80 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header bar */}
@@ -66,14 +66,14 @@ export function ConfirmModal({
             <div className={`p-2.5 rounded-xl border ${iconBg} shadow-inner`}>
               <Icon className="w-5 h-5" />
             </div>
-            <h3 className="text-base font-bold text-white tracking-wide">
+            <h3 className="text-base font-bold text-theme-text tracking-wide">
               {title ?? defaultTitle}
             </h3>
           </div>
           <button
             onClick={onCancel}
             disabled={isLoading}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors disabled:opacity-50"
+            className="p-1 rounded-lg text-theme-sub hover:text-theme-text hover:bg-theme-elevated transition-colors disabled:opacity-50"
           >
             <X className="w-5 h-5" />
           </button>
@@ -81,19 +81,19 @@ export function ConfirmModal({
 
         {/* Message Content */}
         <div className="px-6 py-4">
-          <p className="text-sm text-slate-300 leading-relaxed font-normal">
+          <p className="text-sm text-theme-sub leading-relaxed font-normal">
             {message}
           </p>
         </div>
 
         {/* Actions Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 bg-slate-950/50 border-t border-slate-800/80">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 bg-theme-base/50 border-t border-theme-border/80">
           {!isAlert && (
             <button
               type="button"
               onClick={onCancel}
               disabled={isLoading}
-              className="px-4 py-2 text-xs font-semibold rounded-xl text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-xs font-semibold rounded-xl text-theme-sub bg-theme-elevated hover:bg-theme-muted border border-theme-border-hover transition-colors disabled:opacity-50"
             >
               {cancelText}
             </button>

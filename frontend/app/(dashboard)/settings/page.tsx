@@ -96,19 +96,19 @@ export default function SettingsPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+          <h2 className="text-xl font-bold text-theme-text flex items-center gap-2">
             <Settings2 className="w-6 h-6 text-violet-400" />
             System Settings & Format Rules
           </h2>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-theme-sub mt-1">
             Centralized management for ID auto-generation rules, roll numbers, and system configurations.
           </p>
         </div>
         <button
           onClick={fetchSettings}
-          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-300 text-sm font-medium transition-colors"
+          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-theme-border-hover bg-theme-surface hover:bg-theme-elevated text-theme-sub text-sm font-medium transition-colors"
         >
-          <RefreshCw className="w-4 h-4 text-slate-400" /> Refresh
+          <RefreshCw className="w-4 h-4 text-theme-sub" /> Refresh
         </button>
       </div>
 
@@ -123,28 +123,28 @@ export default function SettingsPage() {
           <span className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4" /> {msg.text}
           </span>
-          <button onClick={() => setMsg(null)} className="text-slate-400 hover:text-white">
+          <button onClick={() => setMsg(null)} className="text-theme-sub hover:text-theme-text">
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
       {loading ? (
-        <div className="flex items-center justify-center py-20 bg-slate-900 border border-slate-800 rounded-2xl">
+        <div className="flex items-center justify-center py-20 bg-theme-surface border border-theme-border rounded-2xl">
           <Loader2 className="w-8 h-8 animate-spin text-violet-400" />
         </div>
       ) : (
         <form onSubmit={handleSave} className="space-y-6">
           {/* SECTION 1: STUDENT ID RULES */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div className="bg-theme-surface border border-theme-border rounded-2xl p-6 shadow-xl space-y-5">
+            <div className="flex items-center justify-between border-b border-theme-border pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-violet-950/60 border border-violet-800/50 text-violet-400">
                   <GraduationCap className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white text-base">Student ID Generation Rules</h3>
-                  <p className="text-xs text-slate-400">Format structure used when auto-assigning Student IDs</p>
+                  <h3 className="font-semibold text-theme-text text-base">Student ID Generation Rules</h3>
+                  <p className="text-xs text-theme-sub">Format structure used when auto-assigning Student IDs</p>
                 </div>
               </div>
               <span className="text-xs font-mono px-3 py-1 rounded-full bg-violet-950 text-violet-300 border border-violet-800/60">
@@ -154,22 +154,22 @@ export default function SettingsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">ID Prefix</label>
+                <label className="block text-xs font-medium text-theme-sub mb-1.5">ID Prefix</label>
                 <input
                   type="text"
                   value={prefix}
                   onChange={(e) => setPrefix(e.target.value)}
                   placeholder="STU-2026"
-                  className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm font-mono text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-600/50"
+                  className="w-full px-3.5 py-2 bg-theme-elevated border border-theme-border-hover rounded-xl text-sm font-mono text-theme-text focus:outline-none focus:ring-2 focus:ring-violet-600/50"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">Sequence Digits Padding</label>
+                <label className="block text-xs font-medium text-theme-sub mb-1.5">Sequence Digits Padding</label>
                 <select
                   value={seqPadding}
                   onChange={(e) => setSeqPadding(parseInt(e.target.value))}
-                  className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-600/50"
+                  className="w-full px-3.5 py-2 bg-theme-elevated border border-theme-border-hover rounded-xl text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-violet-600/50"
                 >
                   {[3, 4, 5, 6].map((p) => (
                     <option key={p} value={p}>
@@ -182,15 +182,15 @@ export default function SettingsPage() {
           </div>
 
           {/* SECTION 2: ROLL NUMBER RULES */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div className="bg-theme-surface border border-theme-border rounded-2xl p-6 shadow-xl space-y-5">
+            <div className="flex items-center justify-between border-b border-theme-border pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-teal-950/60 border border-teal-800/50 text-teal-400">
                   <Hash className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white text-base">Roll Number Generation Rules</h3>
-                  <p className="text-xs text-slate-400">Prefix and digit padding for student roll numbers</p>
+                  <h3 className="font-semibold text-theme-text text-base">Roll Number Generation Rules</h3>
+                  <p className="text-xs text-theme-sub">Prefix and digit padding for student roll numbers</p>
                 </div>
               </div>
               <span className="text-xs font-mono px-3 py-1 rounded-full bg-teal-950 text-teal-300 border border-teal-800/60">
@@ -200,22 +200,22 @@ export default function SettingsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">Roll Prefix</label>
+                <label className="block text-xs font-medium text-theme-sub mb-1.5">Roll Prefix</label>
                 <input
                   type="text"
                   value={rollPrefix}
                   onChange={(e) => setRollPrefix(e.target.value)}
                   placeholder="R"
-                  className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm font-mono text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-600/50"
+                  className="w-full px-3.5 py-2 bg-theme-elevated border border-theme-border-hover rounded-xl text-sm font-mono text-theme-text focus:outline-none focus:ring-2 focus:ring-teal-600/50"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">Sequence Padding</label>
+                <label className="block text-xs font-medium text-theme-sub mb-1.5">Sequence Padding</label>
                 <select
                   value={rollPadding}
                   onChange={(e) => setRollPadding(parseInt(e.target.value))}
-                  className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-600/50"
+                  className="w-full px-3.5 py-2 bg-theme-elevated border border-theme-border-hover rounded-xl text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-teal-600/50"
                 >
                   {[2, 3, 4].map((p) => (
                     <option key={p} value={p}>
@@ -228,15 +228,15 @@ export default function SettingsPage() {
           </div>
 
           {/* SECTION 3: TEACHER ID RULES */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div className="bg-theme-surface border border-theme-border rounded-2xl p-6 shadow-xl space-y-5">
+            <div className="flex items-center justify-between border-b border-theme-border pb-4">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-indigo-950/60 border border-indigo-800/50 text-indigo-400">
                   <Users className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white text-base">Teacher ID Rules</h3>
-                  <p className="text-xs text-slate-400">Prefix and sequence padding for Teacher IDs</p>
+                  <h3 className="font-semibold text-theme-text text-base">Teacher ID Rules</h3>
+                  <p className="text-xs text-theme-sub">Prefix and sequence padding for Teacher IDs</p>
                 </div>
               </div>
               <span className="text-xs font-mono px-3 py-1 rounded-full bg-indigo-950 text-indigo-300 border border-indigo-800/60">
@@ -246,22 +246,22 @@ export default function SettingsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">Teacher Prefix</label>
+                <label className="block text-xs font-medium text-theme-sub mb-1.5">Teacher Prefix</label>
                 <input
                   type="text"
                   value={teacherPrefix}
                   onChange={(e) => setTeacherPrefix(e.target.value)}
                   placeholder="TCH-2026"
-                  className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm font-mono text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-600/50"
+                  className="w-full px-3.5 py-2 bg-theme-elevated border border-theme-border-hover rounded-xl text-sm font-mono text-theme-text focus:outline-none focus:ring-2 focus:ring-indigo-600/50"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">Sequence Padding</label>
+                <label className="block text-xs font-medium text-theme-sub mb-1.5">Sequence Padding</label>
                 <select
                   value={teacherPadding}
                   onChange={(e) => setTeacherPadding(parseInt(e.target.value))}
-                  className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-600/50"
+                  className="w-full px-3.5 py-2 bg-theme-elevated border border-theme-border-hover rounded-xl text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-indigo-600/50"
                 >
                   {[2, 3, 4].map((p) => (
                     <option key={p} value={p}>

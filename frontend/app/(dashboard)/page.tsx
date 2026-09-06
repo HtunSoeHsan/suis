@@ -118,7 +118,7 @@ export default function DashboardPage() {
       desc: "Ask complex university data questions in plain English",
       icon: MessageSquareText,
       badge: "Llama 3.3 70B",
-      accent: "from-amber-500/20 via-amber-500/5 to-transparent border-amber-500/30 hover:border-amber-500/60",
+      accent: "border-amber-500/30 hover:border-amber-500/60",
       iconBg: "bg-amber-500/10 text-amber-400",
     },
     {
@@ -127,7 +127,7 @@ export default function DashboardPage() {
       desc: "Real-time webcam identification & liveness detection",
       icon: ScanFace,
       badge: "InsightFace",
-      accent: "from-emerald-500/20 via-emerald-500/5 to-transparent border-emerald-500/30 hover:border-emerald-500/60",
+      accent: "border-emerald-500/30 hover:border-emerald-500/60",
       iconBg: "bg-emerald-500/10 text-emerald-400",
     },
     {
@@ -136,7 +136,7 @@ export default function DashboardPage() {
       desc: "Add profiles, view details & enroll biometric facial data",
       icon: GraduationCap,
       badge: "Management",
-      accent: "from-violet-500/20 via-violet-500/5 to-transparent border-violet-500/30 hover:border-violet-500/60",
+      accent: "border-violet-500/30 hover:border-violet-500/60",
       iconBg: "bg-violet-500/10 text-violet-400",
     },
     {
@@ -145,7 +145,7 @@ export default function DashboardPage() {
       desc: "Manage teachers, subjects, departments & biometric IDs",
       icon: Users,
       badge: "Faculty",
-      accent: "from-blue-500/20 via-blue-500/5 to-transparent border-blue-500/30 hover:border-blue-500/60",
+      accent: "border-blue-500/30 hover:border-blue-500/60",
       iconBg: "bg-blue-500/10 text-blue-400",
     },
   ];
@@ -169,14 +169,14 @@ export default function DashboardPage() {
               <span>Next-Gen Campus Intelligence</span>
             </div>
 
-            <h1 className="text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
+            <h1 className="text-4xl lg:text-5xl font-extrabold text-theme-text tracking-tight leading-tight">
               Smart University{" "}
               <span className="bg-gradient-to-r from-violet-400 via-fuchsia-300 to-indigo-300 bg-clip-text text-transparent">
                 Intelligence System
               </span>
             </h1>
 
-            <p className="text-slate-300 text-base leading-relaxed">
+            <p className="text-theme-sub text-base leading-relaxed">
               Unified AI command center with instant Text-to-SQL analytics, real-time biometric identification, and automated attendance tracking.
             </p>
 
@@ -192,7 +192,7 @@ export default function DashboardPage() {
                 </Link>
                 <Link
                   href="/face-scanner"
-                  className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 border border-slate-700 text-slate-200 text-sm font-semibold transition-all backdrop-blur-md hover:-translate-y-0.5"
+                  className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-theme-elevated/90 hover:bg-theme-muted/90 border border-theme-border-hover text-theme-text text-sm font-semibold transition-all backdrop-blur-md hover:-translate-y-0.5"
                 >
                   <ScanFace className="w-4 h-4 text-emerald-400" />
                   <span>Open Biometric Scanner</span>
@@ -209,27 +209,27 @@ export default function DashboardPage() {
           <Link
             key={label}
             href={href}
-            className="group relative rounded-2xl bg-slate-900/90 border border-slate-800/80 hover:border-slate-700/90 p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl shadow-black/40 overflow-hidden"
+            className="group relative rounded-2xl bg-theme-surface border border-theme-border hover:border-theme-border-hover p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl shadow-black/10 overflow-hidden"
           >
             <div className="flex items-center justify-between mb-4">
               <div className={`w-12 h-12 rounded-xl bg-gradient-to-tr ${color} flex items-center justify-center shadow-lg ${shadow} group-hover:scale-110 transition-transform`}>
                 <Icon className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xs text-slate-500 group-hover:text-violet-400 transition-colors flex items-center gap-1 font-medium">
+              <span className="text-xs text-theme-muted group-hover:text-violet-400 transition-colors flex items-center gap-1 font-medium">
                 View <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
               </span>
             </div>
 
             <div className="space-y-1">
-              <p className="text-3xl font-black text-white tracking-tight">
+              <p className="text-3xl font-black text-theme-text tracking-tight">
                 {stats.loading ? (
-                  <span className="inline-block w-12 h-8 bg-slate-800 rounded animate-pulse" />
+                  <span className="inline-block w-12 h-8 bg-theme-elevated rounded animate-pulse" />
                 ) : (
                   value
                 )}
               </p>
-              <p className="text-sm font-semibold text-slate-300">{label}</p>
-              <p className="text-xs text-slate-500">{hint}</p>
+              <p className="text-sm font-semibold text-theme-sub">{label}</p>
+              <p className="text-xs text-theme-muted">{hint}</p>
             </div>
           </Link>
         ))}
@@ -238,11 +238,11 @@ export default function DashboardPage() {
       {/* Quick Access Modules */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2.5">
+          <h2 className="text-xl font-bold text-theme-text flex items-center gap-2.5">
             <Zap className="w-5 h-5 text-violet-400" />
             <span>Core Intelligence Modules</span>
           </h2>
-          <span className="text-xs text-slate-500">Select a service to launch</span>
+          <span className="text-xs text-theme-muted">Select a service to launch</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -250,22 +250,22 @@ export default function DashboardPage() {
             <Link
               key={href}
               href={href}
-              className={`group relative rounded-2xl bg-slate-900/90 bg-gradient-to-b ${accent} border p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/50 flex flex-col justify-between`}
+              className={`group relative rounded-2xl bg-theme-surface border ${accent} p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/20 flex flex-col justify-between`}
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <div className={`p-3 rounded-xl ${iconBg} group-hover:scale-105 transition-transform`}>
                     <Icon className="w-6 h-6" />
                   </div>
-                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700/60">
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-theme-elevated text-theme-muted border border-theme-border">
                     {badge}
                   </span>
                 </div>
 
-                <h3 className="text-lg font-bold text-white mb-2 group-hover:text-violet-300 transition-colors">
+                <h3 className="text-lg font-bold text-theme-text mb-2 group-hover:text-violet-400 transition-colors">
                   {label}
                 </h3>
-                <p className="text-slate-400 text-xs leading-relaxed mb-6">
+                <p className="text-theme-sub text-xs leading-relaxed mb-6">
                   {desc}
                 </p>
               </div>

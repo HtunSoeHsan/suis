@@ -120,21 +120,21 @@ export default function CoursesPage() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <h2 className="text-xl font-bold text-theme-text flex items-center gap-2">
               <BookOpen className="w-6 h-6 text-amber-400" /> Courses & Curriculum
             </h2>
             {isTeacher && (
-              <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-semibold">
+              <span className="px-2.5 py-0.5 rounded-full badge-amber border text-xs font-semibold">
                 View Only Mode
               </span>
             )}
           </div>
-          <p className="text-sm text-slate-400 mt-0.5">{data?.total ?? 0} total curriculum courses</p>
+          <p className="text-sm text-theme-sub mt-0.5">{data?.total ?? 0} total curriculum courses</p>
         </div>
         {!isTeacher && (
           <button
             onClick={() => setShowCreate(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-colors shadow-lg shadow-amber-900/30"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-theme-text text-sm font-medium transition-colors shadow-lg shadow-amber-900/30"
           >
             <Plus className="w-4 h-4" /> Add Course
           </button>
@@ -145,15 +145,15 @@ export default function CoursesPage() {
       <div className="flex flex-wrap items-center gap-3">
         {/* Search */}
         <div className="relative flex-1 min-w-48 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
           <input
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(0); }}
             placeholder="Search course code or name…"
-            className="w-full pl-9 pr-9 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-600/50"
+            className="w-full pl-9 pr-9 py-2 bg-theme-surface border border-theme-border-hover rounded-lg text-sm text-theme-text placeholder:text-theme-muted focus:outline-none focus:ring-2 focus:ring-amber-600/50"
           />
           {search && (
-            <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+            <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-sub">
               <X className="w-4 h-4" />
             </button>
           )}
@@ -164,7 +164,7 @@ export default function CoursesPage() {
           <select
             value={filterSemester}
             onChange={(e) => { setFilterSemester(e.target.value); setPage(0); }}
-            className="w-full pl-3 pr-8 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-600/50 appearance-none cursor-pointer"
+            className="w-full pl-3 pr-8 py-2 bg-theme-surface border border-theme-border-hover rounded-lg text-xs font-semibold text-theme-text focus:outline-none focus:ring-2 focus:ring-amber-600/50 appearance-none cursor-pointer"
           >
             <option value="">All Semesters</option>
             {semesters.map((s) => (
@@ -173,7 +173,7 @@ export default function CoursesPage() {
               </option>
             ))}
           </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-theme-sub pointer-events-none" />
         </div>
 
         {/* Department Filter Dropdown */}
@@ -181,7 +181,7 @@ export default function CoursesPage() {
           <select
             value={filterDept}
             onChange={(e) => { setFilterDept(e.target.value); setPage(0); }}
-            className="w-full pl-3 pr-8 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-600/50 appearance-none cursor-pointer"
+            className="w-full pl-3 pr-8 py-2 bg-theme-surface border border-theme-border-hover rounded-lg text-xs font-semibold text-theme-text focus:outline-none focus:ring-2 focus:ring-amber-600/50 appearance-none cursor-pointer"
           >
             <option value="">All Departments</option>
             {departments.map((d) => (
@@ -190,12 +190,12 @@ export default function CoursesPage() {
               </option>
             ))}
           </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-theme-sub pointer-events-none" />
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+      <div className="bg-theme-surface border border-theme-border rounded-xl overflow-hidden shadow-xl">
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-6 h-6 animate-spin text-amber-400" />
@@ -204,8 +204,8 @@ export default function CoursesPage() {
           <div className="text-center py-16 text-red-400 text-sm">{error}</div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="border-b border-slate-800 bg-slate-950/50">
-              <tr className="text-left text-slate-500 text-xs uppercase tracking-wider">
+            <thead className="border-b border-theme-border bg-theme-base/50">
+              <tr className="text-left text-theme-sub text-xs uppercase tracking-wider">
                 {(isTeacher
                   ? ["Course Code", "Course Name", "Semester", "Department", "Credits", "Assigned Teacher"]
                   : ["Course Code", "Course Name", "Semester", "Department", "Credits", "Assigned Teacher", "Actions"]
@@ -214,10 +214,10 @@ export default function CoursesPage() {
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-theme-border">
               {data?.items.length === 0 ? (
                 <tr>
-                  <td colSpan={isTeacher ? 6 : 7} className="text-center py-12 text-slate-500">
+                  <td colSpan={isTeacher ? 6 : 7} className="text-center py-12 text-theme-muted">
                     No courses found.{" "}
                     {!isTeacher && <button onClick={() => setShowCreate(true)} className="text-amber-400 hover:underline">Add one?</button>}
                   </td>
@@ -227,27 +227,27 @@ export default function CoursesPage() {
                 const sem = c.semester_id ? semestersMap[c.semester_id] : null;
 
                 return (
-                  <tr key={c.course_code} className="hover:bg-slate-800/30 transition-colors group">
+                  <tr key={c.course_code} className="hover:bg-theme-elevated/30 transition-colors group">
                     <td className="px-4 py-3 font-mono font-bold text-amber-400 text-xs">{c.course_code}</td>
-                    <td className="px-4 py-3 font-semibold text-slate-200">{c.course_name}</td>
+                    <td className="px-4 py-3 font-semibold text-theme-text">{c.course_name}</td>
                     <td className="px-4 py-3 text-xs">
                       {sem ? (
                         <span className="px-2 py-0.5 rounded-full bg-amber-950/60 border border-amber-800/60 text-amber-300 text-[11px] font-medium inline-flex items-center gap-1">
                           {sem.academic_year} · {sem.term}
                         </span>
                       ) : (
-                        <span className="text-slate-500 italic text-[11px]">Unassigned</span>
+                        <span className="text-theme-muted italic text-[11px]">Unassigned</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-xs">
                       <span className="font-mono font-bold text-sky-400">{c.dept_code}</span>
                       {departmentsMap[c.dept_code] && (
-                        <span className="text-slate-400 ml-1.5 font-medium">
+                        <span className="text-theme-sub ml-1.5 font-medium">
                           — {departmentsMap[c.dept_code].dept_name}
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-slate-300 font-medium">{c.credit_hours} hrs</td>
+                    <td className="px-4 py-3 text-theme-sub font-medium">{c.credit_hours} hrs</td>
                     <td className="px-4 py-3">
                       {teacher ? (
                         <div className="flex items-center gap-2">
@@ -255,14 +255,14 @@ export default function CoursesPage() {
                             {teacher.full_name.charAt(0)}
                           </div>
                           <div>
-                            <p className="font-semibold text-slate-200 text-xs">{teacher.full_name}</p>
-                            <p className="text-[11px] text-slate-400">{teacher.designation} · <span className="font-mono text-amber-400">{teacher.teacher_id}</span></p>
+                            <p className="font-semibold text-theme-text text-xs">{teacher.full_name}</p>
+                            <p className="text-[11px] text-theme-sub">{teacher.designation} · <span className="font-mono text-amber-400">{teacher.teacher_id}</span></p>
                           </div>
                         </div>
                       ) : c.teacher_id ? (
-                        <span className="font-mono text-slate-400 text-xs">{c.teacher_id}</span>
+                        <span className="font-mono text-theme-sub text-xs">{c.teacher_id}</span>
                       ) : (
-                        <span className="text-slate-500 text-xs italic">Unassigned</span>
+                        <span className="text-theme-muted text-xs italic">Unassigned</span>
                       )}
                     </td>
                     {!isTeacher && (
@@ -270,14 +270,14 @@ export default function CoursesPage() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => setEditCourse(c)}
-                            className="p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-amber-400 transition-colors"
+                            className="p-1.5 rounded-md hover:bg-theme-elevated text-theme-sub hover:text-amber-400 transition-colors"
                             title="Edit Course"
                           >
                             <Pencil className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(c)}
-                            className="p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-red-400 transition-colors"
+                            className="p-1.5 rounded-md hover:bg-theme-elevated text-theme-sub hover:text-red-400 transition-colors"
                             title="Delete Course"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -295,20 +295,20 @@ export default function CoursesPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between text-sm text-slate-400">
+        <div className="flex items-center justify-between text-sm text-theme-sub">
           <span>Page {page + 1} of {totalPages}</span>
           <div className="flex gap-2">
             <button
               disabled={page === 0}
               onClick={() => setPage((p) => p - 1)}
-              className="p-2 rounded-lg bg-slate-800 border border-slate-700 disabled:opacity-40 hover:bg-slate-700 transition-colors"
+              className="p-2 rounded-lg bg-theme-elevated border border-theme-border-hover disabled:opacity-40 hover:bg-theme-muted transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               disabled={page + 1 >= totalPages}
               onClick={() => setPage((p) => p + 1)}
-              className="p-2 rounded-lg bg-slate-800 border border-slate-700 disabled:opacity-40 hover:bg-slate-700 transition-colors"
+              className="p-2 rounded-lg bg-theme-elevated border border-theme-border-hover disabled:opacity-40 hover:bg-theme-muted transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>

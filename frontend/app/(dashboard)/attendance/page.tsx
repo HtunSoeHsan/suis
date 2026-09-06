@@ -10,9 +10,9 @@ import { CalendarCheck, Loader2, Search, X, ChevronLeft, ChevronRight, ChevronDo
 import { useAuth } from "@/context/AuthContext";
 
 const STATUS_COLORS: Record<string, string> = {
-  PRESENT: "bg-emerald-900/30 text-emerald-400 border-emerald-800/50",
-  LATE: "bg-amber-900/30 text-amber-400 border-amber-800/50",
-  ABSENT: "bg-red-900/30 text-red-400 border-red-800/50",
+  PRESENT: "badge-emerald border",
+  LATE: "badge-amber border",
+  ABSENT: "badge-red border",
 };
 
 export default function AttendancePage() {
@@ -112,10 +112,10 @@ export default function AttendancePage() {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+          <h2 className="text-xl font-bold text-theme-text flex items-center gap-2">
             <CalendarCheck className="w-6 h-6 text-emerald-400" /> Attendance Logs & Management
           </h2>
-          <p className="text-sm text-slate-400 mt-0.5">{data?.total ?? 0} total attendance verification logs</p>
+          <p className="text-sm text-theme-sub mt-0.5">{data?.total ?? 0} total attendance verification logs</p>
         </div>
 
         {/* Action Buttons */}
@@ -140,15 +140,15 @@ export default function AttendancePage() {
       <div className="flex flex-wrap items-center gap-3">
         {/* Search by Student ID */}
         <div className="relative flex-1 min-w-48 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
           <input
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(0); }}
             placeholder="Search by Name, Student ID, or Roll No…"
-            className="w-full pl-9 pr-9 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-600/50"
+            className="w-full pl-9 pr-9 py-2 bg-theme-surface border border-theme-border-hover rounded-lg text-sm text-theme-text placeholder:text-theme-muted focus:outline-none focus:ring-2 focus:ring-emerald-600/50"
           />
           {search && (
-            <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+            <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-sub">
               <X className="w-4 h-4" />
             </button>
           )}
@@ -156,14 +156,14 @@ export default function AttendancePage() {
 
         {/* Status Filter Buttons */}
         <div className="flex items-center gap-1.5">
-          <span className="text-xs text-slate-500 font-medium">Status:</span>
+          <span className="text-xs text-theme-muted font-medium">Status:</span>
           {(["", "PRESENT", "LATE", "ABSENT"] as const).map((st) => (
             <button
               key={st}
               onClick={() => { setFilterStatus(st); setPage(0); }}
               className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${filterStatus === st
-                  ? st === "" ? "bg-slate-700 border-slate-500 text-white" : `${STATUS_COLORS[st]} border-current`
-                  : "border-slate-700 text-slate-400 hover:border-slate-500"
+                  ? st === "" ? "filter-active border" : `${STATUS_COLORS[st]} border-current`
+                  : "border-theme-border-hover text-theme-sub hover:border-slate-500"
                 }`}
             >
               {st === "" ? "All" : st}
@@ -176,7 +176,7 @@ export default function AttendancePage() {
           <select
             value={filterCourse}
             onChange={(e) => { setFilterCourse(e.target.value); setPage(0); }}
-            className="w-full pl-3 pr-8 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-600/50 appearance-none"
+            className="w-full pl-3 pr-8 py-2 bg-theme-surface border border-theme-border-hover rounded-lg text-xs font-semibold text-theme-text focus:outline-none focus:ring-2 focus:ring-emerald-600/50 appearance-none"
           >
             <option value="">All Courses</option>
             {courses.map((c) => (
@@ -185,19 +185,19 @@ export default function AttendancePage() {
               </option>
             ))}
           </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-theme-sub pointer-events-none" />
         </div>
 
         {/* Section Filter Buttons */}
         <div className="flex items-center gap-1.5">
-          <span className="text-xs text-slate-500 font-medium">Section:</span>
+          <span className="text-xs text-theme-muted font-medium">Section:</span>
           {(["", "A", "B", "C"] as const).map((sec) => (
             <button
               key={sec || "all"}
               onClick={() => { setFilterSection(sec); setPage(0); }}
               className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${filterSection === sec
                   ? "bg-violet-900/40 border-violet-500 text-violet-300"
-                  : "border-slate-700 text-slate-400 hover:border-slate-500"
+                  : "border-theme-border-hover text-theme-sub hover:border-slate-500"
                 }`}
             >
               {sec === "" ? "All" : `§${sec}`}
@@ -207,26 +207,26 @@ export default function AttendancePage() {
 
         {/* Date Range Filter */}
         <div className="flex items-center gap-2">
-          <CalendarDays className="w-4 h-4 text-slate-500 flex-shrink-0" />
+          <CalendarDays className="w-4 h-4 text-theme-muted flex-shrink-0" />
           <input
             type="date"
             value={filterDateFrom}
             onChange={(e) => { setFilterDateFrom(e.target.value); setPage(0); }}
-            className="px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-600/50 [color-scheme:dark]"
+            className="px-2.5 py-1.5 bg-theme-surface border border-theme-border-hover rounded-lg text-xs text-theme-text focus:outline-none focus:ring-2 focus:ring-cyan-600/50 [color-scheme:dark]"
             title="From date"
           />
-          <span className="text-xs text-slate-500">—</span>
+          <span className="text-xs text-theme-muted">—</span>
           <input
             type="date"
             value={filterDateTo}
             onChange={(e) => { setFilterDateTo(e.target.value); setPage(0); }}
-            className="px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-600/50 [color-scheme:dark]"
+            className="px-2.5 py-1.5 bg-theme-surface border border-theme-border-hover rounded-lg text-xs text-theme-text focus:outline-none focus:ring-2 focus:ring-cyan-600/50 [color-scheme:dark]"
             title="To date"
           />
           {(filterDateFrom || filterDateTo) && (
             <button
               onClick={() => { setFilterDateFrom(""); setFilterDateTo(""); setPage(0); }}
-              className="p-1 rounded text-slate-500 hover:text-slate-300 transition-colors"
+              className="p-1 rounded text-theme-muted hover:text-theme-sub transition-colors"
               title="Clear date filter"
             >
               <X className="w-3.5 h-3.5" />
@@ -247,7 +247,7 @@ export default function AttendancePage() {
       </div>
 
       {/* Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+      <div className="bg-theme-surface border border-theme-border rounded-xl overflow-hidden shadow-xl">
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-6 h-6 animate-spin text-emerald-400" />
@@ -256,14 +256,14 @@ export default function AttendancePage() {
           <div className="text-center py-16 text-red-400 text-sm">{error}</div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="border-b border-slate-800 bg-slate-950/50">
-              <tr className="text-left text-slate-500 text-xs uppercase tracking-wider">
+            <thead className="border-b border-theme-border bg-theme-base/50">
+              <tr className="text-left text-theme-sub text-xs uppercase tracking-wider">
                 {["Log ID", "Student Profile", "Course Subject", "Verified At", "Status", "Mode / Confidence", "Actions"].map((h) => (
                   <th key={h} className="px-4 py-3 font-medium">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-theme-border">
               {(() => {
                 const itemsToRender = (data?.items ?? []).filter((a) => {
                   if (!filterSection) return true;
@@ -274,7 +274,7 @@ export default function AttendancePage() {
                 if (itemsToRender.length === 0) {
                   return (
                     <tr>
-                      <td colSpan={7} className="text-center py-12 text-slate-500">
+                      <td colSpan={7} className="text-center py-12 text-theme-muted">
                         No attendance records found matching filters.{" "}
                         <button onClick={() => setShowBatchModal(true)} className="text-emerald-400 hover:underline">Mark Class Attendance?</button>
                       </td>
@@ -288,8 +288,8 @@ export default function AttendancePage() {
                   const isManual = a.confidence_score === 1.0 || a.confidence_score === null;
 
                   return (
-                    <tr key={a.log_id} className="hover:bg-slate-800/30 transition-colors group">
-                      <td className="px-4 py-3 font-mono text-slate-500 text-xs">#{a.log_id}</td>
+                    <tr key={a.log_id} className="hover:bg-theme-elevated/30 transition-colors group">
+                      <td className="px-4 py-3 font-mono text-theme-muted text-xs">#{a.log_id}</td>
                       <td className="px-4 py-3">
                         {student ? (
                           <div className="flex items-center gap-2">
@@ -297,8 +297,8 @@ export default function AttendancePage() {
                               {student.full_name.charAt(0)}
                             </div>
                             <div>
-                              <p className="font-semibold text-slate-200 text-xs">{student.full_name}</p>
-                              <p className="text-[11px] text-slate-400"><span className="font-mono text-violet-400">{student.student_id}</span> · Roll: {student.roll_number}</p>
+                              <p className="font-semibold text-theme-text text-xs">{student.full_name}</p>
+                              <p className="text-[11px] text-theme-sub"><span className="font-mono text-violet-400">{student.student_id}</span> · Roll: {student.roll_number}</p>
                             </div>
                           </div>
                         ) : (
@@ -308,22 +308,22 @@ export default function AttendancePage() {
                       <td className="px-4 py-3">
                         {course ? (
                           <div>
-                            <p className="font-semibold text-slate-200 text-xs">{course.course_name}</p>
+                            <p className="font-semibold text-theme-text text-xs">{course.course_name}</p>
                             <p className="text-[11px] font-mono text-amber-400">{course.course_code}</p>
                           </div>
                         ) : (
                           <span className="font-mono text-amber-400 text-xs">{a.course_code}</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-slate-400 text-xs">{formatTime(a.verified_at)}</td>
+                      <td className="px-4 py-3 text-theme-sub text-xs">{formatTime(a.verified_at)}</td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border uppercase tracking-wider font-semibold ${STATUS_COLORS[a.status] ?? "bg-slate-800 text-slate-400"}`}>
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border uppercase tracking-wider font-semibold ${STATUS_COLORS[a.status] ?? "bg-theme-elevated text-theme-sub"}`}>
                           {a.status}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-xs">
                         {isManual ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 text-[11px]">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-theme-elevated text-theme-sub border border-theme-border-hover text-[11px]">
                             Manual Entry
                           </span>
                         ) : (
@@ -335,7 +335,7 @@ export default function AttendancePage() {
                       <td className="px-4 py-3">
                         <button
                           onClick={() => handleDelete(a)}
-                          className="p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-red-400 transition-colors"
+                          className="p-1.5 rounded-md hover:bg-theme-elevated text-theme-sub hover:text-red-400 transition-colors"
                           title="Delete Attendance Log"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -352,20 +352,20 @@ export default function AttendancePage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between text-sm text-slate-400">
+        <div className="flex items-center justify-between text-sm text-theme-sub">
           <span>Page {page + 1} of {totalPages}</span>
           <div className="flex gap-2">
             <button
               disabled={page === 0}
               onClick={() => setPage((p) => p - 1)}
-              className="p-2 rounded-lg bg-slate-800 border border-slate-700 disabled:opacity-40 hover:bg-slate-700 transition-colors"
+              className="p-2 rounded-lg bg-theme-elevated border border-theme-border-hover disabled:opacity-40 hover:bg-theme-muted transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               disabled={page + 1 >= totalPages}
               onClick={() => setPage((p) => p + 1)}
-              className="p-2 rounded-lg bg-slate-800 border border-slate-700 disabled:opacity-40 hover:bg-slate-700 transition-colors"
+              className="p-2 rounded-lg bg-theme-elevated border border-theme-border-hover disabled:opacity-40 hover:bg-theme-muted transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>

@@ -87,23 +87,23 @@ export function CourseFormDialog({ course, onClose }: Props) {
     }
   };
 
-  const inputCls = "w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-600/50 disabled:opacity-50";
+  const inputCls = "w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-sm text-theme-text placeholder:text-theme-muted focus:outline-none focus:ring-2 focus:ring-amber-600/50 disabled:opacity-50";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-5 border-b border-slate-800">
-          <h3 className="font-semibold text-white">
+      <div className="bg-theme-surface border border-theme-border-hover rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-5 border-b border-theme-border">
+          <h3 className="font-semibold text-theme-text">
             {course ? "Edit Course" : "Add New Course"}
           </h3>
-          <button onClick={onClose} className="text-slate-500 hover:text-slate-200 transition-colors">
+          <button onClick={onClose} className="text-theme-muted hover:text-theme-text transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           {/* Course Code */}
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">Course Code *</label>
+            <label className="block text-xs font-medium text-theme-sub mb-1.5">Course Code *</label>
             <input
               value={form.course_code}
               onChange={(e) => set("course_code", e.target.value)}
@@ -116,7 +116,7 @@ export function CourseFormDialog({ course, onClose }: Props) {
 
           {/* Course Name */}
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">Course Name *</label>
+            <label className="block text-xs font-medium text-theme-sub mb-1.5">Course Name *</label>
             <input
               value={form.course_name}
               onChange={(e) => set("course_name", e.target.value)}
@@ -129,7 +129,7 @@ export function CourseFormDialog({ course, onClose }: Props) {
           {/* Major & Academic Year */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">Major (ဘာသာရပ်)</label>
+              <label className="block text-xs font-medium text-theme-sub mb-1.5">Major (ဘာသာရပ်)</label>
               <div className="relative">
                 <select
                   value={form.major}
@@ -144,11 +144,11 @@ export function CourseFormDialog({ course, onClose }: Props) {
                     <option key={m.value} value={m.value}>{m.label}</option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-sub pointer-events-none" />
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">Target Year Level *</label>
+              <label className="block text-xs font-medium text-theme-sub mb-1.5">Target Year Level *</label>
               <div className="relative">
                 <select
                   value={form.academic_year}
@@ -161,14 +161,14 @@ export function CourseFormDialog({ course, onClose }: Props) {
                   <option value="4">Year 4 (Fourth / Final)</option>
                   <option value="5">Year 5 (Master / Honor)</option>
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-sub pointer-events-none" />
               </div>
             </div>
           </div>
 
           {/* Semester — from Operations semesters */}
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">
+            <label className="block text-xs font-medium text-theme-sub mb-1.5">
               Semester <span className="text-slate-600 font-normal">(optional — ဘယ် Semester ကသင်ရမဲ့ course)</span>
             </label>
             <select
@@ -188,7 +188,7 @@ export function CourseFormDialog({ course, onClose }: Props) {
           {/* Department + Credit Hours */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">Department *</label>
+              <label className="block text-xs font-medium text-theme-sub mb-1.5">Department *</label>
               <select
                 value={form.dept_code}
                 onChange={(e) => set("dept_code", e.target.value)}
@@ -206,7 +206,7 @@ export function CourseFormDialog({ course, onClose }: Props) {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">Credit Hours *</label>
+              <label className="block text-xs font-medium text-theme-sub mb-1.5">Credit Hours *</label>
               <input
                 type="number" min="1" max="10"
                 value={form.credit_hours}
@@ -218,7 +218,7 @@ export function CourseFormDialog({ course, onClose }: Props) {
 
           {/* Assigned Teacher (Filtered by Department) */}
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">
+            <label className="block text-xs font-medium text-theme-sub mb-1.5">
               Assigned Teacher {form.dept_code ? `(${form.dept_code} Department)` : ""}
             </label>
             <select
@@ -240,12 +240,12 @@ export function CourseFormDialog({ course, onClose }: Props) {
           )}
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={onClose}
-              className="flex-1 py-2 rounded-lg border border-slate-700 text-slate-300 text-sm hover:bg-slate-800 transition-colors">
+              className="flex-1 py-2 rounded-lg border border-theme-border-hover text-theme-sub text-sm hover:bg-theme-elevated transition-colors">
               Cancel
             </button>
             <button type="submit"
               disabled={loading || !form.course_code || !form.course_name}
-              className="flex-1 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2">
+              className="flex-1 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-theme-text text-sm font-medium transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               {course ? "Save Changes" : "Create Course"}
             </button>

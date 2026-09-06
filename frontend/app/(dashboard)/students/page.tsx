@@ -18,16 +18,16 @@ import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import { useAuth } from "@/context/AuthContext";
 
 const SECTION_COLORS: Record<string, string> = {
-  A: "bg-blue-900/30 text-blue-400 border-blue-800/50",
-  B: "bg-emerald-900/30 text-emerald-400 border-emerald-800/50",
-  C: "bg-amber-900/30 text-amber-400 border-amber-800/50",
+  A: "badge-blue border",
+  B: "badge-emerald border",
+  C: "badge-amber border",
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  Active: "bg-emerald-900/30 text-emerald-400 border-emerald-800/50",
-  Graduated: "bg-blue-900/30 text-blue-400 border-blue-800/50",
-  Suspended: "bg-amber-900/30 text-amber-400 border-amber-800/50",
-  Dropped: "bg-red-900/30 text-red-400 border-red-800/50",
+  Active: "badge-emerald border",
+  Graduated: "badge-blue border",
+  Suspended: "badge-amber border",
+  Dropped: "badge-red border",
 };
 
 export default function StudentsPage() {
@@ -253,21 +253,21 @@ export default function StudentsPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h2 className="text-xl font-bold text-white">Student Management System</h2>
+            <h2 className="text-xl font-bold text-theme-text">Student Management System</h2>
             {isTeacher && (
-              <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-semibold">
+              <span className="px-2.5 py-0.5 rounded-full badge-amber border text-xs font-semibold">
                 View Only Mode
               </span>
             )}
           </div>
-          <p className="text-sm text-slate-400 mt-0.5">{data?.total ?? 0} total registered students</p>
+          <p className="text-sm text-theme-sub mt-0.5">{data?.total ?? 0} total registered students</p>
         </div>
         {!isTeacher && (
           <div className="flex items-center gap-3">
             {checkedStudentIds.length > 0 && (
               <button
                 onClick={() => openBatchEnroll()}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-sm font-medium transition-colors shadow-lg shadow-teal-900/30 animate-in fade-in"
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-theme-text text-sm font-medium transition-colors shadow-lg shadow-teal-900/30 animate-in fade-in"
               >
                 <BookOpen className="w-4 h-4" /> Enroll Selected ({checkedStudentIds.length})
               </button>
@@ -286,15 +286,15 @@ export default function StudentsPage() {
       <div className="flex flex-wrap items-center gap-3">
         {/* Search */}
         <div className="relative flex-1 min-w-48 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-muted" />
           <input
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(0); }}
             placeholder="Search by name, ID, roll no, NRC, email…"
-            className="w-full pl-9 pr-9 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-600/50"
+            className="w-full pl-9 pr-9 py-2 bg-theme-surface border border-theme-border-hover rounded-lg text-sm text-theme-text placeholder:text-theme-muted focus:outline-none focus:ring-2 focus:ring-violet-600/50"
           />
           {search && (
-            <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300">
+            <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-theme-muted hover:text-theme-sub">
               <X className="w-4 h-4" />
             </button>
           )}
@@ -302,15 +302,15 @@ export default function StudentsPage() {
 
         {/* Status filter */}
         <div className="flex items-center gap-1.5">
-          <span className="text-xs text-slate-500 font-medium">Status:</span>
+          <span className="text-xs text-theme-muted font-medium">Status:</span>
           {(["", "Active", "Graduated", "Suspended", "Dropped"] as const).map((st) => (
             <button
               key={st}
               onClick={() => { setFilterStatus(st); setPage(0); }}
               className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
                 filterStatus === st
-                  ? st === "" ? "bg-slate-700 border-slate-500 text-white" : `${STATUS_COLORS[st]} border-current`
-                  : "border-slate-700 text-slate-400 hover:border-slate-500"
+                  ? st === "" ? "filter-active border" : `${STATUS_COLORS[st]} border-current`
+                  : "border-theme-border-hover text-theme-sub hover:border-slate-500"
               }`}
             >
               {st === "" ? "All" : st}
@@ -320,15 +320,15 @@ export default function StudentsPage() {
 
         {/* Section filter */}
         <div className="flex items-center gap-1.5">
-          <span className="text-xs text-slate-500 font-medium">Section:</span>
+          <span className="text-xs text-theme-muted font-medium">Section:</span>
           {(["", "A", "B", "C"] as const).map((sec) => (
             <button
               key={sec}
               onClick={() => { setFilterSection(sec); setPage(0); }}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
                 filterSection === sec
-                  ? sec === "" ? "bg-slate-700 border-slate-500 text-white" : `${SECTION_COLORS[sec]} border-current`
-                  : "border-slate-700 text-slate-400 hover:border-slate-500"
+                  ? sec === "" ? "filter-active border" : `${SECTION_COLORS[sec]} border-current`
+                  : "border-theme-border-hover text-theme-sub hover:border-slate-500"
               }`}
             >
               {sec === "" ? "All" : sec}
@@ -338,7 +338,7 @@ export default function StudentsPage() {
 
         {/* Year filter */}
         <div className="flex items-center gap-1.5">
-          <span className="text-xs text-slate-500 font-medium">Year:</span>
+          <span className="text-xs text-theme-muted font-medium">Year:</span>
           {(["", 1, 2, 3, 4, 5] as const).map((yr) => (
             <button
               key={yr}
@@ -346,7 +346,7 @@ export default function StudentsPage() {
               className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
                 filterYear === yr
                   ? "bg-violet-600 border-violet-500 text-white"
-                  : "border-slate-700 text-slate-400 hover:border-slate-500"
+                  : "border-theme-border-hover text-theme-sub hover:border-slate-500"
               }`}
             >
               {yr === "" ? "All" : yr}
@@ -356,7 +356,7 @@ export default function StudentsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+      <div className="bg-theme-surface border border-theme-border rounded-xl overflow-hidden shadow-xl">
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-6 h-6 animate-spin text-violet-400" />
@@ -365,14 +365,14 @@ export default function StudentsPage() {
           <div className="text-center py-16 text-red-400 text-sm">{error}</div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="border-b border-slate-800 bg-slate-950/50">
-              <tr className="text-left text-slate-500 text-xs uppercase tracking-wider">
+            <thead className="border-b border-theme-border bg-theme-base/50">
+              <tr className="text-left text-theme-sub text-xs uppercase tracking-wider">
                 <th className="px-4 py-3 w-10">
                   <input
                     type="checkbox"
                     checked={isAllChecked}
                     onChange={toggleSelectAll}
-                    className="rounded border-slate-700 bg-slate-800 text-teal-500 focus:ring-teal-500/30"
+                    className="rounded border-theme-border-hover bg-theme-elevated text-teal-500 focus:ring-teal-500/30"
                   />
                 </th>
                 {["Student ID", "Name / Email", "Major / Roll", "Year & Section", "CGPA", "Status", "Face", "Actions"].map((h) => (
@@ -380,10 +380,10 @@ export default function StudentsPage() {
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-theme-border">
               {data?.items.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="text-center py-12 text-slate-500">
+                  <td colSpan={9} className="text-center py-12 text-theme-muted">
                     No students found.{" "}
                     <button onClick={() => setShowCreate(true)} className="text-violet-400 hover:underline">Add one?</button>
                   </td>
@@ -394,14 +394,14 @@ export default function StudentsPage() {
                   const statusName = s.status || "Active";
                   return (
                     <tr key={s.student_id} className={`transition-colors group ${
-                      isChecked ? "bg-teal-950/20" : "hover:bg-slate-800/30"
+                      isChecked ? "bg-teal-950/20" : "hover:bg-theme-elevated/30"
                     }`}>
                       <td className="px-4 py-3">
                         <input
                           type="checkbox"
                           checked={isChecked}
                           onChange={() => toggleCheckStudent(s.student_id)}
-                          className="rounded border-slate-700 bg-slate-800 text-teal-500 focus:ring-teal-500/30"
+                          className="rounded border-theme-border-hover bg-theme-elevated text-teal-500 focus:ring-teal-500/30"
                         />
                       </td>
                       <td className="px-4 py-3 font-mono text-violet-400 text-xs">
@@ -419,19 +419,19 @@ export default function StudentsPage() {
                           className="hover:text-violet-300 text-left transition-colors"
                           title="View Student Profile Details"
                         >
-                          <div className="font-medium text-slate-200">{s.full_name}</div>
-                          {s.email && <div className="text-[11px] text-slate-400">{s.email}</div>}
+                          <div className="font-medium text-theme-text">{s.full_name}</div>
+                          {s.email && <div className="text-[11px] text-theme-sub">{s.email}</div>}
                         </button>
                       </td>
-                      <td className="px-4 py-3 text-slate-400">
-                        <span className="font-semibold text-slate-300">{s.major || s.dept_code}</span>
-                        {s.roll_number && <span className="text-slate-500 ml-1.5 font-mono text-xs">({s.roll_number})</span>}
+                      <td className="px-4 py-3 text-theme-sub">
+                        <span className="font-semibold text-theme-sub">{s.major || s.dept_code}</span>
+                        {s.roll_number && <span className="text-theme-muted ml-1.5 font-mono text-xs">({s.roll_number})</span>}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <span className="text-slate-400 text-xs">Year {s.academic_year}</span>
+                          <span className="text-theme-sub text-xs">Year {s.academic_year}</span>
                           {s.section && (
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold border ${SECTION_COLORS[s.section] ?? "bg-slate-800 text-slate-400 border-slate-700"}`}>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold border ${SECTION_COLORS[s.section] ?? "bg-theme-elevated text-theme-sub border-theme-border-hover"}`}>
                               §{s.section}
                             </span>
                           )}
@@ -441,11 +441,11 @@ export default function StudentsPage() {
                       <td className="px-4 py-3">
                         {(() => {
                           const cgpa = s.cgpa ?? 0;
-                          let cgpaBadgeClass = "bg-slate-800 text-slate-400 border-slate-700";
-                          if (cgpa >= 3.5) cgpaBadgeClass = "bg-amber-950/80 text-amber-300 border-amber-600/50";
-                          else if (cgpa >= 3.0) cgpaBadgeClass = "bg-emerald-950/80 text-emerald-300 border-emerald-700/60";
-                          else if (cgpa >= 2.0) cgpaBadgeClass = "bg-cyan-950/80 text-cyan-300 border-cyan-700/60";
-                          else if (cgpa > 0) cgpaBadgeClass = "bg-red-950/80 text-red-300 border-red-700/60";
+                          let cgpaBadgeClass = "bg-theme-elevated text-theme-sub border-theme-border-hover";
+                          if (cgpa >= 3.5) cgpaBadgeClass = "badge-cgpa-high border";
+                          else if (cgpa >= 3.0) cgpaBadgeClass = "badge-cgpa-good border";
+                          else if (cgpa >= 2.0) cgpaBadgeClass = "badge-cgpa-avg border";
+                          else if (cgpa > 0) cgpaBadgeClass = "badge-cgpa-low border";
 
                           return (
                             <button
@@ -459,17 +459,17 @@ export default function StudentsPage() {
                         })()}
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border ${STATUS_COLORS[statusName] ?? "bg-slate-800 text-slate-400 border-slate-700"}`}>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border ${STATUS_COLORS[statusName] ?? "bg-theme-elevated text-theme-sub border-theme-border-hover"}`}>
                           {statusName}
                         </span>
                       </td>
                       <td className="px-4 py-3">
                         {s.is_face_registered ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-900/30 text-emerald-400 text-xs border border-emerald-800/50">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full badge-emerald border text-xs">
                             <CheckCircle2 className="w-3 h-3" /> Enrolled
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-900/30 text-amber-400 text-xs border border-amber-800/50">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full badge-amber border text-xs">
                             <Clock className="w-3 h-3" /> Pending
                           </span>
                         )}
@@ -479,14 +479,14 @@ export default function StudentsPage() {
                           <button
                             onClick={() => setDetailTarget(s)}
                             title="View Full Profile Details & Academic Transcript"
-                            className="p-1.5 rounded-md hover:bg-sky-900/30 hover:text-sky-400 text-slate-500 transition-colors"
+                            className="p-1.5 rounded-md hover:bg-sky-900/30 hover:text-sky-400 text-theme-muted transition-colors"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => openGradeModal(s)}
                             title="Assign Course GPA"
-                            className="p-1.5 rounded-md hover:bg-amber-900/30 hover:text-amber-400 text-slate-500 transition-colors"
+                            className="p-1.5 rounded-md hover:bg-amber-900/30 hover:text-amber-400 text-theme-muted transition-colors"
                           >
                             <Award className="w-4 h-4 text-amber-400" />
                           </button>
@@ -495,28 +495,28 @@ export default function StudentsPage() {
                               <button
                                 onClick={() => openBatchEnroll([s.student_id])}
                                 title="Enroll Courses"
-                                className="p-1.5 rounded-md hover:bg-teal-900/30 hover:text-teal-400 text-slate-500 transition-colors"
+                                className="p-1.5 rounded-md hover:bg-teal-900/30 hover:text-teal-400 text-theme-muted transition-colors"
                               >
                                 <BookOpen className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => setEnrollTarget(s)}
                                 title="Enroll / Re-enroll face"
-                                className="p-1.5 rounded-md hover:bg-emerald-900/30 hover:text-emerald-400 text-slate-500 transition-colors"
+                                className="p-1.5 rounded-md hover:bg-emerald-900/30 hover:text-emerald-400 text-theme-muted transition-colors"
                               >
                                 <Camera className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => setEditTarget(s)}
                                 title="Edit Student Profile & Courses"
-                                className="p-1.5 rounded-md hover:bg-violet-900/30 hover:text-violet-400 text-slate-500 transition-colors"
+                                className="p-1.5 rounded-md hover:bg-violet-900/30 hover:text-violet-400 text-theme-muted transition-colors"
                               >
                                 <Pencil className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => handleDelete(s)}
                                 title="Delete"
-                                className="p-1.5 rounded-md hover:bg-red-900/30 hover:text-red-400 text-slate-500 transition-colors"
+                                className="p-1.5 rounded-md hover:bg-red-900/30 hover:text-red-400 text-theme-muted transition-colors"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -535,20 +535,20 @@ export default function StudentsPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between text-sm text-slate-400">
+        <div className="flex items-center justify-between text-sm text-theme-sub">
           <span>Page {page + 1} of {totalPages}</span>
           <div className="flex gap-2">
             <button
               disabled={page === 0}
               onClick={() => setPage((p) => p - 1)}
-              className="p-2 rounded-lg bg-slate-800 border border-slate-700 disabled:opacity-40 hover:bg-slate-700 transition-colors"
+              className="p-2 rounded-lg bg-theme-elevated border border-theme-border-hover disabled:opacity-40 hover:bg-theme-muted transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               disabled={page + 1 >= totalPages}
               onClick={() => setPage((p) => p + 1)}
-              className="p-2 rounded-lg bg-slate-800 border border-slate-700 disabled:opacity-40 hover:bg-slate-700 transition-colors"
+              className="p-2 rounded-lg bg-theme-elevated border border-theme-border-hover disabled:opacity-40 hover:bg-theme-muted transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -595,29 +595,29 @@ export default function StudentsPage() {
         const coursesInSem = studentEnrollments.filter((e) => e.semester_id === selectedSemesterId);
         return (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden">
+            <div className="bg-theme-surface border border-theme-border rounded-2xl w-full max-w-xl shadow-2xl overflow-hidden">
               {/* Header */}
-              <div className="flex items-center justify-between px-6 py-4.5 border-b border-slate-800 bg-slate-950/60">
+              <div className="flex items-center justify-between px-6 py-4.5 border-b border-theme-border bg-theme-surface/60">
                 <div>
-                  <h3 className="font-bold text-white text-lg">GPA / Grade Entry</h3>
-                  <p className="text-sm text-slate-400 mt-0.5">
+                  <h3 className="font-bold text-theme-text text-lg">GPA / Grade Entry</h3>
+                  <p className="text-sm text-theme-sub mt-0.5">
                     {gradeModalStudent.full_name} · <code className="font-mono text-amber-400 font-bold">{gradeModalStudent.student_id}</code>
                   </p>
                 </div>
-                <button onClick={() => setGradeModalStudent(null)} className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors">
+                <button onClick={() => setGradeModalStudent(null)} className="p-1.5 text-theme-sub hover:text-theme-text hover:bg-theme-elevated rounded-lg transition-colors">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               {/* Mode Switcher Tabs */}
-              <div className="grid grid-cols-2 bg-slate-950/80 p-1.5 border-b border-slate-800 text-sm font-semibold">
+              <div className="grid grid-cols-2 bg-theme-surface/80 p-1.5 border-b border-theme-border text-sm font-semibold">
                 <button
                   type="button"
                   onClick={() => setGpaEntryMode("course")}
                   className={`py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all ${
                     gpaEntryMode === "course"
                       ? "bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20"
-                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+                      : "text-theme-sub hover:text-theme-text hover:bg-theme-elevated/50"
                   }`}
                 >
                   <BookOpen className="w-4 h-4" /> ဘာသာရပ်အလိုက် (By Course)
@@ -628,7 +628,7 @@ export default function StudentsPage() {
                   className={`py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all ${
                     gpaEntryMode === "semester"
                       ? "bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/20"
-                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+                      : "text-theme-sub hover:text-theme-text hover:bg-theme-elevated/50"
                   }`}
                 >
                   <Award className="w-4 h-4" /> Semester အလိုက် (By Semester)
@@ -648,19 +648,19 @@ export default function StudentsPage() {
                   {/* Mode 1: By Course */}
                   {gpaEntryMode === "course" ? (
                     studentEnrollments.length === 0 ? (
-                      <div className="p-6 text-center text-xs text-slate-400 space-y-2 bg-slate-950/40 rounded-xl border border-slate-800">
-                        <p className="font-semibold text-slate-300">ကျောင်းသားသည် မည်သည့် Course မျှ enroll မလုပ်ရသေးပါ။</p>
-                        <p className="text-slate-500">Course အလိုက် ထည့်ရန် မမီမီ Enroll မဖြစ်သေးပါက "Semester အလိုက်" Tab ကို အသုံးပြုနိုင်ပါသည်။</p>
+                      <div className="p-6 text-center text-xs text-theme-sub space-y-2 bg-theme-base/40 rounded-xl border border-theme-border">
+                        <p className="font-semibold text-theme-sub">ကျောင်းသားသည် မည်သည့် Course မျှ enroll မလုပ်ရသေးပါ။</p>
+                        <p className="text-theme-muted">Course အလိုက် ထည့်ရန် မမီမီ Enroll မဖြစ်သေးပါက "Semester အလိုက်" Tab ကို အသုံးပြုနိုင်ပါသည်။</p>
                       </div>
                     ) : (
                       <>
                         {/* Semester Select */}
                         <div>
-                          <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Semester ရွေးပါ</label>
+                          <label className="block text-xs font-semibold text-theme-sub uppercase tracking-wider mb-2">Semester ရွေးပါ</label>
                           <select
                             value={selectedSemesterId}
                             onChange={(e) => handleSemesterChange(Number(e.target.value))}
-                            className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-100 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                            className="w-full px-4 py-2.5 bg-theme-elevated border border-theme-border-hover rounded-xl text-sm text-theme-text font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/40"
                           >
                             {uniqueSemIds.map((semId) => {
                               const sem = gradeModalSemesters.find((s) => s.semester_id === semId);
@@ -675,11 +675,11 @@ export default function StudentsPage() {
 
                         {/* Course Select */}
                         <div>
-                          <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Course (ဘာသာရပ်)</label>
+                          <label className="block text-xs font-semibold text-theme-sub uppercase tracking-wider mb-2">Course (ဘာသာရပ်)</label>
                           <select
                             value={selectedEnrollmentId}
                             onChange={(e) => handleCourseChange(Number(e.target.value))}
-                            className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm font-mono text-slate-100 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                            className="w-full px-4 py-2.5 bg-theme-elevated border border-theme-border-hover rounded-xl text-sm font-mono text-theme-text font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/40"
                           >
                             {coursesInSem.map((enr) => {
                               const crs = gradeModalCourses.find((c) => c.course_code === enr.course_code);
@@ -696,7 +696,7 @@ export default function StudentsPage() {
 
                         {/* Course GPA Input */}
                         <div>
-                          <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Course GPA (0.00 – 4.00)</label>
+                          <label className="block text-xs font-semibold text-theme-sub uppercase tracking-wider mb-2">Course GPA (0.00 – 4.00)</label>
                           <input
                             type="number"
                             step="0.01"
@@ -705,7 +705,7 @@ export default function StudentsPage() {
                             value={gpaInput}
                             onChange={(e) => setGpaInput(e.target.value)}
                             placeholder="e.g. 3.70"
-                            className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-2xl font-mono font-bold text-amber-300 text-center focus:outline-none focus:ring-2 focus:ring-amber-500/40 placeholder:text-slate-600 placeholder:text-base placeholder:font-normal"
+                            className="w-full px-4 py-3 bg-theme-elevated border border-theme-border-hover rounded-xl text-2xl font-mono font-bold text-amber-300 text-center focus:outline-none focus:ring-2 focus:ring-amber-500/40 placeholder:text-theme-muted placeholder:text-base placeholder:font-normal"
                             autoFocus
                           />
                         </div>
@@ -715,11 +715,11 @@ export default function StudentsPage() {
                     /* Mode 2: By Semester */
                     <>
                       <div>
-                        <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Semester ရွေးပါ</label>
+                        <label className="block text-xs font-semibold text-theme-sub uppercase tracking-wider mb-2">Semester ရွေးပါ</label>
                         <select
                           value={selectedSemesterId}
                           onChange={(e) => setSelectedSemesterId(Number(e.target.value))}
-                          className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-100 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                          className="w-full px-4 py-2.5 bg-theme-elevated border border-theme-border-hover rounded-xl text-sm text-theme-text font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/40"
                         >
                           {gradeModalSemesters.map((sem) => (
                             <option key={sem.semester_id} value={sem.semester_id}>
@@ -730,7 +730,7 @@ export default function StudentsPage() {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Semester GPA / CGPA (0.00 – 4.00)</label>
+                        <label className="block text-xs font-semibold text-theme-sub uppercase tracking-wider mb-2">Semester GPA / CGPA (0.00 – 4.00)</label>
                         <input
                           type="number"
                           step="0.01"
@@ -739,10 +739,10 @@ export default function StudentsPage() {
                           value={gpaInput}
                           onChange={(e) => setGpaInput(e.target.value)}
                           placeholder="e.g. 3.50"
-                          className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-2xl font-mono font-bold text-amber-300 text-center focus:outline-none focus:ring-2 focus:ring-amber-500/40 placeholder:text-slate-600 placeholder:text-base placeholder:font-normal"
+                          className="w-full px-4 py-3 bg-theme-elevated border border-theme-border-hover rounded-xl text-2xl font-mono font-bold text-amber-300 text-center focus:outline-none focus:ring-2 focus:ring-amber-500/40 placeholder:text-theme-muted placeholder:text-base placeholder:font-normal"
                           autoFocus
                         />
-                        <p className="text-xs text-slate-500 mt-1.5">ထို Semester တစ်ခုလုံးအတွက် သို့မဟုတ် စုစုပေါင်း CGPA ကို တိုက်ရိုက် Manual ထည့်ပေးပါ။</p>
+                        <p className="text-xs text-theme-muted mt-1.5">ထို Semester တစ်ခုလုံးအတွက် သို့မဟုတ် စုစုပေါင်း CGPA ကို တိုက်ရိုက် Manual ထည့်ပေးပါ။</p>
                       </div>
                     </>
                   )}
@@ -750,7 +750,7 @@ export default function StudentsPage() {
                   {/* Buttons */}
                   <div className="flex gap-3 pt-2">
                     <button type="button" onClick={() => setGradeModalStudent(null)}
-                      className="flex-1 py-2.5 rounded-xl border border-slate-700 text-slate-300 text-sm font-semibold hover:bg-slate-800 transition-colors">
+                      className="flex-1 py-2.5 rounded-xl border border-theme-border-hover text-theme-sub text-sm font-semibold hover:bg-theme-elevated transition-colors">
                       Cancel
                     </button>
                     <button type="submit" disabled={isSavingGrade}

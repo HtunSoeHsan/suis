@@ -86,10 +86,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider value={{ user, token, isLoading, login, logout }}>
       {isProtectedPage && (isLoading || !user) ? (
-        <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">
+        <div className="min-h-screen bg-theme-base flex items-center justify-center">
           <div className="flex items-center gap-3">
             <div className="w-6 h-6 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
-            <span className="text-sm font-medium text-slate-300">Loading SUIS Portal...</span>
+            <span className="text-sm font-medium text-theme-sub">Loading SUIS Portal...</span>
           </div>
         </div>
       ) : (

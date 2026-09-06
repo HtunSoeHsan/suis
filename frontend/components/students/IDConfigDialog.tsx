@@ -107,26 +107,26 @@ export function IDConfigDialog({ onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-md">
-        <div className="flex items-center justify-between p-5 border-b border-slate-800">
-          <h3 className="font-semibold text-white flex items-center gap-2">
+      <div className="bg-theme-surface border border-theme-border-hover rounded-2xl shadow-2xl w-full max-w-md">
+        <div className="flex items-center justify-between p-5 border-b border-theme-border">
+          <h3 className="font-semibold text-theme-text flex items-center gap-2">
             <Settings2 className="w-5 h-5 text-violet-400" /> ID &amp; Roll Number Format Rules
           </h3>
-          <button onClick={onClose} className="text-slate-500 hover:text-slate-200 transition-colors">
+          <button onClick={onClose} className="text-theme-muted hover:text-theme-text transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tabs */}
         <div className="px-5 pt-4">
-          <div className="grid grid-cols-2 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-semibold">
+          <div className="grid grid-cols-2 bg-theme-base p-1 rounded-xl border border-theme-border text-xs font-semibold">
             <button
               type="button"
               onClick={() => setActiveTab("student_id")}
               className={`py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 ${
                 activeTab === "student_id"
                   ? "bg-violet-600 text-white shadow-md"
-                  : "text-slate-400 hover:text-slate-200"
+                  : "text-theme-sub hover:text-theme-text"
               }`}
             >
               <User className="w-3.5 h-3.5" /> Student ID Rules
@@ -137,7 +137,7 @@ export function IDConfigDialog({ onClose }: Props) {
               className={`py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 ${
                 activeTab === "roll_number"
                   ? "bg-violet-600 text-white shadow-md"
-                  : "text-slate-400 hover:text-slate-200"
+                  : "text-theme-sub hover:text-theme-text"
               }`}
             >
               <Hash className="w-3.5 h-3.5" /> Roll Number Rules
@@ -164,34 +164,34 @@ export function IDConfigDialog({ onClose }: Props) {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Student ID Template *</label>
+                  <label className="block text-xs font-medium text-theme-sub mb-1.5">Student ID Template *</label>
                   <input
                     value={template}
                     onChange={(e) => handleTemplateChange(e.target.value)}
                     placeholder="STU-{YEAR}-{DEPT}-{SEQ:04d}"
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 font-mono focus:outline-none focus:ring-2 focus:ring-violet-600/50"
+                    className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-sm text-theme-text font-mono focus:outline-none focus:ring-2 focus:ring-violet-600/50"
                   />
-                  <p className="text-[11px] text-slate-500 mt-1">
+                  <p className="text-[11px] text-theme-muted mt-1">
                     Tokens: <code className="text-violet-400">{`{PREFIX}`}</code>, <code className="text-violet-400">{`{YEAR}`}</code>, <code className="text-violet-400">{`{DEPT}`}</code>, <code className="text-violet-400">{`{SEQ:04d}`}</code>
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1.5">ID Prefix *</label>
+                    <label className="block text-xs font-medium text-theme-sub mb-1.5">ID Prefix *</label>
                     <input
                       value={prefix}
                       onChange={(e) => handlePrefixChange(e.target.value)}
                       placeholder="STU"
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 font-mono focus:outline-none focus:ring-2 focus:ring-violet-600/50"
+                      className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-sm text-theme-text font-mono focus:outline-none focus:ring-2 focus:ring-violet-600/50"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1.5">Sequence Padding *</label>
+                    <label className="block text-xs font-medium text-theme-sub mb-1.5">Sequence Padding *</label>
                     <select
                       value={padding}
                       onChange={(e) => handlePaddingChange(parseInt(e.target.value))}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-600/50"
+                      className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-violet-600/50"
                     >
                       <option value={3}>3 digits (001)</option>
                       <option value={4}>4 digits (0001)</option>
@@ -211,20 +211,20 @@ export function IDConfigDialog({ onClose }: Props) {
                   <p className="font-mono text-xl font-bold text-violet-200 tracking-widest">
                     {rollPreview || `${rollPrefix}${"1".padStart(rollPadding, "0")}`}
                   </p>
-                  <p className="text-[11px] text-slate-500 mt-1">Format: <code className="text-violet-400">{rollPrefix}</code> + zero-padded sequence</p>
+                  <p className="text-[11px] text-theme-muted mt-1">Format: <code className="text-violet-400">{rollPrefix}</code> + zero-padded sequence</p>
                 </div>
 
                 {/* Roll Prefix */}
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Roll Number Prefix *</label>
+                  <label className="block text-xs font-medium text-theme-sub mb-1.5">Roll Number Prefix *</label>
                   <input
                     value={rollPrefix}
                     onChange={(e) => handleRollPrefixChange(e.target.value)}
                     placeholder="R"
                     maxLength={20}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 font-mono focus:outline-none focus:ring-2 focus:ring-violet-600/50"
+                    className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-sm text-theme-text font-mono focus:outline-none focus:ring-2 focus:ring-violet-600/50"
                   />
-                  <p className="text-[11px] text-slate-500 mt-1">
+                  <p className="text-[11px] text-theme-muted mt-1">
                     ဥပမာ: <code className="text-violet-300">R</code> → R001 &nbsp;|&nbsp;
                     <code className="text-violet-300">CS-</code> → CS-001 &nbsp;|&nbsp;
                     <code className="text-violet-300">Roll-</code> → Roll-001
@@ -233,7 +233,7 @@ export function IDConfigDialog({ onClose }: Props) {
 
                 {/* Sequence Padding */}
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Sequence Digits *</label>
+                  <label className="block text-xs font-medium text-theme-sub mb-1.5">Sequence Digits *</label>
                   <div className="grid grid-cols-3 gap-2">
                     {[
                       { val: 2, label: "2 digits", eg: "01" },
@@ -247,7 +247,7 @@ export function IDConfigDialog({ onClose }: Props) {
                         className={`py-2.5 rounded-lg border text-xs font-medium transition-colors flex flex-col items-center gap-0.5 ${
                           rollPadding === val
                             ? "bg-violet-600/20 border-violet-500 text-violet-200"
-                            : "border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200"
+                            : "border-theme-border-hover text-theme-sub hover:border-slate-500 hover:text-theme-text"
                         }`}
                       >
                         <span>{label}</span>
@@ -258,8 +258,8 @@ export function IDConfigDialog({ onClose }: Props) {
                 </div>
 
                 {/* Examples */}
-                <div className="p-3 bg-slate-950/50 border border-slate-800 rounded-xl">
-                  <p className="text-[11px] text-slate-500 font-medium mb-1.5">Generated examples:</p>
+                <div className="p-3 bg-theme-base/50 border border-theme-border rounded-xl">
+                  <p className="text-[11px] text-theme-muted font-medium mb-1.5">Generated examples:</p>
                   <div className="flex gap-3 font-mono text-xs">
                     {[1, 2, 3].map((n) => (
                       <span key={n} className="text-teal-300">
@@ -276,7 +276,7 @@ export function IDConfigDialog({ onClose }: Props) {
             {success && <p className="text-sm text-emerald-400 bg-emerald-900/20 border border-emerald-800/50 rounded-lg px-3 py-2">Rules saved successfully!</p>}
 
             <div className="flex gap-3 pt-2">
-              <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-slate-700 text-slate-300 text-sm hover:bg-slate-800 transition-colors">
+              <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-theme-border-hover text-theme-sub text-sm hover:bg-theme-elevated transition-colors">
                 Cancel
               </button>
               <button

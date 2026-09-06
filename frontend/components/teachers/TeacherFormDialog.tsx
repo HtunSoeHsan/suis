@@ -101,24 +101,24 @@ export function TeacherFormDialog({ teacher, onClose }: Props) {
     finally { setLoading(false); }
   };
 
-  const inputClass = "w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-600/50 disabled:opacity-50";
+  const inputClass = "w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-sm text-theme-text placeholder:text-theme-muted focus:outline-none focus:ring-2 focus:ring-indigo-600/50 disabled:opacity-50";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh]">
+      <div className="bg-theme-surface border border-theme-border-hover rounded-2xl shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-slate-800 shrink-0">
-          <h3 className="font-semibold text-white text-lg flex items-center gap-2">
+        <div className="flex items-center justify-between p-5 border-b border-theme-border shrink-0">
+          <h3 className="font-semibold text-theme-text text-lg flex items-center gap-2">
             <Briefcase className="w-5 h-5 text-indigo-400" />
             {teacher ? "Edit Faculty Profile" : "Add New Faculty Member"}
           </h3>
-          <button onClick={onClose} className="text-slate-500 hover:text-slate-200 transition-colors">
+          <button onClick={onClose} className="text-theme-muted hover:text-theme-text transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-slate-800 px-5 bg-slate-950/40">
+        <div className="flex border-b border-theme-border px-5 bg-theme-base/40">
           {[
             { id: "employment", label: "Academic & Employment", icon: Briefcase },
             { id: "personal", label: "Personal & Contact", icon: User },
@@ -130,7 +130,7 @@ export function TeacherFormDialog({ teacher, onClose }: Props) {
               className={`flex items-center gap-2 py-3 px-4 text-xs font-semibold border-b-2 transition-colors ${
                 activeTab === id
                   ? "border-indigo-500 text-indigo-400 bg-indigo-950/20"
-                  : "border-transparent text-slate-400 hover:text-slate-200"
+                  : "border-transparent text-theme-sub hover:text-theme-text"
               }`}
             >
               <Icon className="w-4 h-4" /> {label}
@@ -146,13 +146,13 @@ export function TeacherFormDialog({ teacher, onClose }: Props) {
               {/* Full Name & Teacher ID */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Full Name *</label>
+                  <label className="block text-xs font-medium text-theme-sub mb-1.5">Full Name *</label>
                   <input type="text" value={form.full_name}
                     onChange={(e) => set("full_name", e.target.value)}
                     placeholder="Dr. Smith Johnson" required className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                  <label className="block text-xs font-medium text-theme-sub mb-1.5">
                     {teacher ? "Teacher ID" : "Teacher ID (Auto if blank)"}
                   </label>
                   <input type="text" value={form.teacher_id}
@@ -165,7 +165,7 @@ export function TeacherFormDialog({ teacher, onClose }: Props) {
               {/* Department Dropdown & Designation Dropdown */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Department *</label>
+                  <label className="block text-xs font-medium text-theme-sub mb-1.5">Department *</label>
                   <div className="relative">
                     <select value={form.dept_code} onChange={(e) => set("dept_code", e.target.value)}
                       required className={`${inputClass} appearance-none pr-9`}>
@@ -177,12 +177,12 @@ export function TeacherFormDialog({ teacher, onClose }: Props) {
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-sub pointer-events-none" />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Designation (ရာထူး) *</label>
+                  <label className="block text-xs font-medium text-theme-sub mb-1.5">Designation (ရာထူး) *</label>
                   <div className="relative">
                     <select value={form.designation} onChange={(e) => set("designation", e.target.value)}
                       required className={`${inputClass} appearance-none pr-9`}>
@@ -190,7 +190,7 @@ export function TeacherFormDialog({ teacher, onClose }: Props) {
                         <option key={des} value={des}>{des}</option>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-sub pointer-events-none" />
                   </div>
                 </div>
               </div>
@@ -198,13 +198,13 @@ export function TeacherFormDialog({ teacher, onClose }: Props) {
               {/* Qualification & Specialization */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Qualification (ဘွဲ့)</label>
+                  <label className="block text-xs font-medium text-theme-sub mb-1.5">Qualification (ဘွဲ့)</label>
                   <input type="text" value={form.qualification}
                     onChange={(e) => set("qualification", e.target.value)}
                     placeholder="e.g. Ph.D (IT), M.C.Sc" className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Specialization (အထူးပြု)</label>
+                  <label className="block text-xs font-medium text-theme-sub mb-1.5">Specialization (အထူးပြု)</label>
                   <input type="text" value={form.specialization}
                     onChange={(e) => set("specialization", e.target.value)}
                     placeholder="e.g. Artificial Intelligence" className={inputClass} />
@@ -214,7 +214,7 @@ export function TeacherFormDialog({ teacher, onClose }: Props) {
               {/* Status & Joining Date */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Employment Status</label>
+                  <label className="block text-xs font-medium text-theme-sub mb-1.5">Employment Status</label>
                   <select value={form.status} onChange={(e) => set("status", e.target.value)} className={inputClass}>
                     {STATUSES.map((st) => (
                       <option key={st} value={st}>{st}</option>
@@ -222,7 +222,7 @@ export function TeacherFormDialog({ teacher, onClose }: Props) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Joining Date</label>
+                  <label className="block text-xs font-medium text-theme-sub mb-1.5">Joining Date</label>
                   <input type="date" value={form.joining_date}
                     onChange={(e) => set("joining_date", e.target.value)}
                     className={inputClass} />
@@ -237,13 +237,13 @@ export function TeacherFormDialog({ teacher, onClose }: Props) {
               {/* Email & Phone */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Email Address</label>
+                  <label className="block text-xs font-medium text-theme-sub mb-1.5">Email Address</label>
                   <input type="email" value={form.email}
                     onChange={(e) => set("email", e.target.value)}
                     placeholder="teacher@ucspyay.edu.mm" className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Phone Number</label>
+                  <label className="block text-xs font-medium text-theme-sub mb-1.5">Phone Number</label>
                   <input type="text" value={form.phone}
                     onChange={(e) => set("phone", e.target.value)}
                     placeholder="+95912345678" className={inputClass} />
@@ -253,13 +253,13 @@ export function TeacherFormDialog({ teacher, onClose }: Props) {
               {/* NRC & Gender */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">NRC Number (မှတ်ပုံတင်)</label>
+                  <label className="block text-xs font-medium text-theme-sub mb-1.5">NRC Number (မှတ်ပုံတင်)</label>
                   <input type="text" value={form.nrc_number}
                     onChange={(e) => set("nrc_number", e.target.value)}
                     placeholder="12/PAYA(N)654321" className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Gender</label>
+                  <label className="block text-xs font-medium text-theme-sub mb-1.5">Gender</label>
                   <select value={form.gender} onChange={(e) => set("gender", e.target.value)} className={inputClass}>
                     <option value="Male">Male (ကျား)</option>
                     <option value="Female">Female (မ)</option>
@@ -270,7 +270,7 @@ export function TeacherFormDialog({ teacher, onClose }: Props) {
 
               {/* Address */}
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">Address (နေရပ်လိပ်စာ)</label>
+                <label className="block text-xs font-medium text-theme-sub mb-1.5">Address (နေရပ်လိပ်စာ)</label>
                 <textarea rows={3} value={form.address}
                   onChange={(e) => set("address", e.target.value)}
                   placeholder="Staff Housing, University Campus..."
@@ -282,9 +282,9 @@ export function TeacherFormDialog({ teacher, onClose }: Props) {
           {error && <p className="text-sm text-red-400 bg-red-900/20 border border-red-800/50 rounded-lg px-3 py-2">{error}</p>}
 
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-slate-700 text-slate-300 text-sm hover:bg-slate-800 transition-colors">Cancel</button>
+            <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-theme-border-hover text-theme-sub text-sm hover:bg-theme-elevated transition-colors">Cancel</button>
             <button type="submit" disabled={loading || !form.full_name || !form.dept_code}
-              className="flex-1 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2">
+              className="flex-1 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-theme-text text-sm font-medium transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               {teacher ? "Save Changes" : "Create Teacher"}
             </button>

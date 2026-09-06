@@ -130,14 +130,14 @@ export function SingleAttendanceDialog({ onClose, onSuccess }: SingleAttendanceD
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+      <div className="bg-theme-surface border border-theme-border rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/50">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-theme-border bg-theme-base/50">
           <div className="flex items-center gap-2 text-emerald-400 font-bold text-lg">
             <UserCheck className="w-5 h-5" />
             <span>Record Single Attendance (Manual)</span>
           </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors">
+          <button onClick={onClose} className="p-1 text-theme-sub hover:text-theme-text rounded-lg transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -158,13 +158,13 @@ export function SingleAttendanceDialog({ onClose, onSuccess }: SingleAttendanceD
             <>
               {/* Student Selector */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-theme-sub uppercase tracking-wider mb-1.5">
                   Select Student
                 </label>
                 <select
                   value={studentId}
                   onChange={(e) => setStudentId(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-xl text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                   required
                 >
                   {enrolledStudents.map((s) => (
@@ -177,13 +177,13 @@ export function SingleAttendanceDialog({ onClose, onSuccess }: SingleAttendanceD
 
               {/* Academic Term / Semester Selector */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-theme-sub uppercase tracking-wider mb-1.5">
                   Select Academic Term / Semester
                 </label>
                 <select
                   value={selectedSemesterId}
                   onChange={(e) => setSelectedSemesterId(e.target.value === "ALL" ? "ALL" : Number(e.target.value))}
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                  className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-xl text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                 >
                   <option value="ALL">-- All Semesters --</option>
                   {semesters.map((s) => (
@@ -196,14 +196,14 @@ export function SingleAttendanceDialog({ onClose, onSuccess }: SingleAttendanceD
 
               {/* Course Selector */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-theme-sub uppercase tracking-wider mb-1.5">
                   Select Course
                 </label>
                 <select
                   value={courseCode}
                   onChange={(e) => setCourseCode(e.target.value)}
                   disabled={filteredCourses.length === 0}
-                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50"
+                  className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-xl text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50"
                   required
                 >
                   {filteredCourses.length === 0 ? (
@@ -220,7 +220,7 @@ export function SingleAttendanceDialog({ onClose, onSuccess }: SingleAttendanceD
 
               {/* Status Radio Buttons */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-semibold text-theme-sub uppercase tracking-wider mb-1.5">
                   Attendance Status
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -236,7 +236,7 @@ export function SingleAttendanceDialog({ onClose, onSuccess }: SingleAttendanceD
                       className={`py-2 px-2 rounded-xl border text-xs font-bold transition-all ${
                         status === item.value
                           ? `${item.color} ring-2 ring-emerald-500/30`
-                          : "border-slate-700 bg-slate-800/50 text-slate-400 hover:border-slate-600"
+                          : "border-theme-border-hover bg-theme-elevated/50 text-theme-sub hover:border-slate-600"
                       }`}
                     >
                       {item.label}
@@ -246,11 +246,11 @@ export function SingleAttendanceDialog({ onClose, onSuccess }: SingleAttendanceD
               </div>
 
               {/* Footer Actions */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-theme-border">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+                  className="px-4 py-2 rounded-xl text-sm font-medium text-theme-sub hover:text-theme-text hover:bg-theme-elevated transition-colors"
                 >
                   Cancel
                 </button>

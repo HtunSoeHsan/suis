@@ -68,65 +68,65 @@ export function ClassroomFormDialog({ classroom, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-md">
-        <div className="flex items-center justify-between p-5 border-b border-slate-800">
-          <h3 className="font-semibold text-white">
+      <div className="bg-theme-surface border border-theme-border-hover rounded-2xl shadow-2xl w-full max-w-md">
+        <div className="flex items-center justify-between p-5 border-b border-theme-border">
+          <h3 className="font-semibold text-theme-text">
             {classroom ? "Edit Classroom" : "Add New Classroom"}
           </h3>
-          <button onClick={onClose} className="text-slate-500 hover:text-slate-200 transition-colors">
+          <button onClick={onClose} className="text-theme-muted hover:text-theme-text transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">Room ID *</label>
+            <label className="block text-xs font-medium text-theme-sub mb-1.5">Room ID *</label>
             <input
               value={form.room_id}
               onChange={(e) => set("room_id", e.target.value)}
               placeholder="ROOM-101"
               disabled={!!classroom}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-600/50 disabled:opacity-50 font-mono"
+              className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-sm text-theme-text placeholder:text-theme-muted focus:outline-none focus:ring-2 focus:ring-rose-600/50 disabled:opacity-50 font-mono"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">Room Name *</label>
+            <label className="block text-xs font-medium text-theme-sub mb-1.5">Room Name *</label>
             <input
               value={form.room_name}
               onChange={(e) => set("room_name", e.target.value)}
               placeholder="Lab 1 - AI Research"
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-600/50"
+              className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-sm text-theme-text placeholder:text-theme-muted focus:outline-none focus:ring-2 focus:ring-rose-600/50"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">Building Location *</label>
+            <label className="block text-xs font-medium text-theme-sub mb-1.5">Building Location *</label>
             <input
               value={form.building}
               onChange={(e) => set("building", e.target.value)}
               placeholder="Main Academic Building"
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-600/50"
+              className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-sm text-theme-text placeholder:text-theme-muted focus:outline-none focus:ring-2 focus:ring-rose-600/50"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">Capacity *</label>
+              <label className="block text-xs font-medium text-theme-sub mb-1.5">Capacity *</label>
               <input
                 type="number"
                 min="1"
                 value={form.capacity}
                 onChange={(e) => set("capacity", e.target.value)}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-600/50"
+                className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-rose-600/50"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">Room Type *</label>
+              <label className="block text-xs font-medium text-theme-sub mb-1.5">Room Type *</label>
               <select
                 value={form.room_type}
                 onChange={(e) => set("room_type", e.target.value)}
-                className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-600/50"
+                className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-rose-600/50"
               >
                 <option value="Classroom">Classroom</option>
                 <option value="Lecture Hall">Lecture Hall</option>
@@ -138,7 +138,7 @@ export function ClassroomFormDialog({ classroom, onClose }: Props) {
 
           {error && <p className="text-sm text-red-400 bg-red-900/20 border border-red-800/50 rounded-lg px-3 py-2">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-slate-700 text-slate-300 text-sm hover:bg-slate-800 transition-colors">
+            <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-theme-border-hover text-theme-sub text-sm hover:bg-theme-elevated transition-colors">
               Cancel
             </button>
             <button

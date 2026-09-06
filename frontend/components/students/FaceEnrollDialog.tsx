@@ -46,23 +46,23 @@ export function FaceEnrollDialog({ person, personType, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-lg">
+      <div className="bg-theme-surface border border-theme-border-hover rounded-2xl shadow-2xl w-full max-w-lg">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-slate-800">
+        <div className="flex items-center justify-between p-5 border-b border-theme-border">
           <div>
-            <h3 className="font-semibold text-white">Face Enrollment</h3>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <h3 className="font-semibold text-theme-text">Face Enrollment</h3>
+            <p className="text-xs text-theme-sub mt-0.5">
               {person.full_name} · {isStudent(person) ? person.student_id : (person as Teacher).teacher_id}
             </p>
           </div>
-          <button onClick={onClose} className="text-slate-500 hover:text-slate-200 transition-colors">
+          <button onClick={onClose} className="text-theme-muted hover:text-theme-text transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Camera view */}
         <div className="p-5 space-y-4">
-          <div className="relative rounded-xl overflow-hidden bg-slate-950 aspect-video border border-slate-800">
+          <div className="relative rounded-xl overflow-hidden bg-theme-base aspect-video border border-theme-border">
             <video
               ref={videoRef}
               autoPlay
@@ -81,7 +81,7 @@ export function FaceEnrollDialog({ person, personType, onClose }: Props) {
 
             {/* Camera error */}
             {!camState.isActive && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 gap-2">
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-theme-sub gap-2">
                 <AlertTriangle className="w-8 h-8" />
                 <p className="text-sm">{camState.error ?? "Camera not active"}</p>
                 <button onClick={startCamera} className="text-xs text-violet-400 hover:underline">Try again</button>
@@ -92,19 +92,19 @@ export function FaceEnrollDialog({ person, personType, onClose }: Props) {
             {status === "processing" && (
               <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-2">
                 <Loader2 className="w-8 h-8 animate-spin text-violet-400" />
-                <p className="text-sm text-white">Processing…</p>
+                <p className="text-sm text-theme-text">Processing…</p>
               </div>
             )}
             {status === "success" && (
               <div className="absolute inset-0 bg-emerald-900/60 flex flex-col items-center justify-center gap-2">
                 <CheckCircle2 className="w-10 h-10 text-emerald-400" />
-                <p className="text-sm text-white font-medium">Enrolled!</p>
+                <p className="text-sm text-theme-text font-medium">Enrolled!</p>
               </div>
             )}
           </div>
 
           {/* Instruction */}
-          <p className="text-xs text-slate-500 text-center">
+          <p className="text-xs text-theme-muted text-center">
             Position your face inside the oval guide, then click Capture.
           </p>
 
@@ -115,7 +115,7 @@ export function FaceEnrollDialog({ person, personType, onClose }: Props) {
                 ? "bg-emerald-900/20 border-emerald-800/50 text-emerald-300"
                 : status === "error"
                 ? "bg-red-900/20 border-red-800/50 text-red-300"
-                : "bg-slate-800 border-slate-700 text-slate-300"
+                : "bg-theme-elevated border-theme-border-hover text-theme-sub"
               }`}>
               {message}
             </p>
@@ -129,11 +129,11 @@ export function FaceEnrollDialog({ person, personType, onClose }: Props) {
               </button>
             ) : (
               <>
-                <button onClick={onClose} className="flex-1 py-2.5 rounded-lg border border-slate-700 text-slate-300 text-sm hover:bg-slate-800 transition-colors">
+                <button onClick={onClose} className="flex-1 py-2.5 rounded-lg border border-theme-border-hover text-theme-sub text-sm hover:bg-theme-elevated transition-colors">
                   Cancel
                 </button>
                 {status === "error" ? (
-                  <button onClick={() => { setStatus("idle"); setMessage(""); }} className="flex-1 py-2.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-sm transition-colors inline-flex items-center justify-center gap-2">
+                  <button onClick={() => { setStatus("idle"); setMessage(""); }} className="flex-1 py-2.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-theme-text text-sm transition-colors inline-flex items-center justify-center gap-2">
                     <RefreshCw className="w-4 h-4" /> Retry
                   </button>
                 ) : (

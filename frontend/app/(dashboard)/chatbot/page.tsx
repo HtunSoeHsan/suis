@@ -39,7 +39,7 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
       <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center
         ${isUser
           ? "bg-gradient-to-br from-violet-600 to-indigo-600 shadow-md shadow-violet-900/30"
-          : "bg-slate-800 border border-slate-700"}`}>
+          : "bg-theme-elevated border border-theme-border-hover"}`}>
         {isUser ? <User className="w-4 h-4 text-white" /> : <Bot className="w-4 h-4 text-violet-400" />}
       </div>
 
@@ -48,7 +48,7 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
         <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed
           ${isUser
             ? "bg-violet-600 text-white rounded-tr-sm"
-            : "bg-slate-800 border border-slate-700/60 text-slate-200 rounded-tl-sm"}`}>
+            : "bg-theme-elevated border border-theme-border-hover/60 text-theme-text rounded-tl-sm"}`}>
           {msg.content}
         </div>
 
@@ -57,14 +57,14 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
           <div className="w-full">
             <button
               onClick={() => setShowSql((s) => !s)}
-              className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+              className="flex items-center gap-1.5 text-xs text-theme-muted hover:text-theme-sub transition-colors"
             >
               <Code2 className="w-3.5 h-3.5" />
               {showSql ? "Hide" : "Show"} SQL Query
               <ChevronDown className={`w-3 h-3 transition-transform ${showSql ? "rotate-180" : ""}`} />
             </button>
             {showSql && (
-              <pre className="mt-2 p-3 bg-slate-950 border border-slate-800 rounded-lg text-xs text-emerald-400 overflow-x-auto whitespace-pre-wrap">
+              <pre className="mt-2 p-3 bg-theme-base border border-theme-border rounded-lg text-xs text-emerald-400 overflow-x-auto whitespace-pre-wrap">
                 {msg.sql_query}
               </pre>
             )}
@@ -73,7 +73,7 @@ function MessageBubble({ msg }: { msg: ChatMessage }) {
 
         {/* Raw data count */}
         {!isUser && msg.raw_data && msg.raw_data.length > 0 && (
-          <div className="flex items-center gap-1.5 text-xs text-slate-500">
+          <div className="flex items-center gap-1.5 text-xs text-theme-muted">
             <Database className="w-3.5 h-3.5" />
             {msg.raw_data.length} row{msg.raw_data.length !== 1 ? "s" : ""} returned
           </div>
@@ -113,7 +113,7 @@ export default function ChatbotPage() {
         const defaultModel = data.models.find((m) => m.provider === data.default_provider) ?? data.models[0];
         if (defaultModel) setSelectedModelId(defaultModel.id);
       }
-    }).catch(() => {});
+    }).catch(() => { });
   }, []);
 
   useEffect(() => {
@@ -170,10 +170,10 @@ export default function ChatbotPage() {
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-600 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-900/30">
-            <MessageSquareText className="w-5 h-5 text-white" />
+            <MessageSquareText className="w-5 h-5 text-theme-text" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <h2 className="text-lg font-bold text-theme-text flex items-center gap-2">
               AI Chatbot
               {activeModelObj?.provider === "openrouter" ? (
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-800 font-semibold flex items-center gap-1">
@@ -185,17 +185,17 @@ export default function ChatbotPage() {
                 </span>
               )}
             </h2>
-            <p className="text-xs text-slate-400">Natural Language Text-to-SQL & University Intelligence</p>
+            <p className="text-xs text-theme-sub">Natural Language Text-to-SQL & University Intelligence</p>
           </div>
         </div>
 
         {/* AI Model dropdown */}
-        <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 p-1.5 rounded-xl shadow-md">
+        <div className="flex items-center gap-2 bg-theme-surface border border-theme-border p-1.5 rounded-xl shadow-md">
           <Cpu className="w-4 h-4 text-amber-400 ml-1.5 shrink-0" />
           <select
             value={selectedModelId}
             onChange={(e) => setSelectedModelId(e.target.value)}
-            className="bg-slate-800 border border-slate-700 text-xs font-medium text-slate-100 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500/50 cursor-pointer"
+            className="bg-theme-elevated border border-theme-border-hover text-xs font-medium text-theme-text rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500/50 cursor-pointer"
           >
             {modelsInfo?.models.map((m) => (
               <option key={m.id} value={m.id}>
@@ -207,18 +207,18 @@ export default function ChatbotPage() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-5">
+      <div className="flex-1 overflow-y-auto bg-theme-surface border border-theme-border rounded-xl p-4 space-y-5">
         {messages.map((msg, i) => (
           <MessageBubble key={i} msg={msg} />
         ))}
         {loading && (
           <div className="chat-message flex gap-3">
-            <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 rounded-full bg-theme-elevated border border-theme-border-hover flex items-center justify-center flex-shrink-0">
               <Bot className="w-4 h-4 text-violet-400 animate-pulse" />
             </div>
-            <div className="bg-slate-800 border border-slate-700/60 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-2">
+            <div className="bg-theme-elevated border border-theme-border-hover/60 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin text-violet-400" />
-              <span className="text-sm text-slate-400">
+              <span className="text-sm text-theme-sub">
                 Thinking with <span className="text-amber-400 font-semibold">{activeModelObj?.name ?? "AI"}</span>…
               </span>
             </div>
@@ -234,7 +234,7 @@ export default function ChatbotPage() {
             <button
               key={s}
               onClick={() => sendMessage(s)}
-              className="flex-shrink-0 text-xs px-3 py-1.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300 hover:border-violet-600/50 hover:text-violet-300 transition-colors"
+              className="flex-shrink-0 text-xs px-3 py-1.5 rounded-full bg-theme-elevated border border-theme-border-hover text-theme-sub hover:border-violet-600/50 hover:text-violet-300 transition-colors"
             >
               {s}
             </button>
@@ -244,7 +244,7 @@ export default function ChatbotPage() {
 
       {/* Input bar */}
       <div className="mt-3 flex gap-3">
-        <div className="flex-1 bg-slate-900 border border-slate-700 rounded-xl p-3 focus-within:ring-2 focus-within:ring-violet-600/50 transition-shadow">
+        <div className="flex-1 bg-theme-surface border border-theme-border-hover rounded-xl p-3 focus-within:ring-2 focus-within:ring-violet-600/50 transition-shadow">
           <textarea
             ref={inputRef}
             value={input}
@@ -252,7 +252,7 @@ export default function ChatbotPage() {
             onKeyDown={handleKeyDown}
             placeholder="Ask about students, attendance, university info… (Enter to send)"
             rows={2}
-            className="w-full bg-transparent text-sm text-slate-200 placeholder:text-slate-500 resize-none focus:outline-none"
+            className="w-full bg-transparent text-sm text-theme-text placeholder:text-theme-muted resize-none focus:outline-none"
           />
         </div>
         <button

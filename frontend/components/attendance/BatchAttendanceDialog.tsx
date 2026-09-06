@@ -179,14 +179,14 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-theme-surface border border-theme-border rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/50 flex-shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-theme-border bg-theme-base/50 flex-shrink-0">
           <div className="flex items-center gap-2 text-emerald-400 font-bold text-lg">
             <CheckSquare className="w-5 h-5" />
             <span>Class Attendance Sheet (အစုလိုက် ကောက်ရန်)</span>
           </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-white rounded-lg transition-colors">
+          <button onClick={onClose} className="p-1 text-theme-sub hover:text-theme-text rounded-lg transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -200,7 +200,7 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
           )}
 
           {/* Attendance Date Picker */}
-          <div className="flex items-center gap-3 bg-slate-950/60 px-4 py-3 rounded-xl border border-cyan-900/50">
+          <div className="flex items-center gap-3 bg-theme-surface/60 px-4 py-3 rounded-xl border border-cyan-900/50">
             <CalendarDays className="w-4 h-4 text-cyan-400 flex-shrink-0" />
             <div className="flex-1">
               <label className="block text-[11px] font-semibold text-cyan-400 uppercase tracking-wider mb-1">
@@ -212,7 +212,7 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
                   value={attendanceDate}
                   max={todayStr}
                   onChange={(e) => setAttendanceDate(e.target.value)}
-                  className="px-2.5 py-1.5 bg-slate-900 border border-cyan-800/60 rounded-lg text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-600/50 [color-scheme:dark]"
+                  className="px-2.5 py-1.5 bg-theme-surface border border-cyan-800/60 rounded-lg text-xs text-theme-text focus:outline-none focus:ring-2 focus:ring-cyan-600/50 [color-scheme:dark]"
                 />
                 {attendanceDate !== todayStr && (
                   <button
@@ -233,16 +233,16 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
           </div>
 
           {/* 3-Step Selector Row: Semester -> Course -> Section */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-slate-950/60 p-4 rounded-xl border border-slate-800">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-theme-surface/60 p-4 rounded-xl border border-theme-border">
             {/* 1. Semester Selector */}
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+              <label className="block text-[11px] font-semibold text-theme-sub uppercase tracking-wider mb-1">
                 1. Select Academic Term
               </label>
               <select
                 value={selectedSemesterId}
                 onChange={(e) => setSelectedSemesterId(e.target.value === "ALL" ? "ALL" : Number(e.target.value))}
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                className="w-full px-3 py-2 bg-theme-surface border border-theme-border-hover rounded-xl text-xs font-semibold text-theme-text focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
               >
                 <option value="ALL">-- All Semesters --</option>
                 {semesters.map((s) => (
@@ -255,7 +255,7 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
 
             {/* 2. Course Selector */}
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+              <label className="block text-[11px] font-semibold text-theme-sub uppercase tracking-wider mb-1">
                 2. Select Course
               </label>
               {isLoadingCourses ? (
@@ -267,7 +267,7 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
                   value={selectedCourse}
                   onChange={(e) => setSelectedCourse(e.target.value)}
                   disabled={filteredCourses.length === 0}
-                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-semibold text-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50"
+                  className="w-full px-3 py-2 bg-theme-surface border border-theme-border-hover rounded-xl text-xs font-semibold text-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 disabled:opacity-50"
                 >
                   {filteredCourses.length === 0 ? (
                     <option value="">No courses in semester</option>
@@ -284,13 +284,13 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
 
             {/* 3. Section Filter */}
             <div>
-              <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+              <label className="block text-[11px] font-semibold text-theme-sub uppercase tracking-wider mb-1">
                 3. Filter Section (အစု)
               </label>
               <select
                 value={selectedSection}
                 onChange={(e) => setSelectedSection(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-semibold text-violet-300 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                className="w-full px-3 py-2 bg-theme-surface border border-theme-border-hover rounded-xl text-xs font-semibold text-violet-300 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
               >
                 <option value="ALL">-- All Sections --</option>
                 <option value="A">Section A</option>
@@ -302,7 +302,7 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
 
           {/* Quick Bulk Actions & Counter */}
           <div className="flex items-center justify-between gap-3">
-            <span className="text-xs font-medium text-slate-400">
+            <span className="text-xs font-medium text-theme-sub">
               Showing <span className="text-emerald-400 font-bold">{displayedRows.length}</span> enrolled student{displayedRows.length !== 1 ? "s" : ""}
             </span>
             <div className="flex items-center gap-2">
@@ -324,13 +324,13 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
           </div>
 
           {/* Student Table */}
-          <div className="bg-slate-950/40 border border-slate-800 rounded-xl overflow-hidden">
+          <div className="bg-theme-base/40 border border-theme-border rounded-xl overflow-hidden">
             {isLoadingStudents ? (
               <div className="flex items-center justify-center py-16">
                 <Loader2 className="w-6 h-6 animate-spin text-emerald-400" />
               </div>
             ) : displayedRows.length === 0 ? (
-              <div className="text-center py-12 text-slate-500 text-sm">
+              <div className="text-center py-12 text-theme-muted text-sm">
                 {!selectedCourse ? (
                   "Please select a course above to load enrolled students."
                 ) : (
@@ -339,23 +339,23 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
               </div>
             ) : (
               <table className="w-full text-sm">
-                <thead className="border-b border-slate-800 bg-slate-950">
-                  <tr className="text-left text-slate-500 text-xs uppercase tracking-wider">
+                <thead className="border-b border-theme-border bg-theme-base">
+                  <tr className="text-left text-theme-sub text-xs uppercase tracking-wider">
                     <th className="px-4 py-3">Roll No</th>
                     <th className="px-4 py-3">Student Name</th>
                     <th className="px-4 py-3">Section</th>
                     <th className="px-4 py-3 text-right">Attendance Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-theme-border">
                   {displayedRows.map(({ student, status }) => (
-                    <tr key={student.student_id} className="hover:bg-slate-800/30 transition-colors">
+                    <tr key={student.student_id} className="hover:bg-theme-elevated/30 transition-colors">
                       <td className="px-4 py-3 font-mono font-semibold text-violet-400 text-xs">
                         {student.roll_number}
                       </td>
                       <td className="px-4 py-3">
-                        <p className="font-semibold text-slate-200 text-xs">{student.full_name}</p>
-                        <p className="text-[11px] font-mono text-slate-500">{student.student_id}</p>
+                        <p className="font-semibold text-theme-text text-xs">{student.full_name}</p>
+                        <p className="text-[11px] font-mono text-theme-muted">{student.student_id}</p>
                       </td>
                       <td className="px-4 py-3">
                         {student.section && (
@@ -381,7 +381,7 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
                                 className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs font-bold transition-all ${
                                   isSelected
                                     ? b.active
-                                    : "border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 hover:text-slate-200"
+                                    : "border-theme-border bg-theme-surface text-theme-sub hover:border-theme-border-hover hover:text-theme-text"
                                 }`}
                               >
                                 <Icon className="w-3.5 h-3.5" />
@@ -400,15 +400,15 @@ export function BatchAttendanceDialog({ onClose, onSuccess }: BatchAttendanceDia
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-800 bg-slate-950/50 flex-shrink-0">
-          <p className="text-xs text-slate-400">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-theme-border bg-theme-base/50 flex-shrink-0">
+          <p className="text-xs text-theme-sub">
             Total {displayedRows.length} students enrolled in <span className="font-mono text-emerald-400 font-bold">{selectedCourse || "—"}</span>
           </p>
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors"
+              className="px-4 py-2 rounded-xl text-sm font-medium text-theme-sub hover:text-theme-text hover:bg-theme-elevated transition-colors"
             >
               Cancel
             </button>

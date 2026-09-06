@@ -217,28 +217,28 @@ export default function TimetablesPage() {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <h2 className="text-xl font-bold text-theme-text flex items-center gap-2">
               <CalendarRange className="w-6 h-6 text-cyan-400" /> Class & Exam Schedules
             </h2>
             {isTeacher && (
-              <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-semibold">
+              <span className="px-2.5 py-0.5 rounded-full badge-amber border text-xs font-semibold">
                 My Schedule ({teacherId ?? "Teacher"}) · View Only
               </span>
             )}
           </div>
-          <p className="text-sm text-slate-400 mt-0.5">{totalItems} scheduled timetable slots</p>
+          <p className="text-sm text-theme-sub mt-0.5">{totalItems} scheduled timetable slots</p>
         </div>
         {!isTeacher && (
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowPeriodSetup(true)}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 text-sm font-medium transition-colors"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-theme-elevated hover:bg-theme-muted border border-theme-border-hover text-amber-400 text-sm font-medium transition-colors"
             >
               <Clock className="w-4 h-4 text-amber-400" /> Period Setup
             </button>
             <button
               onClick={() => setShowCreate(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-medium transition-colors shadow-lg shadow-cyan-900/30"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-theme-text text-sm font-medium transition-colors shadow-lg shadow-cyan-900/30"
             >
               <Plus className="w-4 h-4" /> Add Schedule Slot
             </button>
@@ -247,13 +247,13 @@ export default function TimetablesPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-800 gap-4">
+      <div className="flex border-b border-theme-border gap-4">
         <button
           onClick={() => { setActiveTab("academic"); setPage(0); }}
           className={`pb-3 text-sm font-semibold transition-colors border-b-2 ${
             activeTab === "academic"
               ? "border-cyan-500 text-cyan-400"
-              : "border-transparent text-slate-400 hover:text-slate-200"
+              : "border-transparent text-theme-sub hover:text-theme-text"
           }`}
         >
           Academic Class Timetable
@@ -263,7 +263,7 @@ export default function TimetablesPage() {
           className={`pb-3 text-sm font-semibold transition-colors border-b-2 ${
             activeTab === "exam"
               ? "border-cyan-500 text-cyan-400"
-              : "border-transparent text-slate-400 hover:text-slate-200"
+              : "border-transparent text-theme-sub hover:text-theme-text"
           }`}
         >
           Exam Timetable
@@ -275,15 +275,15 @@ export default function TimetablesPage() {
         {/* Day Filter (For Academic Tab) */}
         {activeTab === "academic" && (
           <div className="flex items-center gap-1.5">
-            <span className="text-xs text-slate-500 font-medium">Day:</span>
+            <span className="text-xs text-theme-muted font-medium">Day:</span>
             {(["", ...DAYS] as const).map((d) => (
               <button
                 key={d}
                 onClick={() => { setFilterDay(d); setPage(0); }}
                 className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
                   filterDay === d
-                    ? "bg-cyan-600 border-cyan-500 text-white"
-                    : "border-slate-700 text-slate-400 hover:border-slate-500"
+                    ? "bg-cyan-600 border-cyan-500 text-theme-text"
+                    : "border-theme-border-hover text-theme-sub hover:border-slate-500"
                 }`}
               >
                 {d === "" ? "All Days" : d}
@@ -297,7 +297,7 @@ export default function TimetablesPage() {
           <select
             value={filterCourse}
             onChange={(e) => { setFilterCourse(e.target.value); setPage(0); }}
-            className="w-full pl-3 pr-8 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-600/50 appearance-none"
+            className="w-full pl-3 pr-8 py-2 bg-theme-surface border border-theme-border-hover rounded-lg text-xs font-semibold text-theme-text focus:outline-none focus:ring-2 focus:ring-cyan-600/50 appearance-none"
           >
             <option value="">All Courses</option>
             {courses.map((c) => {
@@ -310,7 +310,7 @@ export default function TimetablesPage() {
               );
             })}
           </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-theme-sub pointer-events-none" />
         </div>
 
         {/* Semester Filter Dropdown */}
@@ -318,7 +318,7 @@ export default function TimetablesPage() {
           <select
             value={filterSemester}
             onChange={(e) => { setFilterSemester(e.target.value ? parseInt(e.target.value) : ""); setPage(0); }}
-            className="w-full pl-3 pr-8 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-600/50 appearance-none"
+            className="w-full pl-3 pr-8 py-2 bg-theme-surface border border-theme-border-hover rounded-lg text-xs font-semibold text-theme-text focus:outline-none focus:ring-2 focus:ring-cyan-600/50 appearance-none"
           >
             <option value="">All Semesters</option>
             {semesters.map((s) => (
@@ -327,12 +327,12 @@ export default function TimetablesPage() {
               </option>
             ))}
           </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-theme-sub pointer-events-none" />
         </div>
       </div>
 
       {/* Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+      <div className="bg-theme-surface border border-theme-border rounded-xl overflow-hidden shadow-xl">
         {isLoading ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-6 h-6 animate-spin text-cyan-400" />
@@ -341,8 +341,8 @@ export default function TimetablesPage() {
           <div className="text-center py-16 text-red-400 text-sm">{error}</div>
         ) : activeTab === "academic" ? (
           <table className="w-full text-sm">
-            <thead className="border-b border-slate-800 bg-slate-950/50">
-              <tr className="text-left text-slate-500 text-xs uppercase tracking-wider">
+            <thead className="border-b border-theme-border bg-theme-base/50">
+              <tr className="text-left text-theme-sub text-xs uppercase tracking-wider">
                 {(isTeacher
                   ? ["Day", "Time Slot", "Course Subject", "Semester", "Target Class", "Assigned Teacher", "Classroom Location"]
                   : ["Day", "Time Slot", "Course Subject", "Semester", "Target Class", "Assigned Teacher", "Classroom Location", "Actions"]
@@ -351,10 +351,10 @@ export default function TimetablesPage() {
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-theme-border">
               {academicData?.items.length === 0 ? (
                 <tr>
-                  <td colSpan={isTeacher ? 7 : 8} className="text-center py-12 text-slate-500">
+                  <td colSpan={isTeacher ? 7 : 8} className="text-center py-12 text-theme-muted">
                     No academic schedule slots found matching filters.{" "}
                     {!isTeacher && <button onClick={() => setShowCreate(true)} className="text-cyan-400 hover:underline">Add one?</button>}
                   </td>
@@ -368,22 +368,22 @@ export default function TimetablesPage() {
                 const target = getTargetClassDetails(semester, course, tt);
 
                 return (
-                  <tr key={tt.timetable_id} className="hover:bg-slate-800/30 transition-colors group">
+                  <tr key={tt.timetable_id} className="hover:bg-theme-elevated/30 transition-colors group">
                     <td className="px-4 py-3 font-semibold text-cyan-400">{tt.day_of_week}</td>
                     <td className="px-4 py-3">
                       {timeSlot ? (
                         <div>
-                          <p className="font-semibold text-slate-200 text-xs">Period #{timeSlot.period_number}</p>
-                          <p className="text-[11px] font-mono text-slate-400">{timeSlot.start_time} - {timeSlot.end_time}</p>
+                          <p className="font-semibold text-theme-text text-xs">Period #{timeSlot.period_number}</p>
+                          <p className="text-[11px] font-mono text-theme-sub">{timeSlot.start_time} - {timeSlot.end_time}</p>
                         </div>
                       ) : (
-                        <span className="font-mono text-slate-300 text-xs">Slot #{tt.slot_id}</span>
+                        <span className="font-mono text-theme-sub text-xs">Slot #{tt.slot_id}</span>
                       )}
                     </td>
                     <td className="px-4 py-3">
                       {course ? (
                         <div>
-                          <p className="font-semibold text-slate-200 text-xs">{course.course_name}</p>
+                          <p className="font-semibold text-theme-text text-xs">{course.course_name}</p>
                           <p className="text-[11px] font-mono text-amber-400">{course.course_code}</p>
                         </div>
                       ) : (
@@ -394,54 +394,54 @@ export default function TimetablesPage() {
                     <td className="px-4 py-3">
                       {semester ? (
                         <div className="flex flex-col gap-0.5">
-                          <span className="font-medium text-slate-200 text-xs">{semester.academic_year}</span>
+                          <span className="font-medium text-theme-text text-xs">{semester.academic_year}</span>
                           <span className="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
                             {semester.term}
                             {semester.is_active && (
-                              <span className="text-[9px] px-1 py-0.2 rounded bg-emerald-950 border border-emerald-700/60 text-emerald-300">ACTIVE</span>
+                              <span className="text-[9px] px-1 py-0.2 rounded badge-emerald border">ACTIVE</span>
                             )}
                           </span>
                         </div>
                       ) : (
-                        <span className="text-slate-500 text-xs italic">Semester #{tt.semester_id}</span>
+                        <span className="text-theme-muted text-xs italic">Semester #{tt.semester_id}</span>
                       )}
                     </td>
                     {/* Target Class column */}
                     <td className="px-4 py-3">
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-violet-900/40 border border-violet-700/60 text-violet-300 text-xs font-bold w-fit">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full badge-violet border text-xs font-bold w-fit">
                             {target.yearLabel}
                           </span>
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-950/60 border border-emerald-700/50 text-emerald-300 text-[11px] font-semibold w-fit">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md badge-emerald border text-[11px] font-semibold w-fit">
                             {target.semLabel}
                           </span>
                         </div>
-                        <span className="text-xs text-slate-300 font-medium mt-0.5">
-                          Major: <span className="font-semibold text-white">{target.majorLabel}</span>
+                        <span className="text-xs text-theme-sub font-medium mt-0.5">
+                          Major: <span className="font-semibold text-theme-text">{target.majorLabel}</span>
                         </span>
                       </div>
                     </td>
                     <td className="px-4 py-3">
                       {teacher ? (
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-cyan-900/50 border border-cyan-700/60 flex items-center justify-center text-cyan-300 font-bold text-xs">
+                          <div className="w-7 h-7 rounded-full badge-sky border flex items-center justify-center font-bold text-xs">
                             {teacher.full_name.charAt(0)}
                           </div>
                           <div>
-                            <p className="font-semibold text-slate-200 text-xs">{teacher.full_name}</p>
-                            <p className="text-[11px] text-slate-400">{teacher.designation} · <span className="font-mono text-cyan-400">{teacher.teacher_id}</span></p>
+                            <p className="font-semibold text-theme-text text-xs">{teacher.full_name}</p>
+                            <p className="text-[11px] text-theme-sub">{teacher.designation} · <span className="font-mono text-cyan-400">{teacher.teacher_id}</span></p>
                           </div>
                         </div>
                       ) : (
-                        <span className="font-mono text-slate-400 text-xs">{tt.teacher_id}</span>
+                        <span className="font-mono text-theme-sub text-xs">{tt.teacher_id}</span>
                       )}
                     </td>
                     <td className="px-4 py-3">
                       {room ? (
                         <div>
-                          <p className="font-semibold text-slate-200 text-xs">{room.room_name}</p>
-                          <p className="text-[11px] text-slate-400"><span className="font-mono text-rose-400">{room.room_id}</span> · {room.building}</p>
+                          <p className="font-semibold text-theme-text text-xs">{room.room_name}</p>
+                          <p className="text-[11px] text-theme-sub"><span className="font-mono text-rose-400">{room.room_id}</span> · {room.building}</p>
                         </div>
                       ) : (
                         <span className="font-mono text-rose-400 text-xs">{tt.room_id}</span>
@@ -451,7 +451,7 @@ export default function TimetablesPage() {
                       <td className="px-4 py-3">
                         <button
                           onClick={() => handleDeleteAcademic(tt)}
-                          className="p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-red-400 transition-colors"
+                          className="p-1.5 rounded-md hover:bg-theme-elevated text-theme-sub hover:text-red-400 transition-colors"
                           title="Delete Schedule Slot"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -465,8 +465,8 @@ export default function TimetablesPage() {
           </table>
         ) : (
           <table className="w-full text-sm">
-            <thead className="border-b border-slate-800 bg-slate-950/50">
-              <tr className="text-left text-slate-500 text-xs uppercase tracking-wider">
+            <thead className="border-b border-theme-border bg-theme-base/50">
+              <tr className="text-left text-theme-sub text-xs uppercase tracking-wider">
                 {(isTeacher
                   ? ["Exam Date", "Exam Time", "Course Subject", "Semester", "Classroom Location", "Supervisor Teacher"]
                   : ["Exam Date", "Exam Time", "Course Subject", "Semester", "Classroom Location", "Supervisor Teacher", "Actions"]
@@ -475,10 +475,10 @@ export default function TimetablesPage() {
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-theme-border">
               {examData?.items.length === 0 ? (
                 <tr>
-                  <td colSpan={isTeacher ? 6 : 7} className="text-center py-12 text-slate-500">
+                  <td colSpan={isTeacher ? 6 : 7} className="text-center py-12 text-theme-muted">
                     No exam schedule slots found matching filters.
                   </td>
                 </tr>
@@ -489,13 +489,13 @@ export default function TimetablesPage() {
                 const semester = semestersMap[e.semester_id] || (course?.semester_id ? semestersMap[course.semester_id] : undefined);
 
                 return (
-                  <tr key={e.exam_id} className="hover:bg-slate-800/30 transition-colors group">
+                  <tr key={e.exam_id} className="hover:bg-theme-elevated/30 transition-colors group">
                     <td className="px-4 py-3 font-semibold text-cyan-400">{e.exam_date}</td>
-                    <td className="px-4 py-3 font-mono text-slate-300">{e.start_time} - {e.end_time}</td>
+                    <td className="px-4 py-3 font-mono text-theme-sub">{e.start_time} - {e.end_time}</td>
                     <td className="px-4 py-3">
                       {course ? (
                         <div>
-                          <p className="font-semibold text-slate-200 text-xs">{course.course_name}</p>
+                          <p className="font-semibold text-theme-text text-xs">{course.course_name}</p>
                           <p className="text-[11px] font-mono text-amber-400">{course.course_code}</p>
                         </div>
                       ) : (
@@ -506,23 +506,23 @@ export default function TimetablesPage() {
                     <td className="px-4 py-3">
                       {semester ? (
                         <div className="flex flex-col gap-0.5">
-                          <span className="font-medium text-slate-200 text-xs">{semester.academic_year}</span>
+                          <span className="font-medium text-theme-text text-xs">{semester.academic_year}</span>
                           <span className="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
                             {semester.term}
                             {semester.is_active && (
-                              <span className="text-[9px] px-1 py-0.2 rounded bg-emerald-950 border border-emerald-700/60 text-emerald-300">ACTIVE</span>
+                              <span className="text-[9px] px-1 py-0.2 rounded badge-emerald border">ACTIVE</span>
                             )}
                           </span>
                         </div>
                       ) : (
-                        <span className="text-slate-500 text-xs italic">Semester #{e.semester_id}</span>
+                        <span className="text-theme-muted text-xs italic">Semester #{e.semester_id}</span>
                       )}
                     </td>
                     <td className="px-4 py-3">
                       {room ? (
                         <div>
-                          <p className="font-semibold text-slate-200 text-xs">{room.room_name}</p>
-                          <p className="text-[11px] text-slate-400"><span className="font-mono text-rose-400">{room.room_id}</span> · {room.building}</p>
+                          <p className="font-semibold text-theme-text text-xs">{room.room_name}</p>
+                          <p className="text-[11px] text-theme-sub"><span className="font-mono text-rose-400">{room.room_id}</span> · {room.building}</p>
                         </div>
                       ) : (
                         <span className="font-mono text-rose-400 text-xs">{e.room_id}</span>
@@ -531,25 +531,25 @@ export default function TimetablesPage() {
                     <td className="px-4 py-3">
                       {supervisor ? (
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-cyan-900/50 border border-cyan-700/60 flex items-center justify-center text-cyan-300 font-bold text-xs">
+                          <div className="w-7 h-7 rounded-full badge-sky border flex items-center justify-center font-bold text-xs">
                             {supervisor.full_name.charAt(0)}
                           </div>
                           <div>
-                            <p className="font-semibold text-slate-200 text-xs">{supervisor.full_name}</p>
-                            <p className="text-[11px] text-slate-400">{supervisor.designation} · <span className="font-mono text-cyan-400">{supervisor.teacher_id}</span></p>
+                            <p className="font-semibold text-theme-text text-xs">{supervisor.full_name}</p>
+                            <p className="text-[11px] text-theme-sub">{supervisor.designation} · <span className="font-mono text-cyan-400">{supervisor.teacher_id}</span></p>
                           </div>
                         </div>
                       ) : e.supervisor_teacher_id ? (
-                        <span className="font-mono text-slate-400 text-xs">{e.supervisor_teacher_id}</span>
+                        <span className="font-mono text-theme-sub text-xs">{e.supervisor_teacher_id}</span>
                       ) : (
-                        <span className="text-slate-500 text-xs italic">Unassigned</span>
+                        <span className="text-theme-muted text-xs italic">Unassigned</span>
                       )}
                     </td>
                     {!isTeacher && (
                       <td className="px-4 py-3">
                         <button
                           onClick={() => handleDeleteExam(e)}
-                          className="p-1.5 rounded-md hover:bg-slate-800 text-slate-400 hover:text-red-400 transition-colors"
+                          className="p-1.5 rounded-md hover:bg-theme-elevated text-theme-sub hover:text-red-400 transition-colors"
                           title="Delete Exam Slot"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -566,20 +566,20 @@ export default function TimetablesPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between text-sm text-slate-400">
+        <div className="flex items-center justify-between text-sm text-theme-sub">
           <span>Page {page + 1} of {totalPages}</span>
           <div className="flex gap-2">
             <button
               disabled={page === 0}
               onClick={() => setPage((p) => p - 1)}
-              className="p-2 rounded-lg bg-slate-800 border border-slate-700 disabled:opacity-40 hover:bg-slate-700 transition-colors"
+              className="p-2 rounded-lg bg-theme-elevated border border-theme-border-hover disabled:opacity-40 hover:bg-theme-muted transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               disabled={page + 1 >= totalPages}
               onClick={() => setPage((p) => p + 1)}
-              className="p-2 rounded-lg bg-slate-800 border border-slate-700 disabled:opacity-40 hover:bg-slate-700 transition-colors"
+              className="p-2 rounded-lg bg-theme-elevated border border-theme-border-hover disabled:opacity-40 hover:bg-theme-muted transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>

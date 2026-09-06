@@ -97,21 +97,21 @@ export function EnrollmentFormDialog({ onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-md">
-        <div className="flex items-center justify-between p-5 border-b border-slate-800">
-          <h3 className="font-semibold text-white">Enroll Student in Courses</h3>
-          <button onClick={onClose} className="text-slate-500 hover:text-slate-200 transition-colors">
+      <div className="bg-theme-surface border border-theme-border-hover rounded-2xl shadow-2xl w-full max-w-md">
+        <div className="flex items-center justify-between p-5 border-b border-theme-border">
+          <h3 className="font-semibold text-theme-text">Enroll Student in Courses</h3>
+          <button onClick={onClose} className="text-theme-muted hover:text-theme-text transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           {/* Semester Selector */}
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">Select Academic Term / Semester *</label>
+            <label className="block text-xs font-medium text-theme-sub mb-1.5">Select Academic Term / Semester *</label>
             <select
               value={semesterId}
               onChange={(e) => setSemesterId(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-600/50 font-mono"
+              className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-teal-600/50 font-mono"
             >
               {semesters.map((sem) => (
                 <option key={sem.semester_id} value={sem.semester_id}>
@@ -123,11 +123,11 @@ export function EnrollmentFormDialog({ onClose }: Props) {
 
           {/* Student */}
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">Select Student *</label>
+            <label className="block text-xs font-medium text-theme-sub mb-1.5">Select Student *</label>
             <select
               value={studentId}
               onChange={(e) => setStudentId(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-600/50"
+              className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-teal-600/50"
             >
               {students.map((s) => (
                 <option key={s.student_id} value={s.student_id}>
@@ -136,7 +136,7 @@ export function EnrollmentFormDialog({ onClose }: Props) {
               ))}
             </select>
             {selectedStudent && (
-              <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-2">
+              <p className="text-[11px] text-theme-sub mt-1 flex items-center gap-2">
                 <span>Current Year: <span className="text-teal-400 font-semibold">Year {selectedStudent.academic_year}</span></span>
                 <span>·</span>
                 <span>Major: <span className="text-amber-400 font-semibold">{selectedStudent.major ?? selectedStudent.dept_code}</span></span>
@@ -147,10 +147,10 @@ export function EnrollmentFormDialog({ onClose }: Props) {
           {/* Course Multi-Select */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-medium text-slate-400">
+              <label className="text-xs font-medium text-theme-sub">
                 Select Courses * <span className="text-teal-400">({selectedCourses.length} selected)</span>
                 {selectedSemester && (
-                  <span className="ml-2 text-[10px] text-slate-500">
+                  <span className="ml-2 text-[10px] text-theme-muted">
                     — {selectedSemester.term}
                   </span>
                 )}
@@ -169,9 +169,9 @@ export function EnrollmentFormDialog({ onClose }: Props) {
                 </button>
               )}
             </div>
-            <div className="bg-slate-800 border border-slate-700 rounded-lg overflow-y-auto max-h-44 divide-y divide-slate-700/50">
+            <div className="bg-theme-elevated border border-theme-border-hover rounded-lg overflow-y-auto max-h-44 divide-y divide-theme-border/50">
               {filteredCourses.length === 0 ? (
-                <p className="text-xs text-slate-500 py-6 text-center">
+                <p className="text-xs text-theme-muted py-6 text-center">
                   {courses.length === 0 ? "No courses available" : "No courses match selected semester / major"}
                 </p>
               ) : (
@@ -184,7 +184,7 @@ export function EnrollmentFormDialog({ onClose }: Props) {
                       className={`flex items-center gap-2.5 px-3 py-2.5 cursor-pointer transition-colors text-xs ${
                         isSelected
                           ? "bg-teal-950/50 text-teal-200"
-                          : "text-slate-300 hover:bg-slate-700/50"
+                          : "text-theme-sub hover:bg-theme-muted/50"
                       }`}
                     >
                       {isSelected ? (
@@ -192,10 +192,10 @@ export function EnrollmentFormDialog({ onClose }: Props) {
                       ) : (
                         <Square className="w-4 h-4 text-slate-600 shrink-0" />
                       )}
-                      <span className="font-mono font-bold text-slate-200">{c.course_code}</span>
-                      <span className="truncate text-slate-400">{c.course_name}</span>
+                      <span className="font-mono font-bold text-theme-text">{c.course_code}</span>
+                      <span className="truncate text-theme-sub">{c.course_name}</span>
                       {c.major && (
-                        <span className="ml-auto font-mono text-[10px] px-1.5 py-0.5 rounded bg-slate-900 text-teal-300">
+                        <span className="ml-auto font-mono text-[10px] px-1.5 py-0.5 rounded bg-theme-surface text-teal-300">
                           {c.major}
                         </span>
                       )}
@@ -207,14 +207,14 @@ export function EnrollmentFormDialog({ onClose }: Props) {
           </div>
 
           {/* Auto-Promote & Major Update */}
-          <div className="p-3 bg-slate-950/60 border border-slate-800 rounded-xl space-y-2.5">
+          <div className="p-3 bg-theme-surface/60 border border-theme-border rounded-xl space-y-2.5">
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-slate-300">
+              <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-theme-sub">
                 <input
                   type="checkbox"
                   checked={autoPromote}
                   onChange={(e) => setAutoPromote(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-teal-500 focus:ring-teal-500/50"
+                  className="w-4 h-4 rounded border-theme-border-hover bg-theme-elevated text-teal-500 focus:ring-teal-500/50"
                 />
                 Promote Student's Academic Year upon enrollment
               </label>
@@ -222,7 +222,7 @@ export function EnrollmentFormDialog({ onClose }: Props) {
                 <select
                   value={promoteYear}
                   onChange={(e) => setPromoteYear(parseInt(e.target.value))}
-                  className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-teal-300 font-bold focus:outline-none"
+                  className="px-2 py-1 bg-theme-elevated border border-theme-border-hover rounded text-xs text-teal-300 font-bold focus:outline-none"
                 >
                   {[1, 2, 3, 4, 5].map((y) => (
                     <option key={y} value={y}>Year {y}</option>
@@ -232,12 +232,12 @@ export function EnrollmentFormDialog({ onClose }: Props) {
             </div>
 
             {isSemester3 && (
-              <div className="flex items-center justify-between border-t border-slate-800/80 pt-2 text-xs animate-in fade-in duration-150">
-                <span className="font-semibold text-slate-300">Update Student Major (အတန်းပြောင်းချိန် Major သိမ်းရန်):</span>
+              <div className="flex items-center justify-between border-t border-theme-border/80 pt-2 text-xs animate-in fade-in duration-150">
+                <span className="font-semibold text-theme-sub">Update Student Major (အတန်းပြောင်းချိန် Major သိမ်းရန်):</span>
                 <select
                   value={updateStudentMajor}
                   onChange={(e) => setUpdateStudentMajor(e.target.value)}
-                  className="px-2.5 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-amber-300 font-bold focus:outline-none"
+                  className="px-2.5 py-1 bg-theme-elevated border border-theme-border-hover rounded text-xs text-amber-300 font-bold focus:outline-none"
                 >
                   <option value="NO_CHANGE">Keep Current Major ({selectedStudent?.major ?? selectedStudent?.dept_code ?? "None"})</option>
                   <option value="CS">CS (Computer Science)</option>
@@ -249,13 +249,13 @@ export function EnrollmentFormDialog({ onClose }: Props) {
 
           {error && <p className="text-sm text-red-400 bg-red-900/20 border border-red-800/50 rounded-lg px-3 py-2">{error}</p>}
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-slate-700 text-slate-300 text-sm hover:bg-slate-800 transition-colors">
+            <button type="button" onClick={onClose} className="flex-1 py-2 rounded-lg border border-theme-border-hover text-theme-sub text-sm hover:bg-theme-elevated transition-colors">
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || !studentId || selectedCourses.length === 0 || !semesterId}
-              className="flex-1 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-sm font-medium transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
+              className="flex-1 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-theme-text text-sm font-medium transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserCheck className="w-4 h-4" />}
               Enroll ({selectedCourses.length} Courses)

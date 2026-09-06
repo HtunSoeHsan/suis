@@ -137,23 +137,23 @@ export function PeriodSetupDialog({ onClose, onUpdated }: Props) {
     }
   };
 
-  const inputCls = "px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500/50";
+  const inputCls = "px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-xs text-theme-text focus:outline-none focus:ring-2 focus:ring-amber-500/50";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col">
+      <div className="bg-theme-surface border border-theme-border-hover rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-slate-800">
+        <div className="flex items-center justify-between p-5 border-b border-theme-border">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-600 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-900/30">
-              <Clock className="w-5 h-5 text-white" />
+              <Clock className="w-5 h-5 text-theme-text" />
             </div>
             <div>
-              <h3 className="font-bold text-white text-base">Period Setup (Timetable Time Slots)</h3>
-              <p className="text-xs text-slate-400">Configure daily periods, start/end times, and lunch breaks</p>
+              <h3 className="font-bold text-theme-text text-base">Period Setup (Timetable Time Slots)</h3>
+              <p className="text-xs text-theme-sub">Configure daily periods, start/end times, and lunch breaks</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-slate-500 hover:text-slate-200 transition-colors">
+          <button onClick={onClose} className="text-theme-muted hover:text-theme-text transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -173,7 +173,7 @@ export function PeriodSetupDialog({ onClose, onUpdated }: Props) {
               <button
                 onClick={handleGeneratePresets}
                 disabled={saving}
-                className="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-semibold transition-colors shrink-0 flex items-center gap-1.5"
+                className="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-theme-text rounded-lg text-xs font-semibold transition-colors shrink-0 flex items-center gap-1.5"
               >
                 {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
                 Auto-Generate
@@ -182,7 +182,7 @@ export function PeriodSetupDialog({ onClose, onUpdated }: Props) {
           )}
 
           {/* Form: Add or Edit Period */}
-          <form onSubmit={handleSave} className="p-4 bg-slate-950/80 border border-slate-800 rounded-xl space-y-3">
+          <form onSubmit={handleSave} className="p-4 bg-theme-surface/80 border border-theme-border rounded-xl space-y-3">
             <h4 className="text-xs font-semibold text-amber-400 tracking-wider uppercase flex items-center gap-2">
               {editingId ? <Pencil className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
               {editingId ? `Edit Period #${form.period_number}` : "Add New Period / Time Slot"}
@@ -190,7 +190,7 @@ export function PeriodSetupDialog({ onClose, onUpdated }: Props) {
 
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
               <div>
-                <label className="block text-[11px] font-medium text-slate-400 mb-1">Period No. *</label>
+                <label className="block text-[11px] font-medium text-theme-sub mb-1">Period No. *</label>
                 <input
                   type="number"
                   min="1"
@@ -203,7 +203,7 @@ export function PeriodSetupDialog({ onClose, onUpdated }: Props) {
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-400 mb-1">Start Time *</label>
+                <label className="block text-[11px] font-medium text-theme-sub mb-1">Start Time *</label>
                 <input
                   type="time"
                   value={form.start_time}
@@ -214,7 +214,7 @@ export function PeriodSetupDialog({ onClose, onUpdated }: Props) {
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-400 mb-1">End Time *</label>
+                <label className="block text-[11px] font-medium text-theme-sub mb-1">End Time *</label>
                 <input
                   type="time"
                   value={form.end_time}
@@ -225,7 +225,7 @@ export function PeriodSetupDialog({ onClose, onUpdated }: Props) {
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-400 mb-1">Slot Type *</label>
+                <label className="block text-[11px] font-medium text-theme-sub mb-1">Slot Type *</label>
                 <select
                   value={form.slot_type}
                   onChange={(e) => setForm({ ...form, slot_type: e.target.value })}
@@ -255,7 +255,7 @@ export function PeriodSetupDialog({ onClose, onUpdated }: Props) {
                     setEditingId(null);
                     setForm({ ...DEFAULT_FORM, period_number: slots.length + 1 });
                   }}
-                  className="px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300 text-xs hover:bg-slate-800 transition-colors"
+                  className="px-3 py-1.5 rounded-lg border border-theme-border-hover text-theme-sub text-xs hover:bg-theme-elevated transition-colors"
                 >
                   Cancel Edit
                 </button>
@@ -263,7 +263,7 @@ export function PeriodSetupDialog({ onClose, onUpdated }: Props) {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-4 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold transition-colors disabled:opacity-50 inline-flex items-center gap-1.5"
+                className="px-4 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-theme-text text-xs font-semibold transition-colors disabled:opacity-50 inline-flex items-center gap-1.5"
               >
                 {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                 {editingId ? "Update Period" : "Save Period"}
@@ -274,7 +274,7 @@ export function PeriodSetupDialog({ onClose, onUpdated }: Props) {
           {/* List of Configured Periods */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h4 className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+              <h4 className="text-xs font-semibold text-theme-sub uppercase tracking-wider">
                 Configured Periods ({slots.length})
               </h4>
               {slots.length > 0 && (
@@ -293,27 +293,27 @@ export function PeriodSetupDialog({ onClose, onUpdated }: Props) {
                 <Loader2 className="w-6 h-6 animate-spin text-amber-400" />
               </div>
             ) : slots.length === 0 ? (
-              <p className="text-xs text-slate-500 py-8 text-center bg-slate-950/40 rounded-xl border border-slate-800">
+              <p className="text-xs text-theme-muted py-8 text-center bg-theme-base/40 rounded-xl border border-theme-border">
                 No periods configured yet. Add your first period above.
               </p>
             ) : (
-              <div className="bg-slate-950/80 border border-slate-800 rounded-xl overflow-hidden divide-y divide-slate-800/80">
+              <div className="bg-theme-surface/80 border border-theme-border rounded-xl overflow-hidden divide-y divide-theme-border/80">
                 {slots.map((s) => (
                   <div
                     key={s.slot_id}
-                    className="flex items-center justify-between p-3 text-xs hover:bg-slate-800/40 transition-colors"
+                    className="flex items-center justify-between p-3 text-xs hover:bg-theme-elevated/40 transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <span className="w-8 h-8 rounded-lg bg-amber-950/70 border border-amber-800/60 text-amber-300 font-bold flex items-center justify-center font-mono">
                         P{s.period_number}
                       </span>
                       <div>
-                        <div className="font-mono font-medium text-slate-200 flex items-center gap-2">
+                        <div className="font-mono font-medium text-theme-text flex items-center gap-2">
                           <span>{s.start_time.substring(0, 5)}</span>
                           <span className="text-slate-600">—</span>
                           <span>{s.end_time.substring(0, 5)}</span>
                         </div>
-                        <span className="text-[10px] text-slate-500 capitalize">
+                        <span className="text-[10px] text-theme-muted capitalize">
                           {s.slot_type === "lunch" ? "🍱 Lunch Break" : s.slot_type === "lab" ? "🧪 Lab Period" : s.slot_type}
                         </span>
                       </div>
@@ -322,14 +322,14 @@ export function PeriodSetupDialog({ onClose, onUpdated }: Props) {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleEdit(s)}
-                        className="p-1.5 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition-colors"
+                        className="p-1.5 text-theme-sub hover:text-amber-400 hover:bg-theme-elevated rounded-lg transition-colors"
                         title="Edit Period"
                       >
                         <Pencil className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(s.slot_id)}
-                        className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors"
+                        className="p-1.5 text-theme-sub hover:text-red-400 hover:bg-theme-elevated rounded-lg transition-colors"
                         title="Delete Period"
                       >
                         <Trash2 className="w-4 h-4" />
