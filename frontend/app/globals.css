@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* ── Register class-based dark mode so dark: Tailwind prefixes work ── */
+@custom-variant dark (&:is(.dark *));
+
 :root {
   --font-inter: "Inter", sans-serif;
 }
@@ -280,4 +283,64 @@ html.dark .filter-inactive {
 }
 .filter-inactive:hover {
   background-color: var(--color-bg-elevated); color: var(--color-text);
+}
+
+/* ─── Dashboard Hero Banner ─── */
+/* Light mode: soft lavender-white gradient */
+.hero-banner-bg {
+  background: linear-gradient(135deg, #f5f0ff 0%, #ffffff 40%, #eef2ff 100%);
+}
+/* Dark mode: rich violet-slate gradient */
+html.dark .hero-banner-bg {
+  background: linear-gradient(135deg, #1e0b3e 0%, #0f172a 45%, #0c1445 100%);
+}
+
+/* Fix hero border */
+.hero-banner-bg + * {
+  border-color: rgba(139,92,246,0.15);
+}
+html.dark .hero-banner-bg + * {
+  border-color: rgba(139,92,246,0.30);
+}
+
+/* ─── Hero title text (adapts to hero bg) ─── */
+/* Light mode hero: dark bg → light text  OR  if the bg switches to light, use dark text */
+/* We use hero-banner-bg which is light in light mode, dark in dark mode */
+.hero-title-text {
+  color: #1e1b4b;  /* indigo-950 — rich dark on light lavender bg */
+}
+html.dark .hero-title-text {
+  color: #f1f5f9;  /* slate-100 — bright on dark violet bg */
+}
+
+/* ─── Hero status panel (right side) ─── */
+.hero-status-panel {
+  background-color: rgba(109, 40, 217, 0.08);
+  border-color: rgba(167, 139, 250, 0.30);
+}
+html.dark .hero-status-panel {
+  background-color: rgba(109, 40, 217, 0.12);
+  border-color: rgba(109, 40, 217, 0.25);
+}
+.hero-status-label {
+  color: #5b21b6;  /* violet-800 — visible on light bg */
+}
+html.dark .hero-status-label {
+  color: #c4b5fd;  /* violet-300 — visible on dark bg */
+}
+.hero-status-value {
+  color: #3730a3;  /* indigo-800 */
+}
+html.dark .hero-status-value {
+  color: #e0e7ff;  /* indigo-100 */
+}
+
+/* ─── Hero banner border ─── */
+/* Override the border for the hero in light mode */
+html:not(.dark) .hero-banner-bg.rounded-3xl,
+html:not(.dark) [class*="hero-banner-bg"] {
+  border-color: rgba(139, 92, 246, 0.20) !important;
+}
+html.dark [class*="hero-banner-bg"] {
+  border-color: rgba(139, 92, 246, 0.25) !important;
 }

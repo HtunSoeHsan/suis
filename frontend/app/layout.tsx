@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 export const metadata: Metadata = {
   title: "SUIS — Smart University Intelligence System",
   description:
-    "Integrated Groq AI Text-to-SQL, InsightFace Computer Vision & University Management Portal",
+    "Integrated Smart Campus & University Management Portal",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

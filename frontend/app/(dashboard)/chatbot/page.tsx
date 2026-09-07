@@ -185,7 +185,7 @@ export default function ChatbotPage() {
                 </span>
               )}
             </h2>
-            <p className="text-xs text-theme-sub">Natural Language Text-to-SQL & University Intelligence</p>
+            <p className="text-xs text-theme-sub">Smart Assistant & University Intelligence</p>
           </div>
         </div>
 
