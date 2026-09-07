@@ -12,7 +12,7 @@ interface Props {
 
 const EMPTY = {
   student_id: "", full_name: "", dept_code: "CST",
-  roll_number: "", academic_year: "4", phone: "", section: "",
+  roll_number: "", academic_year: "4", current_semester: "1", phone: "", section: "",
   email: "", nrc_number: "", gender: "Male", date_of_birth: "",
   blood_type: "", address: "", guardian_name: "", guardian_phone: "",
   admission_year: new Date().getFullYear().toString(), status: "Active", major: "CST",
@@ -62,6 +62,7 @@ export function StudentFormDialog({ student, onClose }: Props) {
         dept_code: student.dept_code ?? "",
         roll_number: student.roll_number ?? "",
         academic_year: student.academic_year?.toString() ?? "4",
+        current_semester: student.current_semester?.toString() ?? "1",
         phone: student.phone ?? "",
         section: student.section ?? "",
         email: student.email ?? "",
@@ -110,6 +111,7 @@ export function StudentFormDialog({ student, onClose }: Props) {
         dept_code: form.dept_code,
         roll_number: form.roll_number || undefined,
         academic_year: form.academic_year ? parseInt(form.academic_year) : 4,
+        current_semester: form.current_semester ? parseInt(form.current_semester) : 1,
         phone: form.phone || undefined,
         section: (form.section || undefined) as "A" | "B" | "C" | undefined,
         email: form.email || undefined,
@@ -257,20 +259,38 @@ export function StudentFormDialog({ student, onClose }: Props) {
                 </div>
               </div>
 
-              {/* Academic Year */}
-              <div>
-                <label className="block text-xs font-medium text-theme-sub mb-1.5">Academic Year (1–5) *</label>
-                <div className="grid grid-cols-5 gap-1.5">
-                  {[1, 2, 3, 4, 5].map((y) => (
-                    <button key={y} type="button" onClick={() => set("academic_year", String(y))}
-                      className={`py-2 rounded-lg text-sm font-semibold border transition-colors ${
-                        form.academic_year === String(y)
-                          ? "bg-violet-600 border-violet-500 text-white"
-                          : "border-theme-border-hover text-theme-sub hover:border-slate-500 hover:text-theme-text"
-                      }`}>
-                      Year {y}
-                    </button>
-                  ))}
+              {/* Academic Year & Current Semester */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-theme-sub mb-1.5">Academic Year (1–5) *</label>
+                  <div className="grid grid-cols-5 gap-1">
+                    {[1, 2, 3, 4, 5].map((y) => (
+                      <button key={y} type="button" onClick={() => set("academic_year", String(y))}
+                        className={`py-2 rounded-lg text-xs font-semibold border transition-colors ${
+                          form.academic_year === String(y)
+                            ? "bg-violet-600 border-violet-500 text-white"
+                            : "border-theme-border-hover text-theme-sub hover:border-slate-500 hover:text-theme-text"
+                        }`}>
+                        Y{y}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-theme-sub mb-1.5">Current Semester *</label>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {[1, 2].map((sem) => (
+                      <button key={sem} type="button" onClick={() => set("current_semester", String(sem))}
+                        className={`py-2 rounded-lg text-xs font-semibold border transition-colors ${
+                          form.current_semester === String(sem)
+                            ? "bg-amber-600 border-amber-500 text-white font-bold"
+                            : "border-theme-border-hover text-theme-sub hover:border-slate-500 hover:text-theme-text"
+                        }`}>
+                        Semester {sem}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 

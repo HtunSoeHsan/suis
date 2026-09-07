@@ -102,7 +102,10 @@ async def create_enrollment(body: EnrollmentCreate, db: AsyncSession = Depends(g
         student = st_res.scalar_one_or_none()
         if student:
             if body.promote_academic_year is not None:
-                student.academic_year = body.promote_academic_year
+                if body.promote_academic_year > 5:
+                    student.status = "Graduated"
+                else:
+                    student.academic_year = body.promote_academic_year
             if body.update_major is not None:
                 student.major = body.update_major
 
@@ -147,7 +150,10 @@ async def create_batch_enrollment(body: BatchEnrollmentCreate, db: AsyncSession 
         students = st_res.scalars().all()
         for st in students:
             if body.promote_academic_year is not None:
-                st.academic_year = body.promote_academic_year
+                if body.promote_academic_year > 5:
+                    st.status = "Graduated"
+                else:
+                    st.academic_year = body.promote_academic_year
             if body.update_major is not None:
                 st.major = body.update_major
 

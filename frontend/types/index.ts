@@ -21,6 +21,7 @@ export interface Student {
   dept_code: string;
   full_name: string;
   academic_year: number;
+  current_semester?: number | null;
   roll_number: string;
   phone?: string | null;
   section?: "A" | "B" | "C" | null;

@@ -124,6 +124,15 @@ export const studentsApi = {
       method: "PATCH",
       body: JSON.stringify(data),
     }),
+  graduate: (id: string) =>
+    apiFetch<import("@/types").Student>(`/api/students/${id}/graduate`, {
+      method: "POST",
+    }),
+  batchGraduate: (student_ids: string[]) =>
+    apiFetch<{ message: string; graduated_count: number }>("/api/students/batch-graduate", {
+      method: "POST",
+      body: JSON.stringify({ student_ids }),
+    }),
 };
 
 // ─── Teachers ─────────────────────────────────────────────────────────────────

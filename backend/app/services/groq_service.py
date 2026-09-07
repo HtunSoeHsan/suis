@@ -49,7 +49,7 @@ TABLE enrollments:
   enrollment_id BIGINT PK, student_id VARCHAR(50) FK, course_code VARCHAR(20) FK, semester_id INT FK, grade VARCHAR(10) (letter grade e.g. 'A', 'B+'), grade_point FLOAT (numeric GPA 0.00 to 4.00), marks FLOAT, enrolled_at TIMESTAMPTZ
 
 TABLE classrooms:
-  room_id VARCHAR(20) PK (e.g. 'ROOM-101'), room_name VARCHAR(100), building VARCHAR(100), capacity INT, room_type VARCHAR(30) ('LECTURE_HALL'|'LAB'|'EXAM_HALL'|'SEMINAR')
+  room_id VARCHAR(20) PK (e.g. 'ROOM-101'), room_name VARCHAR(100), building VARCHAR(100), capacity INT, room_type VARCHAR(30) ('LECTURE_HALL'|'LAB'|'EXAM_HALL'|'SEMINAR'|'AUDITORIUM'|'Auditorium')
 
 TABLE time_slots:
   slot_id INT PK, period_number INT, start_time TIME, end_time TIME, slot_type ('LECTURE'|'LAB'|'LUNCH_BREAK')

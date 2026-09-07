@@ -99,6 +99,7 @@ CREATE TABLE IF NOT EXISTS students (
     guardian_name VARCHAR(100),
     guardian_phone VARCHAR(20),
     admission_year INT,
+    current_semester INT DEFAULT 1,
     status VARCHAR(20) DEFAULT 'Active',
     major VARCHAR(100),
     -- Face & Attendance
