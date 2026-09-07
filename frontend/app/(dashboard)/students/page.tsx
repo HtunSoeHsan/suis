@@ -5,7 +5,7 @@ import { studentsApi, enrollmentsApi, semestersApi, coursesApi } from "@/lib/api
 import type { Student, StudentGPASummary, Enrollment, Semester, Course } from "@/types";
 import {
   Plus, Search, Trash2, Pencil, Camera, CheckCircle2, Clock,
-  ChevronLeft, ChevronRight, X, Loader2, Settings2, BookOpen, UserCheck, ShieldAlert, Eye, Award
+  ChevronLeft, ChevronRight, X, Loader2, Settings2, BookOpen, UserCheck, ShieldAlert, Eye, Award, GraduationCap
 } from "lucide-react";
 import { FaceEnrollDialog } from "@/components/students/FaceEnrollDialog";
 import { StudentFormDialog } from "@/components/students/StudentFormDialog";
@@ -37,6 +37,7 @@ export default function StudentsPage() {
   const [search, setSearch] = useState("");
   const [filterSection, setFilterSection] = useState<"" | "A" | "B" | "C">("");
   const [filterYear, setFilterYear] = useState<number | "">("");
+  const [filterSemester, setFilterSemester] = useState<number | "">("");
   const [filterStatus, setFilterStatus] = useState<"" | "Active" | "Graduated" | "Suspended" | "Dropped">("");
   const [page, setPage] = useState(0);
 
@@ -85,6 +86,7 @@ export default function StudentsPage() {
     limit,
     ...(filterSection ? { section: filterSection } : {}),
     ...(filterYear !== "" ? { academic_year: filterYear } : {}),
+    ...(filterSemester !== "" ? { current_semester: filterSemester } : {}),
     ...(filterStatus ? { status: filterStatus } : {}),
   });
 
@@ -240,6 +242,48 @@ export default function StudentsPage() {
     });
   };
 
+  const handleBatchGraduate = () => {
+    if (checkedStudentIds.length === 0) return;
+    setModalConfig({
+      isOpen: true,
+      title: "Graduate Selected Students",
+      message: `Are you sure you want to mark ${checkedStudentIds.length} selected student(s) as "Graduated"? Their status will be updated to Graduated.`,
+      variant: "info",
+      onConfirm: async () => {
+        setModalConfig((prev) => ({ ...prev, isLoading: true }));
+        try {
+          await studentsApi.batchGraduate(checkedStudentIds);
+          setCheckedStudentIds([]);
+          refetch();
+        } catch (e: unknown) {
+          showAlert((e as Error).message, "Graduation Failed");
+        } finally {
+          setModalConfig({ isOpen: false, message: "" });
+        }
+      },
+    });
+  };
+
+  const handleGraduateSingle = (s: Student) => {
+    setModalConfig({
+      isOpen: true,
+      title: "Graduate Student",
+      message: `Are you sure you want to mark student "${s.full_name}" (${s.student_id}) as "Graduated"?`,
+      variant: "info",
+      onConfirm: async () => {
+        setModalConfig((prev) => ({ ...prev, isLoading: true }));
+        try {
+          await studentsApi.graduate(s.student_id);
+          refetch();
+        } catch (e: unknown) {
+          showAlert((e as Error).message, "Graduation Failed");
+        } finally {
+          setModalConfig({ isOpen: false, message: "" });
+        }
+      },
+    });
+  };
+
   const openBatchEnroll = (ids?: string[]) => {
     setBatchTargetIds(ids ?? checkedStudentIds);
     setShowBatchEnroll(true);
@@ -265,12 +309,20 @@ export default function StudentsPage() {
         {!isTeacher && (
           <div className="flex items-center gap-3">
             {checkedStudentIds.length > 0 && (
-              <button
-                onClick={() => openBatchEnroll()}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-theme-text text-sm font-medium transition-colors shadow-lg shadow-teal-900/30 animate-in fade-in"
-              >
-                <BookOpen className="w-4 h-4" /> Enroll Selected ({checkedStudentIds.length})
-              </button>
+              <>
+                <button
+                  onClick={() => openBatchEnroll()}
+                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-teal-600 hover:bg-teal-500 text-theme-text text-sm font-medium transition-colors shadow-lg shadow-teal-900/30 animate-in fade-in"
+                >
+                  <BookOpen className="w-4 h-4" /> Enroll Selected ({checkedStudentIds.length})
+                </button>
+                <button
+                  onClick={handleBatchGraduate}
+                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-sm font-medium transition-colors shadow-lg shadow-sky-900/30 animate-in fade-in"
+                >
+                  <GraduationCap className="w-4 h-4" /> Graduate Selected ({checkedStudentIds.length})
+                </button>
+              </>
             )}
             <button
               onClick={() => setShowCreate(true)}
@@ -353,6 +405,24 @@ export default function StudentsPage() {
             </button>
           ))}
         </div>
+
+        {/* Semester filter */}
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs text-theme-muted font-medium">Semester:</span>
+          {(["", 1, 2] as const).map((sem) => (
+            <button
+              key={sem}
+              onClick={() => { setFilterSemester(sem); setPage(0); }}
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                filterSemester === sem
+                  ? "bg-amber-600 border-amber-500 text-white"
+                  : "border-theme-border-hover text-theme-sub hover:border-slate-500"
+              }`}
+            >
+              {sem === "" ? "All" : `Sem ${sem}`}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Table */}
@@ -375,7 +445,7 @@ export default function StudentsPage() {
                     className="rounded border-theme-border-hover bg-theme-elevated text-teal-500 focus:ring-teal-500/30"
                   />
                 </th>
-                {["Student ID", "Name / Email", "Major / Roll", "Year & Section", "CGPA", "Status", "Face", "Actions"].map((h) => (
+                {["Student ID", "Name / Email", "Major / Roll", "Year, Sem & Section", "CGPA", "Status", "Face", "Actions"].map((h) => (
                   <th key={h} className="px-4 py-3 font-medium">{h}</th>
                 ))}
               </tr>
@@ -428,8 +498,8 @@ export default function StudentsPage() {
                         {s.roll_number && <span className="text-theme-muted ml-1.5 font-mono text-xs">({s.roll_number})</span>}
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <span className="text-theme-sub text-xs">Year {s.academic_year}</span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-theme-sub text-xs">Year {s.academic_year} · Sem {s.current_semester || 1}</span>
                           {s.section && (
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold border ${SECTION_COLORS[s.section] ?? "bg-theme-elevated text-theme-sub border-theme-border-hover"}`}>
                               §{s.section}
@@ -513,6 +583,15 @@ export default function StudentsPage() {
                               >
                                 <Pencil className="w-4 h-4" />
                               </button>
+                              {s.status !== "Graduated" && (
+                                <button
+                                  onClick={() => handleGraduateSingle(s)}
+                                  title="Mark Student as Graduated"
+                                  className="p-1.5 rounded-md hover:bg-sky-900/30 hover:text-sky-400 text-theme-muted transition-colors"
+                                >
+                                  <GraduationCap className="w-4 h-4 text-sky-400" />
+                                </button>
+                              )}
                               <button
                                 onClick={() => handleDelete(s)}
                                 title="Delete"
@@ -563,6 +642,7 @@ export default function StudentsPage() {
           onClose={() => setDetailTarget(null)}
           onEdit={!isTeacher ? () => setEditTarget(detailTarget) : undefined}
           onFaceEnroll={!isTeacher ? () => setEnrollTarget(detailTarget) : undefined}
+          onGraduate={!isTeacher ? () => handleGraduateSingle(detailTarget) : undefined}
         />
       )}
       {enrollTarget && (

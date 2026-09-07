@@ -37,6 +37,7 @@ class Student(Base):
     guardian_name: Mapped[str | None] = mapped_column(String(100))
     guardian_phone: Mapped[str | None] = mapped_column(String(20))
     admission_year: Mapped[int | None] = mapped_column(Integer)
+    current_semester: Mapped[int | None] = mapped_column(Integer, default=1)
     status: Mapped[str] = mapped_column(String(20), default="Active")  # Active, Graduated, Suspended, Dropped
     major: Mapped[str | None] = mapped_column(String(100))
 

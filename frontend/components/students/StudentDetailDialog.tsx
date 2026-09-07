@@ -16,6 +16,7 @@ interface Props {
   onClose: () => void;
   onEdit?: () => void;
   onFaceEnroll?: () => void;
+  onGraduate?: () => void;
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -25,7 +26,7 @@ const STATUS_COLORS: Record<string, string> = {
   Dropped: "badge-red border",
 };
 
-export function StudentDetailDialog({ student, onClose, onEdit, onFaceEnroll }: Props) {
+export function StudentDetailDialog({ student, onClose, onEdit, onFaceEnroll, onGraduate }: Props) {
   const { user } = useAuth();
   const isTeacher = user?.role === "TEACHER";
 
@@ -94,6 +95,8 @@ export function StudentDetailDialog({ student, onClose, onEdit, onFaceEnroll }: 
                 <span><strong className="text-theme-sub">Major:</strong> {student.major || student.dept_code}</span>
                 <span>•</span>
                 <span><strong className="text-theme-sub">Academic Year:</strong> Year {student.academic_year}</span>
+                <span>•</span>
+                <span><strong className="text-theme-sub">Semester:</strong> Semester {student.current_semester || 1}</span>
                 {student.roll_number && (
                   <>
                     <span>•</span>
@@ -306,6 +309,15 @@ export function StudentDetailDialog({ student, onClose, onEdit, onFaceEnroll }: 
 
           {!isTeacher && (
             <div className="flex items-center gap-2">
+              {onGraduate && student.status !== "Graduated" && (
+                <button
+                  onClick={() => { onClose(); onGraduate(); }}
+                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-sky-600/20 border border-sky-600/40 text-sky-300 text-sm font-semibold hover:bg-sky-600/30 transition-colors"
+                >
+                  <GraduationCap className="w-4 h-4" /> Mark as Graduated
+                </button>
+              )}
+
               {onFaceEnroll && (
                 <button
                   onClick={() => { onClose(); onFaceEnroll(); }}

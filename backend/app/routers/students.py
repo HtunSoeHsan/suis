@@ -41,6 +41,7 @@ async def list_students(
     search: str | None = Query(None, description="Search by name, ID, roll number, NRC, or email"),
     dept_code: str | None = None,
     academic_year: int | None = None,
+    current_semester: int | None = Query(None, description="Filter by current semester (1, 2, etc.)"),
     section: str | None = Query(None, description="Filter by section: A, B, or C"),
     status: str | None = Query(None, description="Filter by status: Active, Graduated, Suspended, Dropped"),
     is_face_registered: bool | None = None,
@@ -64,6 +65,8 @@ async def list_students(
         query = query.where(Student.dept_code == dept_code)
     if academic_year is not None and isinstance(academic_year, int):
         query = query.where(Student.academic_year == academic_year)
+    if current_semester is not None and isinstance(current_semester, int):
+        query = query.where(Student.current_semester == current_semester)
     if section and isinstance(section, str):
         query = query.where(Student.section == section.upper())
     if status and isinstance(status, str):
@@ -184,6 +187,39 @@ async def delete_student(student_id: str, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Student not found.")
     await db.delete(student)
     await db.flush()
+
+
+class BatchGraduateRequest(BaseModel):
+    student_ids: list[str] = Field(..., min_length=1)
+
+
+@router.post("/{student_id}/graduate", response_model=StudentOut)
+async def graduate_student(student_id: str, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Student).where(Student.student_id == student_id))
+    student = result.scalar_one_or_none()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found.")
+
+    student.status = "Graduated"
+    await db.flush()
+    await db.refresh(student)
+    return student
+
+
+@router.post("/batch-graduate", status_code=status.HTTP_200_OK)
+async def batch_graduate_students(body: BatchGraduateRequest, db: AsyncSession = Depends(get_db)):
+    st_res = await db.execute(select(Student).where(Student.student_id.in_(body.student_ids)))
+    students = st_res.scalars().all()
+    if not students:
+        raise HTTPException(status_code=404, detail="No matching students found.")
+
+    graduated_count = 0
+    for st in students:
+        st.status = "Graduated"
+        graduated_count += 1
+
+    await db.flush()
+    return {"message": f"Successfully marked {graduated_count} student(s) as Graduated.", "graduated_count": graduated_count}
 
 
 from app.models.enrollment import Enrollment

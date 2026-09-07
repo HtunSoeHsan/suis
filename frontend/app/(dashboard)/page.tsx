@@ -322,7 +322,7 @@ export default function DashboardPage() {
                 )}
               </p>
               <p className="text-sm font-bold text-theme-text">{label}</p>
-              <p className="text-xs text-theme-muted mt-0.5">{hint}</p>
+              <p className="text-xs font-semibold text-theme-sub mt-0.5">{hint}</p>
 
               <div className="mt-4 pt-4 border-t border-theme-border flex items-center gap-1 text-xs font-semibold text-violet-500 dark:text-violet-400 opacity-0 group-hover:opacity-100 transition-opacity">
                 View all <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
@@ -341,7 +341,7 @@ export default function DashboardPage() {
             </div>
             Core Intelligence Modules
           </h2>
-          <span className="text-xs text-theme-muted hidden sm:block">
+          <span className="text-xs font-semibold text-theme-sub hidden sm:block">
             {visibleQuickLinks.length} services available
           </span>
         </div>
@@ -372,7 +372,7 @@ export default function DashboardPage() {
                 <h3 className="text-base font-bold text-theme-text mb-2 group-hover:text-violet-500 transition-colors">
                   {label}
                 </h3>
-                <p className="text-theme-muted text-xs leading-relaxed">
+                <p className="text-theme-sub text-xs font-semibold leading-relaxed">
                   {desc}
                 </p>
               </div>
