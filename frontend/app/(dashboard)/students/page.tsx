@@ -448,7 +448,7 @@ export default function StudentsPage() {
                     title={year5PageIds.length === 0 ? "No Year 5 students on this page" : "Select all Year 5 students"}
                   />
                 </th>
-                {["Student ID", "Name / Email", "Major / Roll", "Year, Sem & Section", "CGPA", "Status", "Face", "Actions"].map((h) => (
+                {["Student ID", "Name / Email", "Major / Roll", "Year, Sem & Section", "Status", "Face", "Actions"].map((h) => (
                   <th key={h} className="px-4 py-3 font-medium">{h}</th>
                 ))}
               </tr>
@@ -456,7 +456,7 @@ export default function StudentsPage() {
             <tbody className="divide-y divide-theme-border">
               {data?.items.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="text-center py-12 text-theme-muted">
+                  <td colSpan={8} className="text-center py-12 text-theme-muted">
                     No students found.{" "}
                     <button onClick={() => setShowCreate(true)} className="text-violet-400 hover:underline">Add one?</button>
                   </td>
@@ -512,27 +512,6 @@ export default function StudentsPage() {
                             </span>
                           )}
                         </div>
-                      </td>
-                      {/* CGPA Column */}
-                      <td className="px-4 py-3">
-                        {(() => {
-                          const cgpa = s.cgpa ?? 0;
-                          let cgpaBadgeClass = "bg-theme-elevated text-theme-sub border-theme-border-hover";
-                          if (cgpa >= 3.5) cgpaBadgeClass = "badge-cgpa-high border";
-                          else if (cgpa >= 3.0) cgpaBadgeClass = "badge-cgpa-good border";
-                          else if (cgpa >= 2.0) cgpaBadgeClass = "badge-cgpa-avg border";
-                          else if (cgpa > 0) cgpaBadgeClass = "badge-cgpa-low border";
-
-                          return (
-                            <button
-                              onClick={() => setDetailTarget(s)}
-                              className={`px-2.5 py-0.5 rounded-lg border font-mono font-bold text-xs inline-flex items-center gap-1 transition-transform hover:scale-105 ${cgpaBadgeClass}`}
-                              title="Click to view student profile & GPA details"
-                            >
-                              {cgpa > 0 ? cgpa.toFixed(2) : "N/A"}
-                            </button>
-                          );
-                        })()}
                       </td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border ${STATUS_COLORS[statusName] ?? "bg-theme-elevated text-theme-sub border-theme-border-hover"}`}>
