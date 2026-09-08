@@ -91,7 +91,7 @@ export function Sidebar() {
       {/* Footer */}
       <div className="p-4 border-t border-theme-border">
         <p className="text-xs text-theme-muted text-center font-medium">
-          SUIS v1.0 — Smart University System
+          SUIS — Smart University System
         </p>
       </div>
     </aside>

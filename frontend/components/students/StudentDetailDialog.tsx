@@ -309,7 +309,7 @@ export function StudentDetailDialog({ student, onClose, onEdit, onFaceEnroll, on
 
           {!isTeacher && (
             <div className="flex items-center gap-2">
-              {onGraduate && student.status !== "Graduated" && (
+              {onGraduate && student.academic_year === 5 && student.status !== "Graduated" && (
                 <button
                   onClick={() => { onClose(); onGraduate(); }}
                   className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-sky-600/20 border border-sky-600/40 text-sky-300 text-sm font-semibold hover:bg-sky-600/30 transition-colors"

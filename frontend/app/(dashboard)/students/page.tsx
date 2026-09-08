@@ -37,7 +37,6 @@ export default function StudentsPage() {
   const [search, setSearch] = useState("");
   const [filterSection, setFilterSection] = useState<"" | "A" | "B" | "C">("");
   const [filterYear, setFilterYear] = useState<number | "">("");
-  const [filterSemester, setFilterSemester] = useState<number | "">("");
   const [filterStatus, setFilterStatus] = useState<"" | "Active" | "Graduated" | "Suspended" | "Dropped">("");
   const [page, setPage] = useState(0);
 
@@ -86,7 +85,6 @@ export default function StudentsPage() {
     limit,
     ...(filterSection ? { section: filterSection } : {}),
     ...(filterYear !== "" ? { academic_year: filterYear } : {}),
-    ...(filterSemester !== "" ? { current_semester: filterSemester } : {}),
     ...(filterStatus ? { status: filterStatus } : {}),
   });
 
@@ -204,20 +202,21 @@ export default function StudentsPage() {
     setModalConfig({ isOpen: true, title, message, isAlert: true, variant: "warning" });
   };
 
-  const allPageIds = data?.items.map((s) => s.student_id) ?? [];
-  const isAllChecked = allPageIds.length > 0 && allPageIds.every((id) => checkedStudentIds.includes(id));
+  const year5PageIds = data?.items.filter((s) => s.academic_year === 5).map((s) => s.student_id) ?? [];
+  const isAllChecked = year5PageIds.length > 0 && year5PageIds.every((id) => checkedStudentIds.includes(id));
 
   const toggleSelectAll = () => {
     if (isAllChecked) {
-      setCheckedStudentIds((prev) => prev.filter((id) => !allPageIds.includes(id)));
+      setCheckedStudentIds((prev) => prev.filter((id) => !year5PageIds.includes(id)));
     } else {
-      setCheckedStudentIds((prev) => Array.from(new Set([...prev, ...allPageIds])));
+      setCheckedStudentIds((prev) => Array.from(new Set([...prev, ...year5PageIds])));
     }
   };
 
-  const toggleCheckStudent = (id: string) => {
+  const toggleCheckStudent = (s: Student) => {
+    if (s.academic_year !== 5) return;
     setCheckedStudentIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      prev.includes(s.student_id) ? prev.filter((item) => item !== s.student_id) : [...prev, s.student_id]
     );
   };
 
@@ -244,16 +243,36 @@ export default function StudentsPage() {
 
   const handleBatchGraduate = () => {
     if (checkedStudentIds.length === 0) return;
+
+    // Filter selection to only include Year 5 students
+    const year5Students = data?.items.filter(
+      (s) => checkedStudentIds.includes(s.student_id) && s.academic_year === 5 && s.status !== "Graduated"
+    ) ?? [];
+
+    const idsToGraduate = year5Students.map((s) => s.student_id);
+
+    if (idsToGraduate.length === 0) {
+      showAlert(
+        "Only Year 5 students are eligible for graduation. None of the selected students are eligible Year 5 active students.",
+        "Graduation Action Restricted"
+      );
+      return;
+    }
+
     setModalConfig({
       isOpen: true,
       title: "Graduate Selected Students",
-      message: `Are you sure you want to mark ${checkedStudentIds.length} selected student(s) as "Graduated"? Their status will be updated to Graduated.`,
+      message: `Are you sure you want to mark ${idsToGraduate.length} selected Year 5 student(s) as "Graduated"? ${
+        checkedStudentIds.length > idsToGraduate.length
+          ? `(${checkedStudentIds.length - idsToGraduate.length} non-Year 5 student(s) will be skipped.)`
+          : ""
+      }`,
       variant: "info",
       onConfirm: async () => {
         setModalConfig((prev) => ({ ...prev, isLoading: true }));
         try {
-          await studentsApi.batchGraduate(checkedStudentIds);
-          setCheckedStudentIds([]);
+          await studentsApi.batchGraduate(idsToGraduate);
+          setCheckedStudentIds((prev) => prev.filter((id) => !idsToGraduate.includes(id)));
           refetch();
         } catch (e: unknown) {
           showAlert((e as Error).message, "Graduation Failed");
@@ -405,24 +424,6 @@ export default function StudentsPage() {
             </button>
           ))}
         </div>
-
-        {/* Semester filter */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-xs text-theme-muted font-medium">Semester:</span>
-          {(["", 1, 2] as const).map((sem) => (
-            <button
-              key={sem}
-              onClick={() => { setFilterSemester(sem); setPage(0); }}
-              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
-                filterSemester === sem
-                  ? "bg-amber-600 border-amber-500 text-white"
-                  : "border-theme-border-hover text-theme-sub hover:border-slate-500"
-              }`}
-            >
-              {sem === "" ? "All" : `Sem ${sem}`}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* Table */}
@@ -441,8 +442,10 @@ export default function StudentsPage() {
                   <input
                     type="checkbox"
                     checked={isAllChecked}
+                    disabled={year5PageIds.length === 0}
                     onChange={toggleSelectAll}
-                    className="rounded border-theme-border-hover bg-theme-elevated text-teal-500 focus:ring-teal-500/30"
+                    className="rounded border-theme-border-hover bg-theme-elevated text-teal-500 focus:ring-teal-500/30 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                    title={year5PageIds.length === 0 ? "No Year 5 students on this page" : "Select all Year 5 students"}
                   />
                 </th>
                 {["Student ID", "Name / Email", "Major / Roll", "Year, Sem & Section", "CGPA", "Status", "Face", "Actions"].map((h) => (
@@ -462,6 +465,7 @@ export default function StudentsPage() {
                 data?.items.map((s) => {
                   const isChecked = checkedStudentIds.includes(s.student_id);
                   const statusName = s.status || "Active";
+                  const isYear5 = s.academic_year === 5;
                   return (
                     <tr key={s.student_id} className={`transition-colors group ${
                       isChecked ? "bg-teal-950/20" : "hover:bg-theme-elevated/30"
@@ -470,8 +474,10 @@ export default function StudentsPage() {
                         <input
                           type="checkbox"
                           checked={isChecked}
-                          onChange={() => toggleCheckStudent(s.student_id)}
-                          className="rounded border-theme-border-hover bg-theme-elevated text-teal-500 focus:ring-teal-500/30"
+                          disabled={!isYear5}
+                          onChange={() => toggleCheckStudent(s)}
+                          className="rounded border-theme-border-hover bg-theme-elevated text-teal-500 focus:ring-teal-500/30 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                          title={!isYear5 ? "Only Year 5 students can be selected for graduation" : "Select student"}
                         />
                       </td>
                       <td className="px-4 py-3 font-mono text-violet-400 text-xs">
@@ -583,7 +589,7 @@ export default function StudentsPage() {
                               >
                                 <Pencil className="w-4 h-4" />
                               </button>
-                              {s.status !== "Graduated" && (
+                              {s.academic_year === 5 && s.status !== "Graduated" && (
                                 <button
                                   onClick={() => handleGraduateSingle(s)}
                                   title="Mark Student as Graduated"

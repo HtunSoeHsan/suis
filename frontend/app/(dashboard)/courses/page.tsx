@@ -123,22 +123,15 @@ export default function CoursesPage() {
             <h2 className="text-xl font-bold text-theme-text flex items-center gap-2">
               <BookOpen className="w-6 h-6 text-amber-400" /> Courses & Curriculum
             </h2>
-            {isTeacher && (
-              <span className="px-2.5 py-0.5 rounded-full badge-amber border text-xs font-semibold">
-                View Only Mode
-              </span>
-            )}
           </div>
           <p className="text-sm text-theme-sub mt-0.5">{data?.total ?? 0} total curriculum courses</p>
         </div>
-        {!isTeacher && (
-          <button
-            onClick={() => setShowCreate(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-theme-text text-sm font-medium transition-colors shadow-lg shadow-amber-900/30"
-          >
-            <Plus className="w-4 h-4" /> Add Course
-          </button>
-        )}
+        <button
+          onClick={() => setShowCreate(true)}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-theme-text text-sm font-medium transition-colors shadow-lg shadow-amber-900/30"
+        >
+          <Plus className="w-4 h-4" /> Add Course
+        </button>
       </div>
 
       {/* Filters row */}
@@ -206,10 +199,7 @@ export default function CoursesPage() {
           <table className="w-full text-sm">
             <thead className="border-b border-theme-border bg-theme-base/50">
               <tr className="text-left text-theme-sub text-xs uppercase tracking-wider">
-                {(isTeacher
-                  ? ["Course Code", "Course Name", "Semester", "Department", "Credits", "Assigned Teacher"]
-                  : ["Course Code", "Course Name", "Semester", "Department", "Credits", "Assigned Teacher", "Actions"]
-                ).map((h) => (
+                {["Course Code", "Course Name", "Semester", "Department", "Credits", "Assigned Teacher", "Actions"].map((h) => (
                   <th key={h} className="px-4 py-3 font-medium">{h}</th>
                 ))}
               </tr>
@@ -217,9 +207,9 @@ export default function CoursesPage() {
             <tbody className="divide-y divide-theme-border">
               {data?.items.length === 0 ? (
                 <tr>
-                  <td colSpan={isTeacher ? 6 : 7} className="text-center py-12 text-theme-muted">
+                  <td colSpan={7} className="text-center py-12 text-theme-muted">
                     No courses found.{" "}
-                    {!isTeacher && <button onClick={() => setShowCreate(true)} className="text-amber-400 hover:underline">Add one?</button>}
+                    <button onClick={() => setShowCreate(true)} className="text-amber-400 hover:underline">Add one?</button>
                   </td>
                 </tr>
               ) : data?.items.map((c) => {
@@ -265,26 +255,24 @@ export default function CoursesPage() {
                         <span className="text-theme-muted text-xs italic">Unassigned</span>
                       )}
                     </td>
-                    {!isTeacher && (
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => setEditCourse(c)}
-                            className="p-1.5 rounded-md hover:bg-theme-elevated text-theme-sub hover:text-amber-400 transition-colors"
-                            title="Edit Course"
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(c)}
-                            className="p-1.5 rounded-md hover:bg-theme-elevated text-theme-sub hover:text-red-400 transition-colors"
-                            title="Delete Course"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    )}
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setEditCourse(c)}
+                          className="p-1.5 rounded-md hover:bg-theme-elevated text-theme-sub hover:text-amber-400 transition-colors"
+                          title="Edit Course"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(c)}
+                          className="p-1.5 rounded-md hover:bg-theme-elevated text-theme-sub hover:text-red-400 transition-colors"
+                          title="Delete Course"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 );
               })}

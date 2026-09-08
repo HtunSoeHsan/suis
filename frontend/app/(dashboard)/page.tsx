@@ -136,16 +136,6 @@ export default function DashboardPage() {
       iconBg: "badge-amber border",
     },
     {
-      href: "/face-scanner",
-      label: "Face Scanner",
-      desc: "Real-time webcam recognition for instant attendance verification.",
-      icon: ScanFace,
-      badge: "Recognition",
-      color: "from-emerald-500 to-teal-500",
-      accentBorder: "hover:border-emerald-400/60",
-      iconBg: "badge-emerald border",
-    },
-    {
       href: "/students",
       label: "Student Directory",
       desc: "Add profiles, view records & manage facial data for recognition.",
@@ -170,7 +160,7 @@ export default function DashboardPage() {
   const visibleQuickLinks = isAdmin
     ? quickLinks
     : quickLinks.filter(
-        (l) => l.href !== "/chatbot" && l.href !== "/face-scanner"
+        (l) => l.href !== "/chatbot"
       );
 
   return (
@@ -248,14 +238,6 @@ export default function DashboardPage() {
                   <MessageSquareText className="w-4 h-4" />
                   <span>Launch Smart Assistant</span>
                   <ArrowRight className="w-4 h-4 text-violet-200 group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <Link
-                  href="/face-scanner"
-                  className="group inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-theme-surface/90 backdrop-blur-sm border border-theme-border text-theme-text text-sm font-semibold shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 active:translate-y-0"
-                >
-                  <ScanFace className="w-4 h-4 text-emerald-500" />
-                  <span>Open Attendance Scanner</span>
-                  <ChevronRight className="w-4 h-4 text-theme-muted group-hover:translate-x-0.5 transition-transform" />
                 </Link>
               </div>
             )}
@@ -394,7 +376,6 @@ export default function DashboardPage() {
         <div className="flex items-center gap-2.5">
           <BookOpen className="w-4 h-4 text-violet-500" />
           <span className="text-sm font-semibold text-theme-text">Smart University Intelligence System</span>
-          <span className="text-xs badge-violet border px-2 py-0.5 rounded-full font-bold">v3.0</span>
         </div>
         <div className="flex items-center gap-5 text-xs text-theme-muted">
           <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" /> Backend Online</span>

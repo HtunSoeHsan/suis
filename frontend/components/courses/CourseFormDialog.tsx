@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { coursesApi, departmentsApi, teachersApi, semestersApi } from "@/lib/api";
 import type { Course, Department, Teacher, Semester } from "@/types";
 import { X, Loader2, Save, ChevronDown } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 interface Props {
   course?: Course;
@@ -28,7 +29,11 @@ const MAJOR_OPTIONS = [
 ];
 
 export function CourseFormDialog({ course, onClose }: Props) {
-  const [form, setForm] = useState({ ...EMPTY });
+  const { user } = useAuth();
+  const [form, setForm] = useState({
+    ...EMPTY,
+    teacher_id: (!course && user?.role === "TEACHER" && user?.teacher_id) ? user.teacher_id : "",
+  });
   const [departments, setDepartments] = useState<Department[]>([]);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [semesters, setSemesters] = useState<Semester[]>([]);
