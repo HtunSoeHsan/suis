@@ -65,8 +65,6 @@ async def list_students(
         query = query.where(Student.dept_code == dept_code)
     if academic_year is not None and isinstance(academic_year, int):
         query = query.where(Student.academic_year == academic_year)
-    if current_semester is not None and isinstance(current_semester, int):
-        query = query.where(Student.current_semester == current_semester)
     if section and isinstance(section, str):
         query = query.where(Student.section == section.upper())
     if status and isinstance(status, str):

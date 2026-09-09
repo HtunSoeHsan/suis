@@ -120,9 +120,7 @@ export default function DashboardPage() {
     },
   ];
 
-  const visibleStatCards = isAdmin
-    ? statCards
-    : statCards.filter((c) => c.href !== "/face-scanner");
+  const visibleStatCards = statCards;
 
   const quickLinks = [
     {
@@ -157,11 +155,7 @@ export default function DashboardPage() {
     },
   ];
 
-  const visibleQuickLinks = isAdmin
-    ? quickLinks
-    : quickLinks.filter(
-        (l) => l.href !== "/chatbot"
-      );
+  const visibleQuickLinks = quickLinks;
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto pb-10">
@@ -224,23 +218,22 @@ export default function DashboardPage() {
             </div>
 
             {/* CTA buttons */}
-            {isAdmin && (
-              <div className="flex flex-wrap items-center gap-3 pt-1">
-                <Link
-                  href="/chatbot"
-                  className="group inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl
-                    bg-gradient-to-r from-violet-600 to-indigo-600
-                    hover:from-violet-500 hover:to-indigo-500
-                    text-white text-sm font-semibold
-                    shadow-lg shadow-violet-600/30 hover:shadow-violet-500/50
-                    transition-all hover:-translate-y-0.5 active:translate-y-0"
-                >
-                  <MessageSquareText className="w-4 h-4" />
-                  <span>Launch Smart Assistant</span>
-                  <ArrowRight className="w-4 h-4 text-violet-200 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </div>
-            )}
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <Link
+                href="/chatbot"
+                className="group inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl
+                  bg-gradient-to-r from-violet-600 to-indigo-600
+                  hover:from-violet-500 hover:to-indigo-500
+                  text-white text-sm font-semibold
+                  shadow-lg shadow-violet-600/30 hover:shadow-violet-500/50
+                  transition-all hover:-translate-y-0.5 active:translate-y-0"
+              >
+                <MessageSquareText className="w-4 h-4" />
+                <span>Launch Smart Assistant</span>
+                <ArrowRight className="w-4 h-4 text-violet-200 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+
           </div>
 
           {/* Right: floating metrics preview */}

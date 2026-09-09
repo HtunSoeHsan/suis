@@ -18,6 +18,7 @@ class CourseCreate(CourseBase):
 
 
 class CourseUpdate(BaseModel):
+    course_code: Optional[str] = Field(None, max_length=20)
     dept_code: Optional[str] = Field(None, max_length=20)
     course_name: Optional[str] = Field(None, max_length=100)
     credit_hours: Optional[int] = Field(None, ge=1, le=10)
@@ -25,6 +26,7 @@ class CourseUpdate(BaseModel):
     major: Optional[str] = Field(None, max_length=50)
     academic_year: Optional[int] = Field(None)
     semester_id: Optional[int] = Field(None)
+
 
 
 class CourseOut(CourseBase):

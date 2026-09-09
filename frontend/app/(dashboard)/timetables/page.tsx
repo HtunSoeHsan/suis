@@ -27,11 +27,13 @@ export default function TimetablesPage() {
   const [timeSlotsMap, setTimeSlotsMap] = useState<Record<number, TimeSlot>>({});
 
   const [courses, setCourses] = useState<Course[]>([]);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [semesters, setSemesters] = useState<Semester[]>([]);
 
   const [filterDay, setFilterDay] = useState("");
   const [filterCourse, setFilterCourse] = useState("");
   const [filterSemester, setFilterSemester] = useState<number | "">("");
+  const [filterTeacher, setFilterTeacher] = useState("");
   const [page, setPage] = useState(0);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -121,6 +123,7 @@ export default function TimetablesPage() {
       crsRes.items.forEach((c) => { cMap[c.course_code] = c; });
       setCoursesMap(cMap);
 
+      setTeachers(teachRes.items);
       const tMap: Record<string, Teacher> = {};
       teachRes.items.forEach((t) => { tMap[t.teacher_id] = t; });
       setTeachersMap(tMap);
@@ -141,7 +144,7 @@ export default function TimetablesPage() {
         if (filterDay) params.day_of_week = filterDay;
         if (filterCourse) params.course_code = filterCourse;
         if (filterSemester !== "") params.semester_id = filterSemester;
-        if (isTeacher && teacherId) params.teacher_id = teacherId;
+        if (filterTeacher) params.teacher_id = filterTeacher;
 
         const res = await timetablesApi.listAcademic(params);
         setAcademicData(res);
@@ -152,7 +155,7 @@ export default function TimetablesPage() {
         };
         if (filterCourse) params.course_code = filterCourse;
         if (filterSemester !== "") params.semester_id = filterSemester;
-        if (isTeacher && teacherId) params.supervisor_teacher_id = teacherId;
+        if (filterTeacher) params.supervisor_teacher_id = filterTeacher;
 
         const res = await timetablesApi.listExam(params);
         setExamData(res);
@@ -162,11 +165,12 @@ export default function TimetablesPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [activeTab, filterDay, filterCourse, filterSemester, page, isTeacher, teacherId]);
+  }, [activeTab, filterDay, filterCourse, filterSemester, filterTeacher, page]);
 
   useEffect(() => {
     fetchTimetables();
   }, [fetchTimetables]);
+
 
   const handleDeleteAcademic = (tt: AcademicTimetable) => {
     setModalConfig({
@@ -222,28 +226,26 @@ export default function TimetablesPage() {
             </h2>
             {isTeacher && (
               <span className="px-2.5 py-0.5 rounded-full badge-amber border text-xs font-semibold">
-                My Schedule ({teacherId ?? "Teacher"}) · View Only
+                Teacher View ({teacherId ?? "Teacher"})
               </span>
             )}
           </div>
           <p className="text-sm text-theme-sub mt-0.5">{totalItems} scheduled timetable slots</p>
         </div>
-        {!isTeacher && (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowPeriodSetup(true)}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-theme-elevated hover:bg-theme-muted border border-theme-border-hover text-amber-400 text-sm font-medium transition-colors"
-            >
-              <Clock className="w-4 h-4 text-amber-400" /> Period Setup
-            </button>
-            <button
-              onClick={() => setShowCreate(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-theme-text text-sm font-medium transition-colors shadow-lg shadow-cyan-900/30"
-            >
-              <Plus className="w-4 h-4" /> Add Schedule Slot
-            </button>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowPeriodSetup(true)}
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-theme-elevated hover:bg-theme-muted border border-theme-border-hover text-amber-400 text-sm font-medium transition-colors"
+          >
+            <Clock className="w-4 h-4 text-amber-400" /> Period Setup
+          </button>
+          <button
+            onClick={() => setShowCreate(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-theme-text text-sm font-medium transition-colors shadow-lg shadow-cyan-900/30"
+          >
+            <Plus className="w-4 h-4" /> Add Schedule Slot
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -290,6 +292,40 @@ export default function TimetablesPage() {
               </button>
             ))}
           </div>
+        )}
+
+        {/* Teacher Filter Dropdown */}
+        <div className="relative min-w-44">
+          <select
+            value={filterTeacher}
+            onChange={(e) => { setFilterTeacher(e.target.value); setPage(0); }}
+            className="w-full pl-3 pr-8 py-2 bg-theme-surface border border-theme-border-hover rounded-lg text-xs font-semibold text-theme-text focus:outline-none focus:ring-2 focus:ring-cyan-600/50 appearance-none cursor-pointer"
+          >
+            <option value="">All Teachers</option>
+            {teachers.map((t) => (
+              <option key={t.teacher_id} value={t.teacher_id}>
+                {t.full_name} ({t.teacher_id})
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-theme-sub pointer-events-none" />
+        </div>
+
+        {/* Quick My Schedule toggle for Teachers */}
+        {isTeacher && teacherId && (
+          <button
+            onClick={() => {
+              setFilterTeacher(filterTeacher === teacherId ? "" : teacherId);
+              setPage(0);
+            }}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+              filterTeacher === teacherId
+                ? "bg-amber-600 border-amber-500 text-white shadow-md shadow-amber-900/30"
+                : "border-theme-border-hover text-amber-400 hover:bg-amber-950/30"
+            }`}
+          >
+            {filterTeacher === teacherId ? "✓ Showing My Schedule" : "Filter My Schedule"}
+          </button>
         )}
 
         {/* Course Filter Dropdown */}
@@ -343,10 +379,7 @@ export default function TimetablesPage() {
           <table className="w-full text-sm">
             <thead className="border-b border-theme-border bg-theme-base/50">
               <tr className="text-left text-theme-sub text-xs uppercase tracking-wider">
-                {(isTeacher
-                  ? ["Day", "Time Slot", "Course Subject", "Semester", "Target Class", "Assigned Teacher", "Classroom Location"]
-                  : ["Day", "Time Slot", "Course Subject", "Semester", "Target Class", "Assigned Teacher", "Classroom Location", "Actions"]
-                ).map((h) => (
+                {["Day", "Time Slot", "Course Subject", "Semester", "Target Class", "Assigned Teacher", "Classroom Location", "Actions"].map((h) => (
                   <th key={h} className="px-4 py-3 font-medium">{h}</th>
                 ))}
               </tr>
@@ -354,9 +387,9 @@ export default function TimetablesPage() {
             <tbody className="divide-y divide-theme-border">
               {academicData?.items.length === 0 ? (
                 <tr>
-                  <td colSpan={isTeacher ? 7 : 8} className="text-center py-12 text-theme-muted">
+                  <td colSpan={8} className="text-center py-12 text-theme-muted">
                     No academic schedule slots found matching filters.{" "}
-                    {!isTeacher && <button onClick={() => setShowCreate(true)} className="text-cyan-400 hover:underline">Add one?</button>}
+                    <button onClick={() => setShowCreate(true)} className="text-cyan-400 hover:underline">Add one?</button>
                   </td>
                 </tr>
               ) : academicData?.items.map((tt) => {
@@ -447,17 +480,15 @@ export default function TimetablesPage() {
                         <span className="font-mono text-rose-400 text-xs">{tt.room_id}</span>
                       )}
                     </td>
-                    {!isTeacher && (
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={() => handleDeleteAcademic(tt)}
-                          className="p-1.5 rounded-md hover:bg-theme-elevated text-theme-sub hover:text-red-400 transition-colors"
-                          title="Delete Schedule Slot"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </td>
-                    )}
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => handleDeleteAcademic(tt)}
+                        className="p-1.5 rounded-md hover:bg-theme-elevated text-theme-sub hover:text-red-400 transition-colors"
+                        title="Delete Schedule Slot"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
                   </tr>
                 );
               })}
@@ -467,10 +498,7 @@ export default function TimetablesPage() {
           <table className="w-full text-sm">
             <thead className="border-b border-theme-border bg-theme-base/50">
               <tr className="text-left text-theme-sub text-xs uppercase tracking-wider">
-                {(isTeacher
-                  ? ["Exam Date", "Exam Time", "Course Subject", "Semester", "Classroom Location", "Supervisor Teacher"]
-                  : ["Exam Date", "Exam Time", "Course Subject", "Semester", "Classroom Location", "Supervisor Teacher", "Actions"]
-                ).map((h) => (
+                {["Exam Date", "Exam Time", "Course Subject", "Semester", "Classroom Location", "Supervisor Teacher", "Actions"].map((h) => (
                   <th key={h} className="px-4 py-3 font-medium">{h}</th>
                 ))}
               </tr>
@@ -478,7 +506,7 @@ export default function TimetablesPage() {
             <tbody className="divide-y divide-theme-border">
               {examData?.items.length === 0 ? (
                 <tr>
-                  <td colSpan={isTeacher ? 6 : 7} className="text-center py-12 text-theme-muted">
+                  <td colSpan={7} className="text-center py-12 text-theme-muted">
                     No exam schedule slots found matching filters.
                   </td>
                 </tr>
@@ -545,17 +573,15 @@ export default function TimetablesPage() {
                         <span className="text-theme-muted text-xs italic">Unassigned</span>
                       )}
                     </td>
-                    {!isTeacher && (
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={() => handleDeleteExam(e)}
-                          className="p-1.5 rounded-md hover:bg-theme-elevated text-theme-sub hover:text-red-400 transition-colors"
-                          title="Delete Exam Slot"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </td>
-                    )}
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => handleDeleteExam(e)}
+                        className="p-1.5 rounded-md hover:bg-theme-elevated text-theme-sub hover:text-red-400 transition-colors"
+                        title="Delete Exam Slot"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
                   </tr>
                 );
               })}
@@ -563,6 +589,7 @@ export default function TimetablesPage() {
           </table>
         )}
       </div>
+
 
       {/* Pagination */}
       {totalPages > 1 && (

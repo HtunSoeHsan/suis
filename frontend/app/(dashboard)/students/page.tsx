@@ -505,7 +505,7 @@ export default function StudentsPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="text-theme-sub text-xs">Year {s.academic_year} · Sem {s.current_semester || 1}</span>
+                          <span className="text-theme-sub text-xs">Year {s.academic_year}</span>
                           {s.section && (
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold border ${SECTION_COLORS[s.section] ?? "bg-theme-elevated text-theme-sub border-theme-border-hover"}`}>
                               §{s.section}

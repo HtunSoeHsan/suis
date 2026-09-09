@@ -95,8 +95,6 @@ export function StudentDetailDialog({ student, onClose, onEdit, onFaceEnroll, on
                 <span><strong className="text-theme-sub">Major:</strong> {student.major || student.dept_code}</span>
                 <span>•</span>
                 <span><strong className="text-theme-sub">Academic Year:</strong> Year {student.academic_year}</span>
-                <span>•</span>
-                <span><strong className="text-theme-sub">Semester:</strong> Semester {student.current_semester || 1}</span>
                 {student.roll_number && (
                   <>
                     <span>•</span>

@@ -21,7 +21,7 @@ class StudentBase(BaseModel):
     guardian_name: Optional[str] = Field(None, max_length=100)
     guardian_phone: Optional[str] = Field(None, max_length=20)
     admission_year: Optional[int] = Field(None, ge=2000, le=2035)
-    current_semester: Optional[int] = Field(1, ge=1, le=10, description="Current semester (1, 2, etc.)")
+    current_semester: Optional[int] = Field(None, ge=1, le=10, description="Current semester (1, 2, etc.)")
     status: Optional[Literal["Active", "Graduated", "Suspended", "Dropped"]] = "Active"
     major: Optional[str] = Field(None, max_length=100)
     cgpa: Optional[float] = Field(None, ge=0.0, le=4.0, examples=[3.5])

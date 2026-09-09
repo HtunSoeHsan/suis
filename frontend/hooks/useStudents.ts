@@ -10,7 +10,6 @@ export function useStudents(params: {
   limit?: number;
   section?: string;
   academic_year?: number | "";
-  current_semester?: number | "";
   dept_code?: string;
   status?: string;
 }) {
@@ -32,9 +31,6 @@ export function useStudents(params: {
     if (params.academic_year !== undefined && params.academic_year !== "") {
       queryParams.academic_year = params.academic_year;
     }
-    if (params.current_semester !== undefined && params.current_semester !== "") {
-      queryParams.current_semester = params.current_semester;
-    }
     if (params.dept_code) queryParams.dept_code = params.dept_code;
     if (params.status) queryParams.status = params.status;
 
@@ -49,7 +45,6 @@ export function useStudents(params: {
     params.limit,
     params.section,
     params.academic_year,
-    params.current_semester,
     params.dept_code,
     params.status,
     tick,

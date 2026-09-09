@@ -71,6 +71,7 @@ export function CourseFormDialog({ course, onClose }: Props) {
     setLoading(true);
     try {
       const payload = {
+        course_code: form.course_code.trim(),
         dept_code: form.dept_code,
         course_name: form.course_name,
         credit_hours: parseInt(form.credit_hours) || 3,
@@ -82,7 +83,7 @@ export function CourseFormDialog({ course, onClose }: Props) {
       if (course) {
         await coursesApi.update(course.course_code, payload);
       } else {
-        await coursesApi.create({ course_code: form.course_code, ...payload });
+        await coursesApi.create(payload);
       }
       onClose();
     } catch (e: unknown) {
@@ -113,11 +114,11 @@ export function CourseFormDialog({ course, onClose }: Props) {
               value={form.course_code}
               onChange={(e) => set("course_code", e.target.value)}
               placeholder="CS-401"
-              disabled={!!course}
               required
               className={`${inputCls} font-mono`}
             />
           </div>
+
 
           {/* Course Name */}
           <div>

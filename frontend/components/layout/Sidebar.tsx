@@ -35,8 +35,8 @@ const navItems: { href: string; label: string; icon: React.ElementType; roles?: 
   { href: "/classrooms",  label: "Classrooms",      icon: DoorOpen,       roles: ["ADMIN", "TEACHER"] },
   { href: "/timetables",  label: "Timetables",      icon: CalendarRange },
   { href: "/attendance",  label: "Attendance",      icon: CalendarCheck },
-  { href: "/chatbot",     label: "AI Chatbot",      icon: MessageSquareText, roles: ["ADMIN"] },
-  { href: "/face-scanner",label: "Face Scanner",    icon: ScanFace,        roles: ["ADMIN"] },
+  { href: "/chatbot",     label: "AI Chatbot",      icon: MessageSquareText, roles: ["ADMIN", "TEACHER"] },
+  { href: "/face-scanner",label: "Face Scanner",    icon: ScanFace,        roles: ["ADMIN", "TEACHER"] },
   { href: "/users",       label: "User Management", icon: UserCog,        roles: ["ADMIN"] },
   { href: "/settings",    label: "Settings",        icon: Settings2,      roles: ["ADMIN"] },
 ];

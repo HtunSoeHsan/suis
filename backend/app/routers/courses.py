@@ -47,7 +47,15 @@ async def list_courses(
 
 @router.post("", response_model=CourseOut, status_code=status.HTTP_201_CREATED)
 async def create_course(body: CourseCreate, db: AsyncSession = Depends(get_db)):
-    existing = await db.execute(select(Course).where(Course.course_code == body.course_code))
+    body.course_code = body.course_code.strip()
+    existing = await db.execute(
+        select(Course).where(
+            or_(
+                Course.course_code == body.course_code,
+                func.trim(Course.course_code) == body.course_code,
+            )
+        )
+    )
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=409, detail=f"Course code '{body.course_code}' already exists.")
 
@@ -60,10 +68,19 @@ async def create_course(body: CourseCreate, db: AsyncSession = Depends(get_db)):
 
 @router.get("/{course_code}", response_model=CourseOut)
 async def get_course(course_code: str, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Course).where(Course.course_code == course_code))
+    code_clean = course_code.strip()
+    result = await db.execute(
+        select(Course).where(
+            or_(
+                Course.course_code == course_code,
+                Course.course_code == code_clean,
+                func.trim(Course.course_code) == code_clean,
+            )
+        )
+    )
     course = result.scalar_one_or_none()
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found.")
+        raise HTTPException(status_code=404, detail=f"Course '{course_code}' not found.")
     return course
 
 
@@ -71,13 +88,75 @@ async def get_course(course_code: str, db: AsyncSession = Depends(get_db)):
 async def update_course(
     course_code: str, body: CourseUpdate, db: AsyncSession = Depends(get_db)
 ):
-    result = await db.execute(select(Course).where(Course.course_code == course_code))
+    code_clean = course_code.strip()
+    result = await db.execute(
+        select(Course).where(
+            or_(
+                Course.course_code == course_code,
+                Course.course_code == code_clean,
+                func.trim(Course.course_code) == code_clean,
+            )
+        )
+    )
     course = result.scalar_one_or_none()
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found.")
+        raise HTTPException(status_code=404, detail=f"Course '{course_code}' not found.")
 
-    for field, value in body.model_dump(exclude_unset=True).items():
-        setattr(course, field, value)
+    update_data = body.model_dump(exclude_unset=True)
+
+    if "course_code" in update_data and update_data["course_code"] and update_data["course_code"].strip() != course.course_code:
+        new_code = update_data["course_code"].strip()
+        if not new_code:
+            raise HTTPException(status_code=400, detail="Course code cannot be empty.")
+
+        existing = await db.execute(
+            select(Course).where(
+                or_(
+                    Course.course_code == new_code,
+                    func.trim(Course.course_code) == new_code,
+                )
+            )
+        )
+        if existing.scalar_one_or_none():
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Course code '{new_code}' already exists."
+            )
+
+        from app.models.enrollment import Enrollment
+        from app.models.timetable import AcademicTimetable, ExamTimetable
+        from app.models.attendance import AttendanceLog
+        from sqlalchemy import update
+
+        old_code = course.course_code
+
+        await db.execute(
+            update(Enrollment)
+            .where(Enrollment.course_code == old_code)
+            .values(course_code=new_code)
+        )
+        await db.execute(
+            update(AcademicTimetable)
+            .where(AcademicTimetable.course_code == old_code)
+            .values(course_code=new_code)
+        )
+        await db.execute(
+            update(ExamTimetable)
+            .where(ExamTimetable.course_code == old_code)
+            .values(course_code=new_code)
+        )
+        await db.execute(
+            update(AttendanceLog)
+            .where(AttendanceLog.course_code == old_code)
+            .values(course_code=new_code)
+        )
+
+        course.course_code = new_code
+
+    for field, value in update_data.items():
+        if field != "course_code":
+            setattr(course, field, value)
+
     await db.flush()
     await db.refresh(course)
     return course
@@ -85,9 +164,19 @@ async def update_course(
 
 @router.delete("/{course_code}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_course(course_code: str, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Course).where(Course.course_code == course_code))
+    code_clean = course_code.strip()
+    result = await db.execute(
+        select(Course).where(
+            or_(
+                Course.course_code == course_code,
+                Course.course_code == code_clean,
+                func.trim(Course.course_code) == code_clean,
+            )
+        )
+    )
     course = result.scalar_one_or_none()
     if not course:
-        raise HTTPException(status_code=404, detail="Course not found.")
+        raise HTTPException(status_code=404, detail=f"Course '{course_code}' not found.")
     await db.delete(course)
     await db.flush()
+
