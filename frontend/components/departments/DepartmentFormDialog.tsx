@@ -20,12 +20,19 @@ const EMPTY = {
 export function DepartmentFormDialog({ department, onClose }: Props) {
   const [form, setForm] = useState({ ...EMPTY });
   const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [existingDepts, setExistingDepts] = useState<Department[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    teachersApi.list({ limit: 100 })
-      .then((res) => setTeachers(res.items))
+    Promise.all([
+      teachersApi.list({ limit: 100 }),
+      departmentsApi.list({ limit: 100 }),
+    ])
+      .then(([tRes, dRes]) => {
+        setTeachers(tRes.items);
+        setExistingDepts(dRes.items);
+      })
       .catch(() => {});
   }, []);
 
@@ -42,23 +49,32 @@ export function DepartmentFormDialog({ department, onClose }: Props) {
 
   const set = (k: keyof typeof EMPTY, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
+  const occupiedHeadIds = new Set(
+    existingDepts
+      .filter((d) => d.dept_code !== department?.dept_code && d.head_teacher_id)
+      .map((d) => d.head_teacher_id)
+  );
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
+      const headTeacherVal = form.head_teacher_id.trim() ? form.head_teacher_id.trim() : null;
+      const buildingLocVal = form.building_location.trim() ? form.building_location.trim() : null;
+
       if (department) {
         await departmentsApi.update(department.dept_code, {
           dept_name: form.dept_name,
-          building_location: form.building_location || undefined,
-          head_teacher_id: form.head_teacher_id || undefined,
+          building_location: buildingLocVal,
+          head_teacher_id: headTeacherVal,
         });
       } else {
         await departmentsApi.create({
           dept_code: form.dept_code,
           dept_name: form.dept_name,
-          building_location: form.building_location || undefined,
-          head_teacher_id: form.head_teacher_id || undefined,
+          building_location: buildingLocVal,
+          head_teacher_id: headTeacherVal,
         });
       }
       onClose();
@@ -120,11 +136,14 @@ export function DepartmentFormDialog({ department, onClose }: Props) {
               className="w-full px-3 py-2 bg-theme-elevated border border-theme-border-hover rounded-lg text-sm text-theme-text focus:outline-none focus:ring-2 focus:ring-sky-600/50"
             >
               <option value="">-- None / Unassigned --</option>
-              {teachers.map((t) => (
-                <option key={t.teacher_id} value={t.teacher_id}>
-                  {t.full_name} ({t.teacher_id} - {t.designation})
-                </option>
-              ))}
+              {teachers.map((t) => {
+                const isOccupied = occupiedHeadIds.has(t.teacher_id);
+                return (
+                  <option key={t.teacher_id} value={t.teacher_id} disabled={isOccupied}>
+                    {t.full_name} ({t.teacher_id} - {t.designation}){isOccupied ? " — [Already Head]" : ""}
+                  </option>
+                );
+              })}
             </select>
           </div>
 

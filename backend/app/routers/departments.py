@@ -3,6 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, or_, and_
 from app.database import get_db
 from app.models.department import Department
+from app.models.teacher import Teacher
+from app.models.student import Student
 from app.schemas.department import DepartmentCreate, DepartmentUpdate, DepartmentOut, DepartmentListOut
 
 router = APIRouter(prefix="/api/departments", tags=["Departments"])
@@ -45,6 +47,16 @@ async def create_department(body: DepartmentCreate, db: AsyncSession = Depends(g
     if existing_name.scalar_one_or_none():
         raise HTTPException(status_code=409, detail=f"Department name '{body.dept_name}' already exists.")
 
+    if body.head_teacher_id:
+        existing_head = await db.execute(
+            select(Department).where(Department.head_teacher_id == body.head_teacher_id)
+        )
+        if existing_head.scalar_one_or_none():
+            raise HTTPException(
+                status_code=409,
+                detail=f"Teacher '{body.head_teacher_id}' is already the head teacher of another department."
+            )
+
     dept = Department(**body.model_dump())
     db.add(dept)
     await db.flush()
@@ -82,6 +94,25 @@ async def update_department(
         if existing_name.scalar_one_or_none():
             raise HTTPException(status_code=409, detail=f"Department name '{body.dept_name}' already exists.")
 
+    if body.head_teacher_id is not None:
+        if body.head_teacher_id == "":
+            body.head_teacher_id = None
+
+        if body.head_teacher_id is not None:
+            existing_head = await db.execute(
+                select(Department).where(
+                    and_(
+                        Department.head_teacher_id == body.head_teacher_id,
+                        Department.dept_code != dept_code,
+                    )
+                )
+            )
+            if existing_head.scalar_one_or_none():
+                raise HTTPException(
+                    status_code=409,
+                    detail=f"Teacher '{body.head_teacher_id}' is already the head teacher of another department."
+                )
+
     for field, value in body.model_dump(exclude_unset=True).items():
         setattr(dept, field, value)
     await db.flush()
@@ -95,5 +126,25 @@ async def delete_department(dept_code: str, db: AsyncSession = Depends(get_db)):
     dept = result.scalar_one_or_none()
     if not dept:
         raise HTTPException(status_code=404, detail="Department not found.")
+
+    teachers_res = await db.execute(select(func.count()).select_from(Teacher).where(Teacher.dept_code == dept_code))
+    teachers_count = teachers_res.scalar_one()
+
+    students_res = await db.execute(select(func.count()).select_from(Student).where(Student.dept_code == dept_code))
+    students_count = students_res.scalar_one()
+
+    if teachers_count > 0 or students_count > 0:
+        details = []
+        if teachers_count > 0:
+            details.append(f"{teachers_count} teacher(s)")
+        if students_count > 0:
+            details.append(f"{students_count} student(s)")
+        detail_str = " and ".join(details)
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot delete department '{dept_code}'. It still has {detail_str} assigned to it. Please reassign or remove them first."
+        )
+
     await db.delete(dept)
     await db.flush()
+
